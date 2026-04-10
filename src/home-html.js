@@ -27,6 +27,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
         </div>
       </form>
       <p class="hint">Vous pouvez dicter : micro du clavier sur mobile ou bouton Dictée si proposé.</p>
+      <div id="cr-history-root" hidden></div>
       <p class="hint error" id="analyze-error" hidden role="alert"></p>
     </section>
 

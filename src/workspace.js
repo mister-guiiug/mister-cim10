@@ -30,6 +30,63 @@ let recognizer = null;
 let listening = false;
 let lastAnalyze = { ran: false, hadText: false, count: 0 };
 
+const LS_CR_HISTORY = 'cr_history';
+const HISTORY_MAX = 5;
+
+function loadCrHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_CR_HISTORY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveCrHistory(text) {
+  const h = loadCrHistory().filter((t) => t !== text);
+  h.unshift(text);
+  localStorage.setItem(LS_CR_HISTORY, JSON.stringify(h.slice(0, HISTORY_MAX)));
+}
+
+function renderCrHistory() {
+  const ta = /** @type {HTMLTextAreaElement} */ (document.getElementById('cr-text'));
+  const root = document.getElementById('cr-history-root');
+  if (!root || !ta) return;
+  const history = loadCrHistory();
+  if (!history.length) {
+    root.hidden = true;
+    root.innerHTML = '';
+    return;
+  }
+  root.hidden = false;
+  root.innerHTML = `
+    <details class="cr-history-details">
+      <summary class="cr-history-summary">Historique (${history.length})</summary>
+      <ul class="cr-history-list">
+        ${history
+          .map(
+            (t, i) => `
+          <li class="cr-history-item">
+            <button type="button" class="cr-history-btn ghost" data-idx="${i}" title="${escapeHtml(t)}">
+              ${escapeHtml(t.length > 80 ? t.slice(0, 80) + '\u2026' : t)}
+            </button>
+          </li>`
+          )
+          .join('')}
+      </ul>
+    </details>`;
+  root.querySelectorAll('.cr-history-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.getAttribute('data-idx'));
+      const h = loadCrHistory();
+      if (h[idx] !== undefined) {
+        ta.value = h[idx];
+        window.__savedCrText = h[idx];
+        ta.focus();
+      }
+    });
+  });
+}
+
 const app = () => document.getElementById('app');
 
 function hideAnalyzeError() {
@@ -56,6 +113,7 @@ async function runAnalyze() {
 
   const text = ta.value.trim();
   if (btn) btn.disabled = true;
+  if (text) saveCrHistory(text);
 
   try {
     const cfg = readAnalyzeSettings();
@@ -126,6 +184,7 @@ async function runAnalyze() {
     };
 
     renderSuggestions();
+    renderCrHistory();
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -379,4 +438,5 @@ export function mountHomePage() {
   refreshWorkspaceChrome();
   renderSuggestions();
   renderValidated();
+  renderCrHistory();
 }
