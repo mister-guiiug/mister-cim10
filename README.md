@@ -4,13 +4,18 @@ PWA d'aide à la cotation **CIM-10** : saisie ou dictée d'un compte-rendu, sugg
 
 ## Fonctionnalités
 
-- **Analyse de texte** — suggestions de codes CIM-10 à partir d'un compte-rendu saisi ou dicté, issues du dictionnaire intégré et/ou de l'API OMS (ICD-11).
+- **Analyse de texte** — suggestions de codes CIM-10 à partir d'un compte-rendu saisi ou dicté, issues du dictionnaire intégré et/ou de l’API OMS (ICD-11).
 - **Validation en un clic** — valider, modifier ou rejeter chaque proposition ; les codes OMS sont affichés en premier.
 - **Indicateur de pertinence** — badge coloré (Élevée / Moyenne / Faible) à la place d'un pourcentage brut.
-- **Recherche manuelle** — ajouter un diagnostic directement par code ou libellé sans passer par l'analyse texte.
-- **Réordonnancement** — boutons ↑ / ↓ pour changer l'ordre des diagnostics retenus avant l'export.
+- **Validation du format de code** — vérification du format CIM-10 (`[A-Z]\d{2}(\.\d{1,4})?`) lors de la modification manuelle, avec message d’avertissement inline.
+- **Terme parent** — pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est affiché en contexte.
+- **Recherche manuelle** — ajouter un diagnostic directement par code ou libellé ; interroge l’API OMS si configurée (avec fallback local).
+- **Réordonnancement** — boutons ↑ / ↓ pour changer l’ordre des diagnostics retenus avant l’export.
 - **Sauvegarde automatique** — les diagnostics validés sont conservés dans le navigateur et retrouvés après rechargement.
-- **Historique des textes** — les 5 derniers comptes-rendus analysés sont mémorisés et rappelables en un clic.
+- **Historique des textes** — les 5 derniers comptes-rendus analysés sont mémorisés, rappelables ou supprimables individuellement.
+- **Nouvelle session** — réinitialisation complète (compte-rendu + diagnostics) en un clic avec confirmation.
+- **Raccourci clavier** — `Ctrl+Entrée` (ou `Cmd+Entrée`) pour lancer l’analyse depuis le textarea.
+- **Impression / PDF** — bouton « Imprimer / PDF » avec feuille de style dédiée (mise en page propre, sans l’interface).
 - **Export** — fichier texte (`.txt`) et tableur (`.csv`), partage par e-mail ou API Partager.
 - **PWA** — installable, fonctionne hors ligne, thème clair / sombre.
 

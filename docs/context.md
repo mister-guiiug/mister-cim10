@@ -18,10 +18,21 @@ Application web **PWA** pour faciliter la **cotation CIM-10** à partir de compt
 | Besoin | Statut |
 |--------|--------|
 | PWA (manifest, service worker) | Livré (`public/manifest.webmanifest`, `public/sw.js`) |
-| Formulaire + analyse locale | Livré (`src/main.js`, `src/analyzer.js`) |
+| Formulaire + analyse locale | Livré (`src/workspace.js`, `src/analyzer.js`) |
 | Dictée (Web Speech API) | Livré si le navigateur le permet (`src/speech.js`) |
 | Suggestions CIM-10 + actions Valider / Modifier / Rejeter | Livré |
-| Export JSON et CSV | Livré |
+| Indicateur de pertinence (Élevée / Moyenne / Faible) | Livré |
+| Validation du format de code CIM-10 | Livré |
+| Affichage du terme parent pour les sous-codes | Livré |
+| Recherche manuelle par code ou libellé (local + OMS) | Livré |
+| Réordonnancement des diagnostics validés (↑ / ↓) | Livré |
+| Sauvegarde automatique de session (localStorage) | Livré |
+| Historique des 5 derniers comptes-rendus | Livré |
+| Nouvelle session (réinitialisation complète) | Livré |
+| Raccourci clavier Ctrl+Entrée | Livré |
+| Impression / PDF (feuille de style dédiée) | Livré |
+| Export TXT et CSV | Livré |
+| Intégration API OMS (ICD-11, autocodage + recherche) | Livré (`src/who-icd-api.js`) |
 | Déploiement GitHub Pages | Livré via **GitHub Actions** (`.github/workflows/pages.yml`) |
 
 ## Architecture technique (résumé)
@@ -53,9 +64,11 @@ Pour intégrer une API dans cette PWA, il faudrait un **proxy** ou des appels av
 
 ## Évolutions possibles
 
-- Charger un fichier JSON complet de codes / synonymes (export local ou ETL depuis un référentiel autorisé).
-- Brancher l’**ICD API OMS** ou un serveur FHIR pour la **recherche** de codes, en complément des synonymes FR métier.
-- Brancher un service d’analyse (LLM ou API) avec consentement, clés et hébergement adaptés.
-- Intégration d’un validateur de format de code CIM-10.
+- **Import d'un référentiel complet** — glisser-déposer ou sélection d'un fichier JSON pour remplacer `icd10-data.js` en mémoire sans rebuild.
+- **Export JSON** — format structuré pour réimporter ou traiter les diagnostics dans un autre outil.
+- **Analyse LLM** — brancher un service d'analyse (LLM ou API) avec consentement, clés et hébergement adaptés.
+- **Serveur FHIR** — interroger un serveur de terminologie (Ontoserver, Snowstorm) pour la recherche de codes.
+- **Multi-session** — gérer plusieurs dossiers patients en parallèle (onglets ou liste de sessions nommées).
+- **Annotations** — ajouter une note libre par code validé (précision clinique, date, praticien).
 
 Pour l’installation locale et la publication sur GitHub Pages, voir le [README à la racine du dépôt](../README.md).

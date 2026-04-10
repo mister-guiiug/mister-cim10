@@ -7,6 +7,9 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
   const dis = hasValidated ? '' : 'disabled';
   return `
     <main id="main-content" class="workspace" tabindex="-1">
+    <div id="offline-banner" class="offline-banner" hidden role="alert">
+      &#x26A0;&#xFE0F; Vous êtes hors-ligne. Les suggestions OMS ne sont pas disponibles.
+    </div>
     <section class="panel panel--cr" aria-labelledby="cr-label">
       <div class="panel-head">
         <h2 id="cr-label" class="panel-title">Compte-rendu</h2>
@@ -58,6 +61,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
           <div class="toolbar export-row export-row--panel">
             <button type="button" class="secondary" id="export-txt" ${dis}>Texte (.txt)</button>
             <button type="button" class="secondary" id="export-csv" ${dis}>Tableur (.csv)</button>
+            <button type="button" class="secondary" id="export-json" ${dis}>JSON</button>
             <button type="button" class="secondary" id="btn-print" ${dis}>Imprimer / PDF</button>
           </div>
         </div>
@@ -74,9 +78,21 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
         </div>
         <p class="hint export-hint" id="export-hint">
           <strong>Texte (.txt)</strong> : fichier lisible (date, diagnostics, compte-rendu).
-          <strong>E-mail / Partager</strong> : même contenu sous forme de texte simple (fichier .txt ou corps de message).
+          <strong>JSON</strong> : données structurées avec annotations.
+          <strong>E-mail / Partager</strong> : même contenu sous forme de texte simple.
         </p>
       </div>
+    </section>
+
+    <section class="panel" aria-labelledby="sessions-label">
+      <div class="panel-head">
+        <h2 id="sessions-label" class="panel-title">Sessions sauvegardées</h2>
+      </div>
+      <div class="sessions-save-row">
+        <input id="session-name-input" type="text" class="session-name-inp" placeholder="Nom de la session (ex. Dr Dupont 12/06)" aria-label="Nom de la session à sauvegarder" />
+        <button type="button" class="secondary" id="btn-save-session">Sauvegarder</button>
+      </div>
+      <div id="sessions-root"></div>
     </section>
     </main>
 

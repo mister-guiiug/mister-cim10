@@ -9,6 +9,7 @@ export function buildSimpleReportText(validated, compteRendu) {
   const diagBlocks = validated.map((v, i) => {
     let b = `${i + 1}. ${v.code} — ${v.label}\n   Statut : ${v.statut}`;
     if (v.matchedTerm) b += `\n   Terme repéré : ${v.matchedTerm}`;
+    if (v.note) b += `\n   Note : ${v.note}`;
     return b;
   });
   const cr = compteRendu.trim() || '(aucun texte saisi)';
@@ -36,17 +37,33 @@ export function csvEscape(s) {
 
 export function buildCsvString(validated, compteRendu) {
   const rows = [
-    ['exportéLe', 'code', 'label', 'statut', 'termeRepéré', 'compteRendu_extrait'],
+    ['exportéLe', 'code', 'label', 'statut', 'termeRepéré', 'note', 'compteRendu_extrait'],
     ...validated.map((v) => [
       new Date().toISOString(),
       v.code,
       csvEscape(v.label),
       v.statut,
       csvEscape(v.matchedTerm || ''),
+      csvEscape(v.note || ''),
       csvEscape(compteRendu.slice(0, 500)),
     ]),
   ];
   return rows.map((r) => r.join(';')).join('\n');
+}
+
+export function buildJsonString(validated, compteRendu) {
+  return JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    application: 'Mister CIM-10',
+    compteRendu: compteRendu.trim(),
+    diagnostics: validated.map((v) => ({
+      code: v.code,
+      label: v.label,
+      statut: v.statut,
+      ...(v.matchedTerm ? { matchedTerm: v.matchedTerm } : {}),
+      ...(v.note ? { note: v.note } : {}),
+    })),
+  }, null, 2);
 }
 
 export function dateSlug() {
@@ -86,6 +103,11 @@ export function exportTextFile(validated, compteRendu) {
 export function exportCsv(validated, compteRendu) {
   const blob = new Blob(['\ufeff' + buildCsvString(validated, compteRendu)], { type: 'text/csv;charset=utf-8' });
   downloadBlob(blob, `mister-cim10-${dateSlug()}.csv`);
+}
+
+export function exportJson(validated, compteRendu) {
+  const blob = new Blob([buildJsonString(validated, compteRendu)], { type: 'application/json;charset=utf-8' });
+  downloadBlob(blob, `mister-cim10-${dateSlug()}.json`);
 }
 
 /**

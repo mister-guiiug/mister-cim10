@@ -15,6 +15,7 @@ import {
 import { refreshWorkspaceChrome } from './header-chrome.js';
 import {
   exportCsv,
+  exportJson,
   exportTextFile,
   exportViaEmail,
   shareExport,
@@ -33,6 +34,19 @@ let lastAnalyze = { ran: false, hadText: false, count: 0 };
 
 const LS_CR_HISTORY = 'cr_history';
 const LS_VALIDATED = 'validated_session';
+const LS_SESSIONS = 'named_sessions';
+
+/** @type {Array<{validated: any[], compteRendu: string}>} */
+let undoStack = [];
+
+function pushUndo(cr) {
+  undoStack.push({ validated: JSON.parse(JSON.stringify(validated)), compteRendu: cr });
+  if (undoStack.length > 20) undoStack.shift();
+}
+
+function popUndo() {
+  return undoStack.pop() || null;
+}
 const HISTORY_MAX = 5;
 
 function loadCrHistory() {
@@ -281,6 +295,8 @@ function renderSuggestions() {
       const conf = confidenceLabel(s.confidence);
       const parent = findParentEntry(s.code);
       const parentHtml = parent ? `<span class="parent-code" title="Rubrique parent"> — ${escapeHtml(parent.code)} ${escapeHtml(parent.label)}</span>` : '';
+      const notInLocal = isWho && !icdEntries.some((e) => e.code === s.code);
+      const cim11WarnBadge = notInLocal ? '<span class="badge cim11-warn" title="Code ICD-11 sans équivalent direct dans le dictionnaire CIM-10 intégré">ICD-11</span>' : '';
       const meta = isWho
         ? `Proposition OMS à partir de « ${escapeHtml(s.matchedTerm)} »${parentHtml}`
         : `Repéré à partir de « ${escapeHtml(s.matchedTerm)} »${parentHtml}`;
@@ -294,6 +310,7 @@ function renderSuggestions() {
           <span class="code">${escapeHtml(s.code)}</span>
           <span class="label">${escapeHtml(s.label)}</span>
           ${srcBadge}
+          ${cim11WarnBadge}
           ${confBadge}
         </div>
         <p class="meta">${meta}</p>
@@ -332,6 +349,8 @@ function findSuggestion(id) {
 function acceptSuggestion(id, modified, code, label) {
   const s = findSuggestion(id);
   if (!s) return;
+  const ta = document.getElementById('cr-text');
+  pushUndo(ta?.value || '');
   suggestionState.set(id, 'accepted');
   validated.push({
     id: randomId(),
@@ -403,7 +422,16 @@ function renderValidated() {
       <span class="code">${escapeHtml(v.code)}</span>
       <span class="validated-label">${escapeHtml(v.label)}</span>
       <span class="badge ${v.statut === 'modifié' ? 'modified' : ''}">${escapeHtml(v.statut)}</span>
+      <button type="button" class="ghost icon-btn" data-annotate="${escapeHtml(v.id)}" title="Ajouter une note">&#128221;</button>
       <button type="button" class="ghost" data-rid="${escapeHtml(v.id)}">Retirer</button>
+      ${v.note ? `<p class="validated-note">${escapeHtml(v.note)}</p>` : ''}
+      <div class="validated-note-form" id="note-form-${escapeHtml(v.id)}" hidden>
+        <textarea class="validated-note-inp" rows="2" placeholder="Note clinique (praticien, date, précision)…">${escapeHtml(v.note || '')}</textarea>
+        <div class="toolbar">
+          <button type="button" class="primary" style="font-size:0.8rem;padding:0.3rem 0.7rem" data-save-note="${escapeHtml(v.id)}">Enregistrer</button>
+          <button type="button" class="ghost" style="font-size:0.8rem" data-cancel-note="${escapeHtml(v.id)}">Annuler</button>
+        </div>
+      </div>
     </li>`
     )
     .join('');
@@ -435,9 +463,39 @@ function renderValidated() {
   list.querySelectorAll('[data-rid]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const rid = btn.getAttribute('data-rid');
+      const ta2 = document.getElementById('cr-text');
+      pushUndo(ta2?.value || '');
       validated = validated.filter((x) => x.id !== rid);
       saveValidatedSession();
       renderValidated();
+    });
+  });
+
+  list.querySelectorAll('[data-annotate]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-annotate');
+      const form = document.getElementById(`note-form-${id}`);
+      if (form) form.hidden = !form.hidden;
+    });
+  });
+
+  list.querySelectorAll('[data-save-note]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-save-note');
+      const form = document.getElementById(`note-form-${id}`);
+      const ta3 = form?.querySelector('.validated-note-inp');
+      const note = ta3?.value?.trim() || '';
+      const item = validated.find((x) => x.id === id);
+      if (item) { item.note = note; saveValidatedSession(); }
+      renderValidated();
+    });
+  });
+
+  list.querySelectorAll('[data-cancel-note]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-cancel-note');
+      const form = document.getElementById(`note-form-${id}`);
+      if (form) form.hidden = true;
     });
   });
 
@@ -492,6 +550,73 @@ function toggleDictation(ta, micBtn) {
     listening = false;
     micBtn.classList.remove('listening');
   }
+}
+
+function loadNamedSessions() {
+  try { return JSON.parse(localStorage.getItem(LS_SESSIONS) || '{}'); } catch { return {}; }
+}
+
+function saveNamedSession(name, cr) {
+  const sessions = loadNamedSessions();
+  sessions[name] = { validated: JSON.parse(JSON.stringify(validated)), compteRendu: cr, savedAt: new Date().toISOString() };
+  localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions));
+}
+
+function loadNamedSession(name) {
+  const sessions = loadNamedSessions();
+  return sessions[name] || null;
+}
+
+function deleteNamedSession(name) {
+  const sessions = loadNamedSessions();
+  delete sessions[name];
+  localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions));
+}
+
+function renderSessionsPanel() {
+  const root = document.getElementById('sessions-root');
+  if (!root) return;
+  const sessions = loadNamedSessions();
+  const names = Object.keys(sessions);
+  if (!names.length) {
+    root.innerHTML = '<p class="sessions-empty">Aucune session enregistrée.</p>';
+    return;
+  }
+  root.innerHTML = names.map((n) => {
+    const s = sessions[n];
+    const date = s.savedAt ? new Date(s.savedAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '';
+    return `<div class="session-item">
+      <div class="session-info">
+        <span class="session-name">${escapeHtml(n)}</span>
+        <span class="session-meta">${s.validated?.length ?? 0} diag. — ${escapeHtml(date)}</span>
+      </div>
+      <div class="session-actions">
+        <button type="button" class="ghost" data-load="${escapeHtml(n)}">Charger</button>
+        <button type="button" class="ghost" data-del-session="${escapeHtml(n)}" aria-label="Supprimer">×</button>
+      </div>
+    </div>`;
+  }).join('');
+  root.querySelectorAll('[data-load]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const name = btn.getAttribute('data-load');
+      const sess = loadNamedSession(name);
+      if (!sess) return;
+      if (!confirm(`Charger la session « ${name} » ? La session en cours sera remplacée.`)) return;
+      validated = sess.validated || [];
+      const ta = document.getElementById('cr-text');
+      if (ta) { ta.value = sess.compteRendu || ''; window.__savedCrText = ta.value; }
+      saveValidatedSession();
+      renderValidated();
+      renderSessionsPanel();
+    });
+  });
+  root.querySelectorAll('[data-del-session]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const name = btn.getAttribute('data-del-session');
+      deleteNamedSession(name);
+      renderSessionsPanel();
+    });
+  });
 }
 
 function renderManualHits(hits, results, inp) {
@@ -627,6 +752,32 @@ export function mountHomePage() {
     }
   });
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      const prev = popUndo();
+      if (!prev) return;
+      e.preventDefault();
+      validated = prev.validated;
+      const el = document.getElementById('cr-text');
+      if (el) { el.value = prev.compteRendu; window.__savedCrText = prev.compteRendu; }
+      saveValidatedSession();
+      renderValidated();
+      renderSuggestions();
+    }
+  });
+
+  // Offline mode
+  function updateOfflineBanner() {
+    const ob = document.getElementById('offline-banner');
+    if (ob) ob.hidden = navigator.onLine;
+    // Disable WHO search when offline
+    const ms = document.getElementById('manual-search');
+    if (ms) ms.placeholder = navigator.onLine ? 'Recherche manuelle…' : 'Recherche OMS indisponible hors-ligne';
+  }
+  window.addEventListener('online', () => { updateOfflineBanner(); renderSuggestions(); });
+  window.addEventListener('offline', () => { updateOfflineBanner(); renderSuggestions(); });
+  updateOfflineBanner();
+
   document.getElementById('export-txt')?.addEventListener('click', () => exportTextFile(validated, ta.value));
   document.getElementById('export-csv')?.addEventListener('click', () => exportCsv(validated, ta.value));
   document.getElementById('export-email')?.addEventListener('click', () => exportViaEmail(validated, ta.value));
@@ -654,6 +805,19 @@ export function mountHomePage() {
   });
 
   document.getElementById('btn-print')?.addEventListener('click', () => window.print());
+
+  document.getElementById('export-json')?.addEventListener('click', () => exportJson(validated, ta.value));
+
+  document.getElementById('btn-save-session')?.addEventListener('click', () => {
+    const inp = document.getElementById('session-name-input');
+    const name = (inp?.value || '').trim();
+    if (!name) { inp?.focus(); return; }
+    saveNamedSession(name, { compteRendu: ta.value, validated });
+    if (inp) inp.value = '';
+    renderSessionsPanel();
+  });
+
+  renderSessionsPanel();
 
   wireNavDrawer();
   wireThemeToggle();
