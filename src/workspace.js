@@ -107,7 +107,7 @@ async function runAnalyze() {
 
     const seen = new Set();
     suggestions = [];
-    for (const s of [...localList, ...whoList]) {
+    for (const s of [...whoList, ...localList]) {
       const key = `${s.source || 'local'}:${s.code}`;
       if (seen.has(key)) continue;
       seen.add(key);

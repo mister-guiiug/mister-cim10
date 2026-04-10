@@ -145,7 +145,7 @@ export async function shareOrCopySettingsLink() {
     }
   }
 
-  const title = 'Paramètres — Cotation CIM-10';
+  const title = 'Paramètres — Mister CIM-10';
   const text = 'Ouvrez ce lien pour appliquer la configuration dans l’application (navigateur).';
 
   if (navigator.share) {

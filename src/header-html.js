@@ -63,7 +63,7 @@ export function buildAppHeaderHtml(escapeHtml, opts) {
       <div class="app-header-inner${settingsReady && isHome ? ' app-header-inner--daily' : ''}${!isHome ? ' app-header-inner--subpage' : ''}">
         <div class="app-header-body">
           <div class="app-header-top">
-            <a href="#/" class="brand-block brand-link" aria-label="Accueil — Cotation CIM-10">
+            <a href="#/" class="brand-block brand-link" aria-label="Accueil — Mister CIM-10">
               <div class="brand-mark" aria-hidden="true">
                 <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-mark-svg">
                   <rect x="6" y="4" width="20" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
@@ -71,7 +71,7 @@ export function buildAppHeaderHtml(escapeHtml, opts) {
                 </svg>
               </div>
               <div class="brand-text">
-                ${isHome ? '<h1 class="app-title">Cotation CIM-10</h1>' : '<p class="app-title">Cotation CIM-10</p>'}
+                ${isHome ? '<h1 class="app-title">Mister CIM-10</h1>' : '<p class="app-title">Mister CIM-10</p>'}
                 <p class="app-tagline" id="app-tagline">${escapeHtml(taglineText)}</p>
               </div>
             </a>

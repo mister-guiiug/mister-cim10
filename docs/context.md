@@ -1,8 +1,8 @@
-# Cotation CIM-10 — contexte produit
+# Mister CIM-10 — contexte produit
 
 ## Objectif
 
-Application web **PWA** pour faciliter la **cotation CIM-10** à partir de comptes-rendus médicaux libres : saisie ou dictée, suggestions de codes, validation utilisateur, export des diagnostics retenus.
+Application web **PWA** pour faciliter la **cotation CIM-10** à partir de comptes-rendus médicaux libres : saisie ou dictée, suggestions de codes, validation utilisateur, export des diagnostics retenus (application **Mister CIM-10**).
 
 ## Cahier des charges initial
 

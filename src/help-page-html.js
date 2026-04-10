@@ -69,7 +69,7 @@ export function buildHelpPageMainHtml(escapeHtml) {
           <li>À l’issue de la création, notez le <strong>Client ID</strong> et générez ou copiez le <strong>Client secret</strong> (mot secret). Le secret n’est souvent affiché qu’une fois : conservez-le dans un endroit sûr.</li>
         </ul>
 
-        <h3 class="help-h3">3. Renseigner l’application Cotation CIM-10</h3>
+        <h3 class="help-h3">3. Renseigner l'application Mister CIM-10</h3>
         <ul class="help-list">
           <li>Allez dans <a href="#/parametres">Paramètres</a>, activez un mode incluant l’OMS, puis collez l’<strong>identifiant</strong> et le <strong>mot secret</strong> fournis par le portail.</li>
           <li>Renseignez aussi l’<strong>adresse de la passerelle</strong> (voir section suivante) : le navigateur ne peut pas appeler directement l’API OMS sans cette étape technique.</li>
