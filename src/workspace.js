@@ -171,7 +171,12 @@ async function runAnalyze() {
       seen.add(key);
       suggestions.push(s);
     }
-    suggestions.sort((a, b) => b.confidence - a.confidence);
+    suggestions.sort((a, b) => {
+      const srcA = a.source === 'who11' ? 0 : 1;
+      const srcB = b.source === 'who11' ? 0 : 1;
+      if (srcA !== srcB) return srcA - srcB;
+      return b.confidence - a.confidence;
+    });
     if (suggestions.length > 35) suggestions = suggestions.slice(0, 35);
 
     suggestionState.clear();
