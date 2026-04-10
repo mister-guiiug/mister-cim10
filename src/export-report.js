@@ -13,7 +13,7 @@ export function buildSimpleReportText(validated, compteRendu) {
   });
   const cr = compteRendu.trim() || '(aucun texte saisi)';
   return [
-    'Cotation CIM-10 — Export',
+    'Mister CIM-10 — Export',
     '================================',
     `Date : ${when}`,
     '',
@@ -25,7 +25,7 @@ export function buildSimpleReportText(validated, compteRendu) {
     '--------------------------------',
     cr,
     '',
-    '— Document généré par l’application Cotation CIM-10 (aide à la cotation ; à valider selon les règles en vigueur).',
+    '— Document généré par l'application Mister CIM-10 (aide à la cotation ; à valider selon les règles en vigueur).',
   ].join('\n');
 }
 
@@ -94,7 +94,7 @@ export function exportCsv(validated, compteRendu) {
 export function exportViaEmail(validated, compteRendu) {
   if (!validated.length) return;
   const body = truncateForEmailBody(buildSimpleReportText(validated, compteRendu));
-  const subject = `Export Cotation CIM-10 (${dateSlug()})`;
+  const subject = `Export Mister CIM-10 (${dateSlug()})`;
   window.location.href = buildMailtoUrl(subject, body);
 }
 
@@ -106,7 +106,7 @@ export async function shareExport(validated, compteRendu) {
   const fullText = buildSimpleReportText(validated, compteRendu);
   const filename = `mister-cim10-${dateSlug()}.txt`;
   const file = new File(['\ufeff' + fullText], filename, { type: 'text/plain' });
-  const title = 'Export Cotation CIM-10';
+  const title = 'Export Mister CIM-10';
   const shortText = `Export du ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })} — ${validated.length} diagnostic(s).`;
 
   const shareDataFile = { files: [file], title, text: shortText };

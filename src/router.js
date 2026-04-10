@@ -5,9 +5,9 @@
  * @type {Record<AppRoute, { documentTitle: string }>}
  */
 export const ROUTE_META = {
-  home: { documentTitle: 'Cotation CIM-10' },
-  parametres: { documentTitle: 'Paramètres — Cotation CIM-10' },
-  aide: { documentTitle: 'Aide — Cotation CIM-10' },
+  home: { documentTitle: 'Mister CIM-10' },
+  parametres: { documentTitle: 'Paramètres — Mister CIM-10' },
+  aide: { documentTitle: 'Aide — Mister CIM-10' },
 };
 
 /** @param {AppRoute} route */
