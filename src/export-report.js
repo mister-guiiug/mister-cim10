@@ -25,7 +25,7 @@ export function buildSimpleReportText(validated, compteRendu) {
     '--------------------------------',
     cr,
     '',
-    '— Document généré par l'application Mister CIM-10 (aide à la cotation ; à valider selon les règles en vigueur).',
+    '— Document généré par l\u2019application Mister CIM-10 (aide à la cotation ; à valider selon les règles en vigueur).',
   ].join('\n');
 }
 
