@@ -35,11 +35,11 @@ L’activation des requêtes vers l’[ICD API](https://icd.who.int/icdapi) néc
 
 ## Publication sur GitHub Pages
 
-1. Dépôt GitHub nommé **`cotation-cim10`** (ou adapter `base` dans `vite.config.js` pour qu’il corresponde à `/<nom-du-dépôt>/`).
+1. Dépôt GitHub nommé **`mister-cim10`** (ou adapter `base` dans `vite.config.js` pour qu’il corresponde à `/<nom-du-dépôt>/`).
 2. Dans **Settings → Pages** : source **GitHub Actions** (pas une branche `gh-pages` manuelle pour ce workflow).
 3. Pousser sur la branche **`main`** : le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) exécute `npm ci`, `npm run build` et publie le contenu de **`dist/`**.
 
-URL typique : `https://<votre-compte>.github.io/cotation-cim10/`.
+URL typique : `https://<votre-compte>.github.io/mister-cim10/`.
 
 ## Structure du dépôt
 

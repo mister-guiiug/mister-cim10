@@ -30,7 +30,7 @@ Application web **PWA** pour faciliter la **cotation CIM-10** à partir de compt
 - **Données** : référentiel CIM-10 **d’exemple** embarqué (`src/icd10-data.js`), enrichissable.
 - **Analyse** : correspondance textuelle normalisée (libellés et synonymes) en local ; en option, appels à l’[**ICD API OMS**](https://icd.who.int/icdapi) (OAuth2) pour l’**autocodage ICD-11 MMS** (`src/who-icd-api.js`), si l’utilisateur renseigne identifiant / secret et une **URL de proxy** (le navigateur bloque en général l’accès direct à l’OMS pour cause de **CORS** ; voir `workers/`).
 - **Confidentialité** : sans option OMS, **aucun envoi** du compte-rendu ; avec l’OMS, des **segments de texte** transitent vers votre **proxy** puis vers les serveurs WHO (`id.who.int`, `icdaccessmanagement.who.int`).
-- **Build** : sortie dans `dist/` ; en production, `base` Vite = `/cotation-cim10/` (site projet `https://<utilisateur>.github.io/cotation-cim10/`).
+- **Build** : sortie dans `dist/` ; en production, `base` Vite = `/mister-cim10/` (site projet `https://<utilisateur>.github.io/mister-cim10/`).
 
 ## Limites et usage responsable
 

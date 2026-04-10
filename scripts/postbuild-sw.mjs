@@ -10,7 +10,7 @@ const root = path.join(__dirname, '..');
 const distHtml = path.join(root, 'dist', 'index.html');
 const outSw = path.join(root, 'dist', 'sw.js');
 
-/** @param {string} base préfixe type `/cotation-cim10` ou `` */
+/** @param {string} base préfixe type `/mister-cim10` ou `` */
 /** @param {string} sub chemin relatif, ex. `index.html` */
 function assetPath(base, sub) {
   const clean = sub.replace(/^\//, '');
@@ -41,7 +41,7 @@ const html = fs.readFileSync(distHtml, 'utf8');
 const precache = extractPrecachePaths(html);
 
 const swSource = `/* Généré par scripts/postbuild-sw.mjs — ne pas éditer à la main */
-const CACHE = 'cotation-cim10-v3';
+const CACHE = 'mister-cim10-v3';
 const PRECACHE_URLS = ${JSON.stringify(precache)};
 
 self.addEventListener('install', (event) => {
