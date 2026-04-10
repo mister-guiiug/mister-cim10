@@ -1,0 +1,54 @@
+/* Lien d’évitement : visible uniquement au focus clavier */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10001;
+  padding: 0.65rem 1.1rem;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--btn-primary-fg);
+  background: linear-gradient(165deg, var(--accent), var(--accent-dim));
+  border-radius: 10px;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.skip-to-content:focus {
+  left: max(0.5rem, var(--safe-l, 0px));
+  top: max(0.5rem, var(--safe-t, 0px));
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+/* Bannière « nouvelle version » (service worker) */
+.sw-update-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1rem;
+  padding: max(0.75rem, var(--safe-b, 0px)) max(1rem, var(--safe-l, 0px)) max(0.85rem, var(--safe-b, 0px))
+    max(1rem, var(--safe-r, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--surface2);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.sw-update-banner__text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text);
+  max-width: 36rem;
+  text-align: center;
+}
+
+.sw-update-banner__btn {
+  flex-shrink: 0;
+}

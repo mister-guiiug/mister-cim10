@@ -1,0 +1,45 @@
+{
+  "name": "Cotation CIM-10",
+  "short_name": "CIM-10",
+  "description": "Analyse de comptes-rendus et suggestions de codes CIM-10",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Paramètres",
+      "short_name": "Réglages",
+      "description": "Source des suggestions et connexion OMS",
+      "url": "./#/parametres"
+    },
+    {
+      "name": "Aide",
+      "short_name": "Aide",
+      "description": "Guide d’utilisation et API OMS",
+      "url": "./#/aide"
+    }
+  ]
+}
