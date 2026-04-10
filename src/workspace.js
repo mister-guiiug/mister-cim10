@@ -1,4 +1,5 @@
 import { suggestFromText } from './analyzer.js';
+import { icdEntries } from './icd10-data.js';
 import { randomId } from './random-id.js';
 import { createSpeechRecognizer, isSpeechRecognitionSupported } from './speech.js';
 import { escapeHtml } from './html-utils.js';
@@ -228,6 +229,19 @@ async function runAnalyze() {
   }
 }
 
+const ICD10_CODE_RE = /^[A-Z]\d{2}(\.\d{1,4})?$/;
+
+function validateIcd10Code(code) {
+  return ICD10_CODE_RE.test(code.trim().toUpperCase());
+}
+
+function findParentEntry(code) {
+  const dot = code.indexOf('.');
+  if (dot <= 0) return null;
+  const parentCode = code.slice(0, dot);
+  return icdEntries.find((e) => e.code === parentCode) || null;
+}
+
 function confidenceLabel(confidence) {
   if (confidence >= 0.7) return { text: 'Élevée', cls: 'conf-high' };
   if (confidence >= 0.4) return { text: 'Moyenne', cls: 'conf-med' };
@@ -239,6 +253,12 @@ function renderSuggestions() {
   if (!root) return;
 
   const visible = suggestions.filter((s) => suggestionState.get(s.id) === 'pending');
+  const sugTitle = document.getElementById('sug-label');
+  if (sugTitle) {
+    sugTitle.textContent = visible.length
+      ? `Suggestions (${visible.length} en attente)`
+      : 'Suggestions';
+  }
   if (!visible.length) {
     let msg =
       '<p class="empty">Lancez <strong>Analyser</strong> pour obtenir des propositions de codes à partir du texte saisi.</p>';
@@ -259,9 +279,11 @@ function renderSuggestions() {
     .map((s) => {
       const isWho = s.source === 'who11';
       const conf = confidenceLabel(s.confidence);
+      const parent = findParentEntry(s.code);
+      const parentHtml = parent ? `<span class="parent-code" title="Rubrique parent"> — ${escapeHtml(parent.code)} ${escapeHtml(parent.label)}</span>` : '';
       const meta = isWho
-        ? `Proposition OMS à partir de « ${escapeHtml(s.matchedTerm)} »`
-        : `Repéré à partir de « ${escapeHtml(s.matchedTerm)} »`;
+        ? `Proposition OMS à partir de « ${escapeHtml(s.matchedTerm)} »${parentHtml}`
+        : `Repéré à partir de « ${escapeHtml(s.matchedTerm)} »${parentHtml}`;
       const srcBadge = isWho
         ? '<span class="badge who11" title="Suggestion issue du service de classification de l’OMS">OMS</span>'
         : '<span class="badge local" title="Suggestion issue du dictionnaire de l’application">Intégré</span>';
@@ -282,6 +304,7 @@ function renderSuggestions() {
         </div>
         <div class="edit-form" id="edit-${escapeHtml(s.id)}">
           <label>Code diagnostic <input type="text" class="inp-code" value="${escapeHtml(s.code)}" /></label>
+          <p class="code-format-warn hint error" hidden></p>
           <label>Libellé <input type="text" class="inp-label" value="${escapeHtml(s.label)}" /></label>
           <div class="toolbar">
             <button type="button" class="primary" data-action="save-edit">Enregistrer</button>
@@ -320,6 +343,16 @@ function acceptSuggestion(id, modified, code, label) {
   saveValidatedSession();
   renderSuggestions();
   renderValidated();
+  flashValidated();
+}
+
+function flashValidated() {
+  const section = document.querySelector('[aria-labelledby="val-label"]');
+  if (!section) return;
+  section.classList.remove('flash-ok');
+  void section.offsetWidth;
+  section.classList.add('flash-ok');
+  section.addEventListener('animationend', () => section.classList.remove('flash-ok'), { once: true });
 }
 
 function rejectSuggestion(id) {
@@ -341,7 +374,12 @@ function saveEdit(id) {
     alert('Renseignez le code et le libellé.');
     return;
   }
-  acceptSuggestion(id, true, code, label);
+  if (!validateIcd10Code(code)) {
+    const warn = card.querySelector('.code-format-warn');
+    if (warn) { warn.hidden = false; warn.textContent = `Format inattendu : « ${code} ». Attendu : lettre + 2 chiffres (+ sous-code optionnel, ex. I10, E11.9).`; }
+    return;
+  }
+  acceptSuggestion(id, true, code.toUpperCase(), label);
 }
 
 function renderValidated() {
@@ -351,6 +389,7 @@ function renderValidated() {
   const ec = document.getElementById('export-csv');
   const em = document.getElementById('export-email');
   const es = document.getElementById('export-share');
+  const ep = document.getElementById('btn-print');
   if (!list || !empty) return;
 
   list.innerHTML = validated
@@ -408,6 +447,7 @@ function renderValidated() {
   if (ec) ec.disabled = !has;
   if (em) em.disabled = !has;
   if (es) es.disabled = !has;
+  if (ep) ep.disabled = !has;
 
   const titleEl = document.getElementById('val-label');
   if (titleEl) {
@@ -454,41 +494,82 @@ function toggleDictation(ta, micBtn) {
   }
 }
 
+function renderManualHits(hits, results, inp) {
+  if (!hits.length) {
+    results.innerHTML = '<p class="manual-search-empty">Aucun résultat trouvé.</p>';
+    return;
+  }
+  results.innerHTML = hits.map((h) => {
+    const parent = findParentEntry(h.code);
+    const parentHtml = parent ? `<span class="manual-search-parent">${escapeHtml(parent.code)} — ${escapeHtml(parent.label)}</span>` : '';
+    return `<button type="button" class="manual-search-hit" data-code="${escapeHtml(h.code)}" data-label="${escapeHtml(h.label)}">
+      <span class="code">${escapeHtml(h.code)}</span>
+      <span class="manual-search-hit-label">${escapeHtml(h.label)}</span>
+      ${parentHtml}
+    </button>`;
+  }).join('');
+  results.querySelectorAll('.manual-search-hit').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const code = btn.getAttribute('data-code') || '';
+      const label = btn.getAttribute('data-label') || '';
+      validated.push({ id: randomId(), code, label, statut: 'validé' });
+      saveValidatedSession();
+      renderValidated();
+      inp.value = '';
+      results.innerHTML = '';
+      inp.focus();
+    });
+  });
+}
+
 function wireManualSearch() {
   const form = document.getElementById('manual-search-form');
   const inp = /** @type {HTMLInputElement} */ (document.getElementById('manual-search-inp'));
   const results = document.getElementById('manual-search-results');
   if (!form || !inp || !results) return;
 
-  function doSearch() {
+  let debounceTimer = null;
+
+  async function doSearch() {
     const q = inp.value.trim();
     if (q.length < 2) { results.innerHTML = ''; return; }
-    const hits = suggestFromText(q).slice(0, 8);
-    if (!hits.length) {
-      results.innerHTML = '<p class="manual-search-empty">Aucun résultat dans le dictionnaire intégré.</p>';
+
+    const localHits = suggestFromText(q).slice(0, 8);
+    const cfg = readAnalyzeSettings();
+    const useApi = (cfg.mode === 'api' || cfg.mode === 'both') && cfg.clientId && cfg.clientSecret && cfg.proxyUrl;
+
+    if (!useApi) {
+      renderManualHits(localHits, results, inp);
       return;
     }
-    results.innerHTML = hits.map((h) => `
-      <button type="button" class="manual-search-hit" data-code="${escapeHtml(h.code)}" data-label="${escapeHtml(h.label)}">
-        <span class="code">${escapeHtml(h.code)}</span>
-        <span class="manual-search-hit-label">${escapeHtml(h.label)}</span>
-      </button>`).join('');
-    results.querySelectorAll('.manual-search-hit').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const code = btn.getAttribute('data-code') || '';
-        const label = btn.getAttribute('data-label') || '';
-        validated.push({ id: randomId(), code, label, statut: 'validé' });
-        saveValidatedSession();
-        renderValidated();
-        inp.value = '';
-        results.innerHTML = '';
-        inp.focus();
+
+    results.innerHTML = '<p class="manual-search-empty">Recherche OMS…</p>';
+    try {
+      const { fetchWhoIcd11AutocodeSuggestions } = await import('./who-icd-api.js');
+      const whoHits = await fetchWhoIcd11AutocodeSuggestions(cfg.clientId, cfg.clientSecret, q, {
+        releaseId: cfg.releaseId,
+        lang: cfg.lang,
+        matchThreshold: 0.25,
+        maxPhrases: 1,
+        proxyBase: cfg.proxyUrl,
       });
-    });
+      const seen = new Set();
+      const merged = [...whoHits, ...localHits].filter((h) => {
+        if (seen.has(h.code)) return false;
+        seen.add(h.code);
+        return true;
+      }).slice(0, 10);
+      renderManualHits(merged, results, inp);
+    } catch {
+      renderManualHits(localHits, results, inp);
+    }
   }
 
-  inp.addEventListener('input', doSearch);
-  form.addEventListener('submit', (e) => { e.preventDefault(); doSearch(); });
+  inp.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => void doSearch(), 350);
+  });
+  form.addEventListener('submit', (e) => { e.preventDefault(); void doSearch(); });
 }
 
 export function mountHomePage() {
@@ -539,6 +620,13 @@ export function mountHomePage() {
     window.__savedCrText = ta.value;
   });
 
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      void runAnalyze().catch((err) => console.error(err));
+    }
+  });
+
   document.getElementById('export-txt')?.addEventListener('click', () => exportTextFile(validated, ta.value));
   document.getElementById('export-csv')?.addEventListener('click', () => exportCsv(validated, ta.value));
   document.getElementById('export-email')?.addEventListener('click', () => exportViaEmail(validated, ta.value));
@@ -549,6 +637,23 @@ export function mountHomePage() {
       exportViaEmail(validated, ta.value);
     });
   });
+
+  document.getElementById('btn-new-session')?.addEventListener('click', () => {
+    if (!confirm('Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.')) return;
+    ta.value = '';
+    window.__savedCrText = '';
+    validated = [];
+    suggestions = [];
+    suggestionState.clear();
+    lastAnalyze = { ran: false, hadText: false, count: 0 };
+    localStorage.removeItem(LS_VALIDATED);
+    hideAnalyzeError();
+    renderSuggestions();
+    renderValidated();
+    renderCrHistory();
+  });
+
+  document.getElementById('btn-print')?.addEventListener('click', () => window.print());
 
   wireNavDrawer();
   wireThemeToggle();

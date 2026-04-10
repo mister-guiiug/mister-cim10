@@ -24,6 +24,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
               : ''
           }
           <button type="button" class="secondary" id="btn-clear">Effacer le texte</button>
+          <button type="button" class="ghost" id="btn-new-session">Nouvelle session</button>
         </div>
       </form>
       <p class="hint">Vous pouvez dicter : micro du clavier sur mobile ou bouton Dictée si proposé.</p>
@@ -57,6 +58,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
           <div class="toolbar export-row export-row--panel">
             <button type="button" class="secondary" id="export-txt" ${dis}>Texte (.txt)</button>
             <button type="button" class="secondary" id="export-csv" ${dis}>Tableur (.csv)</button>
+            <button type="button" class="secondary" id="btn-print" ${dis}>Imprimer / PDF</button>
           </div>
         </div>
         <div class="export-block">
