@@ -25,7 +25,13 @@ function normalizeForMatch(s) {
 export function suggestFromText(rawText) {
   const text = normalizeForMatch(rawText);
   if (text.length < 2) return [];
-
+  // Correspondance directe par code (ex. "I10", "E11.9")
+  const upperRaw = rawText.trim().toUpperCase();
+  const exactCodeEntry = icdEntries.find((e) => e.code === upperRaw);
+  const exactCodeHits = exactCodeEntry
+    ? [{ id: randomId(), code: exactCodeEntry.code, label: exactCodeEntry.label, matchedTerm: exactCodeEntry.code, score: 999, confidence: 0.99 }]
+    : [];
+  const exactCodes = new Set(exactCodeHits.map((h) => h.code));
   const hits = [];
 
   for (const e of icdEntries) {
@@ -62,8 +68,8 @@ export function suggestFromText(rawText) {
 
   hits.sort((a, b) => b.score - a.score);
 
-  const seen = new Set();
-  const out = [];
+  const seen = new Set(exactCodes);
+  const out = [...exactCodeHits];
   for (const h of hits) {
     if (seen.has(h.code)) continue;
     seen.add(h.code);
