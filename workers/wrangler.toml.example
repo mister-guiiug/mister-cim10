@@ -1,0 +1,10 @@
+# Copier vers wrangler.toml et adapter le nom du worker.
+# wrangler deploy
+
+name = "who-icd-proxy"
+main = "who-icd-proxy.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Exemple (liste séparée par des virgules, sans espaces superflus) :
+# ALLOWED_ORIGINS = "https://moncompte.github.io,http://localhost:5173"
