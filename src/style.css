@@ -776,6 +776,13 @@ html[data-theme='light'] .theme-switch-face {
   font-weight: 600;
   color: var(--text);
   list-style: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.settings-summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .settings-summary::-webkit-details-marker {
