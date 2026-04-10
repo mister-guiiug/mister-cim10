@@ -42,6 +42,13 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
       <div class="panel-head">
         <h2 id="val-label" class="panel-title">Diagnostics retenus</h2>
       </div>
+      <form id="manual-search-form" class="manual-search-form" action="#" method="get" autocomplete="off">
+        <label for="manual-search-inp" class="manual-search-label">Ajouter un code manuellement</label>
+        <div class="manual-search-row">
+          <input id="manual-search-inp" type="search" class="manual-search-inp" placeholder="Code ou libellé (ex. I10, diabète…)" aria-label="Recherche de code CIM-10" />
+        </div>
+        <div id="manual-search-results" class="manual-search-results" role="listbox" aria-label="Résultats de recherche"></div>
+      </form>
       <ul class="validated-list" id="validated-root" role="list"></ul>
       <p class="empty" id="validated-empty" hidden>Aucun diagnostic validé pour l’instant.</p>
       <div class="export-blocks">

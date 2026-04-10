@@ -31,6 +31,7 @@ let listening = false;
 let lastAnalyze = { ran: false, hadText: false, count: 0 };
 
 const LS_CR_HISTORY = 'cr_history';
+const LS_VALIDATED = 'validated_session';
 const HISTORY_MAX = 5;
 
 function loadCrHistory() {
@@ -47,6 +48,21 @@ function saveCrHistory(text) {
   localStorage.setItem(LS_CR_HISTORY, JSON.stringify(h.slice(0, HISTORY_MAX)));
 }
 
+function saveValidatedSession() {
+  try {
+    localStorage.setItem(LS_VALIDATED, JSON.stringify(validated));
+  } catch {}
+}
+
+function loadValidatedSession() {
+  try {
+    const raw = localStorage.getItem(LS_VALIDATED);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
 function renderCrHistory() {
   const ta = /** @type {HTMLTextAreaElement} */ (document.getElementById('cr-text'));
   const root = document.getElementById('cr-history-root');
@@ -60,7 +76,9 @@ function renderCrHistory() {
   root.hidden = false;
   root.innerHTML = `
     <details class="cr-history-details">
-      <summary class="cr-history-summary">Historique (${history.length})</summary>
+      <summary class="cr-history-summary">Historique (${history.length})
+        <button type="button" class="cr-history-clear ghost" title="Effacer tout l'historique">Effacer</button>
+      </summary>
       <ul class="cr-history-list">
         ${history
           .map(
@@ -69,6 +87,7 @@ function renderCrHistory() {
             <button type="button" class="cr-history-btn ghost" data-idx="${i}" title="${escapeHtml(t)}">
               ${escapeHtml(t.length > 80 ? t.slice(0, 80) + '\u2026' : t)}
             </button>
+            <button type="button" class="cr-history-del ghost" data-del="${i}" aria-label="Supprimer cette entrée">\u00d7</button>
           </li>`
           )
           .join('')}
@@ -84,6 +103,21 @@ function renderCrHistory() {
         ta.focus();
       }
     });
+  });
+  root.querySelectorAll('.cr-history-del').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = Number(btn.getAttribute('data-del'));
+      const h = loadCrHistory();
+      h.splice(idx, 1);
+      localStorage.setItem(LS_CR_HISTORY, JSON.stringify(h));
+      renderCrHistory();
+    });
+  });
+  root.querySelector('.cr-history-clear')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    localStorage.removeItem(LS_CR_HISTORY);
+    renderCrHistory();
   });
 }
 
@@ -166,9 +200,8 @@ async function runAnalyze() {
     const seen = new Set();
     suggestions = [];
     for (const s of [...whoList, ...localList]) {
-      const key = `${s.source || 'local'}:${s.code}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (seen.has(s.code)) continue;
+      seen.add(s.code);
       suggestions.push(s);
     }
     suggestions.sort((a, b) => {
@@ -195,6 +228,18 @@ async function runAnalyze() {
   }
 }
 
+function confidenceLabel(confidence) {
+  if (confidence >= 0.7) return { text: 'Élevée', cls: 'conf-high' };
+  if (confidence >= 0.4) return { text: 'Moyenne', cls: 'conf-med' };
+  return { text: 'Faible', cls: 'conf-low' };
+}
+
+function confidenceLabel(confidence) {
+  if (confidence >= 0.7) return { text: 'Élevée', cls: 'conf-high' };
+  if (confidence >= 0.4) return { text: 'Moyenne', cls: 'conf-med' };
+  return { text: 'Faible', cls: 'conf-low' };
+}
+
 function renderSuggestions() {
   const root = document.getElementById('suggestions-root');
   if (!root) return;
@@ -218,27 +263,24 @@ function renderSuggestions() {
 
   root.innerHTML = `<div class="cards">${visible
     .map((s) => {
-      const pct = Math.round(s.confidence * 100);
       const isWho = s.source === 'who11';
-      const whoPct =
-        isWho && typeof s.whoMatchScore === 'number'
-          ? Math.round(s.whoMatchScore * 100)
-          : null;
+      const conf = confidenceLabel(s.confidence);
       const meta = isWho
-        ? `Proposition OMS à partir de « ${escapeHtml(s.matchedTerm)} » — pertinence estimée ${whoPct != null ? whoPct : pct} % (affichée ${pct} %)`
-        : `Repéré à partir de « ${escapeHtml(s.matchedTerm)} » — pertinence indicative ${pct} %`;
+        ? `Proposition OMS à partir de « ${escapeHtml(s.matchedTerm)} »`
+        : `Repéré à partir de « ${escapeHtml(s.matchedTerm)} »`;
       const srcBadge = isWho
         ? '<span class="badge who11" title="Suggestion issue du service de classification de l’OMS">OMS</span>'
         : '<span class="badge local" title="Suggestion issue du dictionnaire de l’application">Intégré</span>';
+      const confBadge = `<span class="badge conf ${conf.cls}" title="Pertinence estimée">${conf.text}</span>`;
       return `
       <article class="card" data-id="${escapeHtml(s.id)}">
         <div class="card-header">
           <span class="code">${escapeHtml(s.code)}</span>
           <span class="label">${escapeHtml(s.label)}</span>
           ${srcBadge}
+          ${confBadge}
         </div>
         <p class="meta">${meta}</p>
-        <div class="bar" role="presentation"><span style="width:${pct}%"></span></div>
         <div class="actions">
           <button type="button" class="accept" data-action="accept">Valider</button>
           <button type="button" class="edit" data-action="edit">Modifier</button>
@@ -281,6 +323,7 @@ function acceptSuggestion(id, modified, code, label) {
     statut: modified ? 'modifié' : 'validé',
     matchedTerm: s.matchedTerm,
   });
+  saveValidatedSession();
   renderSuggestions();
   renderValidated();
 }
@@ -318,20 +361,49 @@ function renderValidated() {
 
   list.innerHTML = validated
     .map(
-      (v) => `
-    <li>
+      (v, i) => `
+    <li class="validated-item">
+      <div class="validated-reorder">
+        <button type="button" class="ghost icon-btn" data-up="${escapeHtml(v.id)}" aria-label="Monter" ${i === 0 ? 'disabled' : ''}>↑</button>
+        <button type="button" class="ghost icon-btn" data-down="${escapeHtml(v.id)}" aria-label="Descendre" ${i === validated.length - 1 ? 'disabled' : ''}>↓</button>
+      </div>
       <span class="code">${escapeHtml(v.code)}</span>
-      <span>${escapeHtml(v.label)}</span>
+      <span class="validated-label">${escapeHtml(v.label)}</span>
       <span class="badge ${v.statut === 'modifié' ? 'modified' : ''}">${escapeHtml(v.statut)}</span>
       <button type="button" class="ghost" data-rid="${escapeHtml(v.id)}">Retirer</button>
     </li>`
     )
     .join('');
 
+  list.querySelectorAll('[data-up]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-up');
+      const idx = validated.findIndex((x) => x.id === id);
+      if (idx > 0) {
+        [validated[idx - 1], validated[idx]] = [validated[idx], validated[idx - 1]];
+        saveValidatedSession();
+        renderValidated();
+      }
+    });
+  });
+
+  list.querySelectorAll('[data-down]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-down');
+      const idx = validated.findIndex((x) => x.id === id);
+      if (idx !== -1 && idx < validated.length - 1) {
+        [validated[idx], validated[idx + 1]] = [validated[idx + 1], validated[idx]];
+        saveValidatedSession();
+        renderValidated();
+      }
+    });
+  });
+
   list.querySelectorAll('[data-rid]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const rid = btn.getAttribute('data-rid');
       validated = validated.filter((x) => x.id !== rid);
+      saveValidatedSession();
       renderValidated();
     });
   });
@@ -342,6 +414,13 @@ function renderValidated() {
   if (ec) ec.disabled = !has;
   if (em) em.disabled = !has;
   if (es) es.disabled = !has;
+
+  const titleEl = document.getElementById('val-label');
+  if (titleEl) {
+    titleEl.textContent = validated.length
+      ? `Diagnostics retenus (${validated.length})`
+      : 'Diagnostics retenus';
+  }
 }
 
 function toggleDictation(ta, micBtn) {
@@ -381,6 +460,43 @@ function toggleDictation(ta, micBtn) {
   }
 }
 
+function wireManualSearch() {
+  const form = document.getElementById('manual-search-form');
+  const inp = /** @type {HTMLInputElement} */ (document.getElementById('manual-search-inp'));
+  const results = document.getElementById('manual-search-results');
+  if (!form || !inp || !results) return;
+
+  function doSearch() {
+    const q = inp.value.trim();
+    if (q.length < 2) { results.innerHTML = ''; return; }
+    const hits = suggestFromText(q).slice(0, 8);
+    if (!hits.length) {
+      results.innerHTML = '<p class="manual-search-empty">Aucun résultat dans le dictionnaire intégré.</p>';
+      return;
+    }
+    results.innerHTML = hits.map((h) => `
+      <button type="button" class="manual-search-hit" data-code="${escapeHtml(h.code)}" data-label="${escapeHtml(h.label)}">
+        <span class="code">${escapeHtml(h.code)}</span>
+        <span class="manual-search-hit-label">${escapeHtml(h.label)}</span>
+      </button>`).join('');
+    results.querySelectorAll('.manual-search-hit').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const code = btn.getAttribute('data-code') || '';
+        const label = btn.getAttribute('data-label') || '';
+        validated.push({ id: randomId(), code, label, statut: 'validé' });
+        saveValidatedSession();
+        renderValidated();
+        inp.value = '';
+        results.innerHTML = '';
+        inp.focus();
+      });
+    });
+  }
+
+  inp.addEventListener('input', doSearch);
+  form.addEventListener('submit', (e) => { e.preventDefault(); doSearch(); });
+}
+
 export function mountHomePage() {
   const root = app();
   if (!root) return;
@@ -390,6 +506,8 @@ export function mountHomePage() {
   const settingsReady = isSettingsReadyForDailyUse();
   const modeLabel = MODE_SUMMARY_LABEL[mode] || '';
   const shareSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  validated = loadValidatedSession();
 
   root.innerHTML =
     buildAppHeaderHtml(escapeHtml, {
@@ -444,4 +562,5 @@ export function mountHomePage() {
   renderSuggestions();
   renderValidated();
   renderCrHistory();
+  wireManualSearch();
 }

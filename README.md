@@ -1,6 +1,18 @@
 # Mister CIM-10
 
-PWA d’aide à la cotation **CIM-10** : saisie ou dictée d’un compte-rendu, suggestions de codes, validation / modification / rejet, export **JSON** et **CSV**. Tout le traitement se fait **dans le navigateur**.
+PWA d'aide à la cotation **CIM-10** : saisie ou dictée d'un compte-rendu, suggestions de codes, validation / modification / rejet, export **TXT** et **CSV**. Tout le traitement se fait **dans le navigateur**.
+
+## Fonctionnalités
+
+- **Analyse de texte** — suggestions de codes CIM-10 à partir d'un compte-rendu saisi ou dicté, issues du dictionnaire intégré et/ou de l'API OMS (ICD-11).
+- **Validation en un clic** — valider, modifier ou rejeter chaque proposition ; les codes OMS sont affichés en premier.
+- **Indicateur de pertinence** — badge coloré (Élevée / Moyenne / Faible) à la place d'un pourcentage brut.
+- **Recherche manuelle** — ajouter un diagnostic directement par code ou libellé sans passer par l'analyse texte.
+- **Réordonnancement** — boutons ↑ / ↓ pour changer l'ordre des diagnostics retenus avant l'export.
+- **Sauvegarde automatique** — les diagnostics validés sont conservés dans le navigateur et retrouvés après rechargement.
+- **Historique des textes** — les 5 derniers comptes-rendus analysés sont mémorisés et rappelables en un clic.
+- **Export** — fichier texte (`.txt`) et tableur (`.csv`), partage par e-mail ou API Partager.
+- **PWA** — installable, fonctionne hors ligne, thème clair / sombre.
 
 Le [contexte produit et le périmètre fonctionnel](docs/context.md) sont décrits dans `docs/context.md`.
 
@@ -45,11 +57,14 @@ URL typique : `https://<votre-compte>.github.io/mister-cim10/`.
 
 | Élément | Rôle |
 |---------|------|
-| `src/main.js` | Interface, dictée, validation, export |
-| `src/analyzer.js` | Suggestions à partir du texte |
+| `src/workspace.js` | Interface principale, analyse, validation, export |
+| `src/analyzer.js` | Suggestions locales à partir du texte |
+| `src/who-icd-api.js` | Intégration API OMS (ICD-11) |
 | `src/icd10-data.js` | Échantillon de codes / synonymes FR |
 | `src/speech.js` | Web Speech API |
+| `src/export-report.js` | Export TXT, CSV, e-mail, partage |
 | `public/` | Manifest PWA, favicon, service worker |
+| `workers/` | Proxy CORS Cloudflare Worker (optionnel) |
 | `docs/context.md` | Documentation produit |
 
 ## Licence et responsabilité
