@@ -1,8 +1,10 @@
-# Cotation CIM-10
+# Mister CIM-10
 
 PWA d’aide à la cotation **CIM-10** : saisie ou dictée d’un compte-rendu, suggestions de codes, validation / modification / rejet, export **JSON** et **CSV**. Tout le traitement se fait **dans le navigateur**.
 
 Le [contexte produit et le périmètre fonctionnel](docs/context.md) sont décrits dans `docs/context.md`.
+
+**[Accéder à l'application](https://mister-guiiug.github.io/mister-CIM10/)**
 
 ## Prérequis
 

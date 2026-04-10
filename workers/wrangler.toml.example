@@ -3,8 +3,8 @@
 
 name = "who-icd-proxy"
 main = "who-icd-proxy.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2025-01-01"
 
 [vars]
 # Exemple (liste séparée par des virgules, sans espaces superflus) :
-# ALLOWED_ORIGINS = "https://moncompte.github.io,http://localhost:5173"
+# ALLOWED_ORIGINS = "https://mister-guiiug.github.io,http://localhost:5173"

@@ -1,6 +1,6 @@
 {
-  "name": "Cotation CIM-10",
-  "short_name": "CIM-10",
+  "name": "Mister CIM-10",
+  "short_name": "Mr-CIM-10",
   "description": "Analyse de comptes-rendus et suggestions de codes CIM-10",
   "start_url": "./",
   "scope": "./",
