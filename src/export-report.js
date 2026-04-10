@@ -77,7 +77,7 @@ export function truncateForEmailBody(text) {
 export function exportTextFile(validated, compteRendu) {
   const text = buildSimpleReportText(validated, compteRendu);
   const blob = new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' });
-  downloadBlob(blob, `cotation-cim10-${dateSlug()}.txt`);
+  downloadBlob(blob, `mister-cim10-${dateSlug()}.txt`);
 }
 
 /**
@@ -85,7 +85,7 @@ export function exportTextFile(validated, compteRendu) {
  */
 export function exportCsv(validated, compteRendu) {
   const blob = new Blob(['\ufeff' + buildCsvString(validated, compteRendu)], { type: 'text/csv;charset=utf-8' });
-  downloadBlob(blob, `cotation-cim10-${dateSlug()}.csv`);
+  downloadBlob(blob, `mister-cim10-${dateSlug()}.csv`);
 }
 
 /**
@@ -104,7 +104,7 @@ export function exportViaEmail(validated, compteRendu) {
 export async function shareExport(validated, compteRendu) {
   if (!validated.length) return;
   const fullText = buildSimpleReportText(validated, compteRendu);
-  const filename = `cotation-cim10-${dateSlug()}.txt`;
+  const filename = `mister-cim10-${dateSlug()}.txt`;
   const file = new File(['\ufeff' + fullText], filename, { type: 'text/plain' });
   const title = 'Export Cotation CIM-10';
   const shortText = `Export du ${new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })} — ${validated.length} diagnostic(s).`;
