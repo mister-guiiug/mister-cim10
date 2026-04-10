@@ -234,12 +234,6 @@ function confidenceLabel(confidence) {
   return { text: 'Faible', cls: 'conf-low' };
 }
 
-function confidenceLabel(confidence) {
-  if (confidence >= 0.7) return { text: 'Élevée', cls: 'conf-high' };
-  if (confidence >= 0.4) return { text: 'Moyenne', cls: 'conf-med' };
-  return { text: 'Faible', cls: 'conf-low' };
-}
-
 function renderSuggestions() {
   const root = document.getElementById('suggestions-root');
   if (!root) return;
