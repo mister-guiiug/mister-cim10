@@ -1189,7 +1189,7 @@ section.panel {
 }
 
 .panel--cr {
-  box-shadow: var(--shadow-panel), var(--shadow-glow);
+  box-shadow: var(--shadow-panel);
 }
 
 .panel-head {
