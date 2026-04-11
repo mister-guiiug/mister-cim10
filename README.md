@@ -1,5 +1,8 @@
 # Mister CIM-10
 
+[![Deploy](https://github.com/mister-guiiug/mister-CIM10/actions/workflows/pages.yml/badge.svg)](https://github.com/mister-guiiug/mister-CIM10/actions/workflows/pages.yml)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
+
 PWA d'aide à la cotation **CIM-10** : saisie ou dictée d'un compte-rendu, suggestions de codes, validation / modification / rejet, export **TXT** et **CSV**. Tout le traitement se fait **dans le navigateur**.
 
 ## Fonctionnalités

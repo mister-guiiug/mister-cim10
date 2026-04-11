@@ -50,11 +50,12 @@ export function buildAppHeaderHtml(escapeHtml, opts) {
         </div>
 
         <p class="disclaimer ${settingsReady ? 'disclaimer--compact' : ''}" id="app-disclaimer">
-          ${
+          <span id="disclaimer-text">${
             settingsReady
               ? 'Suggestions indicatives — vous restez responsable des codes retenus et des règles en vigueur.'
-              : 'Outil d’aide : les suggestions sont indicatives. Vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.'
-          }
+              : 'Outil d’aide : les suggestions sont indicatives. Vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.'
+          }</span>
+          <button type="button" class="disclaimer-dismiss" id="disclaimer-dismiss-btn" aria-label="Masquer cet avertissement">×</button>
         </p>`
     : '';
 
