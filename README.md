@@ -1,188 +1,189 @@
 # Mister CIM-10
 
-[![Deploy](https://github.com/mister-guiiug/mister-CIM10/actions/workflows/pages.yml/badge.svg)](https://github.com/mister-guiiug/mister-CIM10/actions/workflows/pages.yml)
-[![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
+[![Application en ligne](https://img.shields.io/badge/Application-En%20ligne-brightgreen?style=for-the-badge)](https://mister-guiiug.github.io/mister-CIM10/)
+[![Buy Me A Coffee](https://img.shields.io/badge/Soutenir-%E2%98%95-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
 
-> **PWA d'aide à la cotation CIM-10** — Saisissez ou dictez un compte-rendu médical, obtenez des suggestions de codes, validez-les et exportez-les en TXT/CSV. **Tout le traitement se fait dans le navigateur**, sans envoi de données (sauf option API OMS).
+> **Aide à la cotation CIM-10 dans votre navigateur.**
+> Saisissez ou dictez un compte-rendu médical, obtenez des suggestions de codes, validez-les et exportez-les — sans installation, sans compte, sans envoi de données.
 
 **[▶ Accéder à l'application](https://mister-guiiug.github.io/mister-CIM10/)**
 
 ---
 
-## Table des matières
+## Pour qui ?
 
-- [Fonctionnalités](#fonctionnalités)
-- [Stack technique](#stack-technique)
-- [Démarrage rapide](#démarrage-rapide)
-- [Débogage (VS Code / Cursor)](#débogage-vs-code--cursor)
-- [Tests](#tests)
-- [Structure du dépôt](#structure-du-dépôt)
-- [API OMS (ICD-11)](#api-oms-icd-11)
-- [Déploiement sur GitHub Pages](#déploiement-sur-github-pages)
-- [Confidentialité](#confidentialité)
-- [Licence](#licence)
+Mister CIM-10 s'adresse aux **professionnels de santé** (médecins, DIM, techniciens d'information médicale) qui souhaitent disposer d'une aide rapide à la cotation CIM-10 directement dans leur navigateur, sans dépendance à un logiciel métier.
+
+> ⚠️ **Cet outil est une aide à la décision, pas une référence clinique officielle.**
+> Il ne remplace pas le guide méthodologique de l'ATIH ni le jugement professionnel.
+> Le jeu de codes embarqué est un échantillon — vérifiez toujours avec les référentiels officiels.
+
+---
+
+## Comment l'utiliser
+
+1. **Ouvrez l'application** — aucune installation requise, fonctionne dans Chrome, Edge, Firefox ou Safari.
+2. **Saisissez ou dictez** votre compte-rendu dans la zone de texte (microphone disponible sur mobile).
+3. **Lancez l'analyse** avec le bouton ou `Ctrl+Entrée` — les codes CIM-10 suggérés apparaissent aussitôt.
+4. **Validez, modifiez ou rejetez** chaque suggestion en un clic. Réordonnez les codes si besoin.
+5. **Exportez** la liste finale en fichier texte (`.txt`) ou tableur (`.csv`), ou imprimez-la directement.
+
+L'application peut être **installée sur votre appareil** (bouton d'installation du navigateur) et fonctionne **hors connexion** une fois installée.
 
 ---
 
 ## Fonctionnalités
 
-### Analyse et suggestions
+### Analyse
 
-| Fonctionnalité | Description |
+| Fonctionnalité | Ce que ça fait |
 |---|---|
-| **Analyse de texte** | Suggestions de codes CIM-10 issues du dictionnaire intégré et/ou de l'API OMS (ICD-11) |
-| **Indicateur de pertinence** | Badge coloré Élevée / Moyenne / Faible |
-| **Terme parent** | Pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est affiché |
-| **Recherche manuelle** | Ajout d'un diagnostic par code ou libellé, avec fallback local si l'API OMS est absente |
+| **Analyse du texte libre** | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (ICD-11) si configurée |
+| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible |
+| **Terme parent** | Pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est rappelé pour le contexte |
+| **Recherche manuelle** | Retrouvez un code par son libellé ou saisissez-le directement si vous le connaissez |
 
-### Validation et édition
+### Validation et saisie
 
-| Fonctionnalité | Description |
+| Fonctionnalité | Ce que ça fait |
 |---|---|
-| **Validation en un clic** | Valider, modifier ou rejeter chaque proposition |
-| **Validation du format** | Vérification du format CIM-10 (`[A-Z]\d{2}(\.\d{1,4})?`) avec message inline |
-| **Réordonnancement** | Boutons ↑ / ↓ pour trier les diagnostics retenus avant l'export |
+| **Valider / Modifier / Rejeter** | Traitez chaque proposition en un clic ; modifiez librement le code si besoin |
+| **Contrôle du format** | L'application vérifie que le code saisi respecte le format CIM-10 et vous avertit en cas d'erreur |
+| **Réordonner les codes** | Changez l'ordre des diagnostics retenus avant l'export avec les boutons ↑ / ↓ |
 
-### Productivité
+### Confort d'utilisation
 
-| Fonctionnalité | Description |
+| Fonctionnalité | Ce que ça fait |
 |---|---|
-| **Saisie ou dictée** | Reconnaissance vocale via Web Speech API |
-| **Raccourci clavier** | `Ctrl+Entrée` / `Cmd+Entrée` pour lancer l'analyse |
-| **Sauvegarde automatique** | Diagnostics conservés dans le navigateur (localStorage) |
-| **Historique** | 5 derniers comptes-rendus rappelables ou supprimables |
-| **Nouvelle session** | Réinitialisation complète en un clic avec confirmation |
+| **Dictée vocale** | Parlez directement dans l'application (selon le navigateur et l'appareil) |
+| **Sauvegarde automatique** | Vos diagnostics validés sont mémorisés dans le navigateur — ils sont là si vous rechargez la page |
+| **Historique des comptes-rendus** | Les 5 derniers textes analysés sont mémorisés et rappelables en un clic |
+| **Nouvelle session** | Réinitialisez tout (texte + diagnostics) en un clic, avec confirmation |
+| **Raccourci clavier** | `Ctrl+Entrée` (ou `Cmd+Entrée` sur Mac) pour lancer l'analyse rapidement |
 
-### Export
+### Export et partage
 
-| Fonctionnalité | Description |
+| Fonctionnalité | Ce que ça fait |
 |---|---|
-| **Export TXT / CSV** | Fichiers téléchargeables directement |
-| **Impression / PDF** | Feuille de style dédiée, sans l'interface |
-| **Partage** | E-mail ou API Web Share |
-
-### Application
-
-- **PWA** installable, fonctionne hors ligne
-- Thème **clair / sombre** automatique
-
-Le [contexte produit et le périmètre complet](docs/context.md) sont détaillés dans `docs/context.md`.
+| **Export TXT / CSV** | Téléchargez la liste de codes validés en texte brut ou tableur |
+| **Impression / PDF** | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface) |
+| **Partage** | Partagez par e-mail ou via l'API Web Share (selon le navigateur) |
 
 ---
 
-## Stack technique
+## Confidentialité et données
+
+La protection des données est une priorité pour un outil traitant des informations médicales.
+
+| Mode | Données transmises |
+|---|---|
+| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement. |
+| **Avec option API OMS** | Des fragments du compte-rendu transitent vers votre proxy personnel, puis vers les serveurs de l'OMS (`id.who.int`). Vous contrôlez votre proxy. |
+
+- Aucun compte utilisateur requis.
+- Aucun stockage serveur.
+- Les données de session restent dans le **stockage local de votre navigateur** (effacées en vidant le cache).
+
+---
+
+## Questions fréquentes
+
+**L'application fonctionne-t-elle sans connexion ?**
+Oui, une fois chargée (ou installée), elle est disponible hors ligne. L'option API OMS nécessite une connexion.
+
+**Les codes proposés sont-ils fiables ?**
+Le dictionnaire embarqué est un échantillon à titre d'exemple. Les suggestions sont indicatives — vérifiez toujours avec le guide méthodologique officiel (ATIH).
+
+**Puis-je l'utiliser sur téléphone ou tablette ?**
+Oui. L'application est responsive et installable sur iOS et Android via le bouton d'installation du navigateur.
+
+**Y a-t-il des frais ?**
+Non, l'application est gratuite et open source (licence MIT).
+
+---
+
+## Soutenir le projet
+
+Si l'outil vous est utile, vous pouvez soutenir son développement :
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
+
+---
+
+<details>
+<summary><strong>Documentation technique (développeurs)</strong></summary>
+
+### Stack
 
 | Couche | Technologie |
 |---|---|
 | Build | [Vite 6](https://vitejs.dev/) |
 | Tests | [Vitest 3](https://vitest.dev/) |
-| Runtime | Navigateur — HTML / CSS / JS vanilla (sans framework) |
+| Runtime | HTML / CSS / JS vanilla — sans framework |
 | PWA | Service Worker généré par `scripts/postbuild-sw.mjs` |
 | Proxy CORS | [Cloudflare Workers](workers/README.md) (optionnel) |
 | CI/CD | GitHub Actions → GitHub Pages |
 
----
+### Démarrage local
 
-## Démarrage rapide
-
-**Pré-requis** : [Node.js](https://nodejs.org/) ≥ 20 (la CI utilise la 22).
+**Pré-requis** : [Node.js](https://nodejs.org/) ≥ 20.
 
 ```bash
-# Cloner puis installer
 git clone https://github.com/mister-guiiug/mister-CIM10.git
 cd mister-CIM10
 npm install
-
-# Développement  →  http://localhost:5173
-npm run dev
-
-# Build de production  →  dist/
-npm run build
-
-# Prévisualiser le build local
+npm run dev      # → http://localhost:5173
+npm run build    # → dist/
 npm run preview
 ```
 
----
-
-## Débogage (VS Code / Cursor)
-
-1. Ouvrir le dossier dans l'éditeur.
-2. **F5** ou *Run → Start Debugging*, puis choisir une configuration :
-   - **Déboguer : Chrome + Vite** / **Déboguer : Edge + Vite** — démarre `npm run dev` et ouvre le navigateur avec le débogueur attaché (points d'arrêt dans `src/*.js`).
-   - **Déboguer : Chrome (serveur déjà lancé)** — si `npm run dev` tourne déjà dans un terminal.
-3. Sous Windows, Edge est disponible via le type `msedge` (inclus dans VS Code).
-
-> Les tâches sont dans `.vscode/tasks.json` et les profils de lancement dans `.vscode/launch.json`.
-
----
-
-## Tests
+### Tests
 
 ```bash
 npm test             # exécution unique
-npm run test:watch   # mode watch (développement)
+npm run test:watch   # mode watch
 ```
 
-Les tests unitaires (Vitest + jsdom) couvrent `analyzer.js`, `router.js`, `export-report.js` et `settings-share.js`.
+Vitest + jsdom, couvre `analyzer.js`, `router.js`, `export-report.js`, `settings-share.js`.
 
----
+### Débogage VS Code / Cursor
 
-## Structure du dépôt
+F5 → choisir une configuration :
+- **Déboguer : Chrome + Vite** — démarre le serveur et ouvre le navigateur avec le débogueur.
+- **Déboguer : Chrome (serveur déjà lancé)** — si `npm run dev` tourne déjà.
 
-```
-.
-├── src/
-│   ├── analyzer.js        # Suggestions locales (correspondance texte → code)
-│   ├── who-icd-api.js     # Intégration API OMS ICD-11 (OAuth2)
-│   ├── icd10-data.js      # Échantillon de codes / synonymes FR
-│   ├── workspace.js       # Interface principale — analyse, validation, export
-│   ├── export-report.js   # Export TXT, CSV, e-mail, Web Share
-│   ├── speech.js          # Web Speech API
-│   ├── router.js          # Routeur SPA
-│   └── …                  # Composants UI, thème, PWA
-├── workers/               # Proxy CORS Cloudflare Worker (optionnel)
-├── public/                # Manifest PWA, icônes, service worker
-├── scripts/               # Génération d'icônes, post-build SW
-├── docs/context.md        # Contexte produit détaillé
-└── .github/workflows/     # CI/CD GitHub Actions
-```
+### API OMS (ICD-11) et proxy CORS
 
----
-
-## API OMS (ICD-11)
-
-L'accès direct à l'[ICD API](https://icd.who.int/icdapi) est bloqué par CORS depuis le navigateur. Un proxy est donc nécessaire.
-
-**Mise en place du proxy Cloudflare Worker :**
+L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par CORS. Un proxy Cloudflare Worker est fourni dans [`workers/`](workers/README.md) :
 
 1. Copier `workers/wrangler.toml.example` → `workers/wrangler.toml`.
-2. Déployer avec `wrangler deploy` (compte Cloudflare gratuit suffisant).
-3. Configurer `ALLOWED_ORIGINS` dans le Worker.
-4. Renseigner l'URL du Worker dans les paramètres de l'application.
+2. `wrangler deploy` (compte Cloudflare gratuit).
+3. Configurer `ALLOWED_ORIGINS`, puis renseigner l'URL dans les paramètres de l'application.
 
-Voir [`workers/README.md`](workers/README.md) pour le détail complet.
+### Déploiement sur GitHub Pages
 
----
+1. Nommer le dépôt `mister-cim10` (ou adapter `base` dans `vite.config.js`).
+2. **Settings → Pages** : source → **GitHub Actions**.
+3. Pousser sur `main` : le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) exécute `npm ci && npm run build` et publie `dist/`.
 
-## Déploiement sur GitHub Pages
+### Structure du dépôt
 
-1. Nommer le dépôt **`mister-cim10`** (ou adapter `base` dans `vite.config.js`).
-2. Dans **Settings → Pages** : source → **GitHub Actions** (pas de branche `gh-pages` manuelle).
-3. Pousser sur **`main`** : le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) exécute `npm ci && npm run build` et publie `dist/`.
+```
+src/
+  analyzer.js        Suggestions locales (texte → code CIM-10)
+  who-icd-api.js     Intégration API OMS ICD-11 (OAuth2)
+  icd10-data.js      Échantillon de codes / synonymes FR
+  workspace.js       Interface principale — analyse, validation, export
+  export-report.js   Export TXT, CSV, e-mail, Web Share
+  speech.js          Web Speech API
+  router.js          Routeur SPA
+workers/             Proxy CORS Cloudflare Worker (optionnel)
+public/              Manifest PWA, icônes
+scripts/             Génération d'icônes, post-build SW
+docs/context.md      Contexte produit détaillé
+```
 
-URL résultante : `https://<votre-compte>.github.io/mister-cim10/`
-
----
-
-## Confidentialité
-
-- **Sans option OMS** : traitement 100 % local, aucun envoi réseau.
-- **Avec option OMS** : des segments du compte-rendu transitent vers votre proxy puis vers les serveurs WHO (`id.who.int`, `icdaccessmanagement.who.int`).
-- Aucune persistance serveur dans cette version.
-
-> L'application est une **aide à la décision**, pas un substitut à l'expertise clinique ni au guide méthodologique officiel (ATIH / CIM-10). Le jeu de codes embarqué est un **échantillon** à remplacer pour un usage réel en production.
+</details>
 
 ---
 
@@ -190,4 +191,4 @@ URL résultante : `https://<votre-compte>.github.io/mister-cim10/`
 
 [MIT](LICENSE) — Copyright © 2026 Guillaume GUERIN.
 
-Usage sous votre entière responsabilité.
+Utilisation sous votre entière responsabilité. Cet outil ne remplace pas les référentiels officiels ni le jugement clinique.
