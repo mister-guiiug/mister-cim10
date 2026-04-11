@@ -63,6 +63,21 @@ export function mountParametresPage() {
   refreshWorkspaceChrome();
   const importBanner = document.getElementById('settings-import-banner');
   if (importBanner) importBanner.hidden = !importedFromLink;
+
+  const btnResetDisclaimer = document.getElementById('btn-reset-disclaimer');
+  if (btnResetDisclaimer) {
+    btnResetDisclaimer.addEventListener('click', () => {
+      localStorage.removeItem('disclaimer_dismissed');
+      const disc = document.getElementById('app-disclaimer');
+      if (disc) disc.hidden = false;
+      btnResetDisclaimer.textContent = 'Avertissement réaffiché ✓';
+      btnResetDisclaimer.disabled = true;
+      setTimeout(() => {
+        btnResetDisclaimer.textContent = 'Réafficher l\u2019avertissement';
+        btnResetDisclaimer.disabled = false;
+      }, 2000);
+    });
+  }
 }
 
 export function mountAidePage() {

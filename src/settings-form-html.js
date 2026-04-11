@@ -83,6 +83,12 @@ export function buildSettingsFormHtml() {
             </div>
             <p class="settings-share-feedback" id="settings-share-feedback" hidden role="status"></p>
           </div>
-        </div>
+          <div class="settings-block settings-display-block">
+            <p class="settings-block-title">Préférences d'affichage</p>
+            <p class="settings-hint">Éléments masqués manuellement que vous pouvez réafficher.</p>
+            <div class="toolbar">
+              <button type="button" class="ghost" id="btn-reset-disclaimer">Réafficher l'avertissement</button>
+            </div>
+          </div>        </div>
   `;
 }
