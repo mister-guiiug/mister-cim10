@@ -3,6 +3,7 @@ import { icdEntries } from './icd10-data.js';
 import { randomId } from './random-id.js';
 import { createSpeechRecognizer, isSpeechRecognitionSupported } from './speech.js';
 import { escapeHtml } from './html-utils.js';
+import { showConfirm, showAlert } from './dialog-ui.js';
 import { buildAppHeaderHtml } from './header-html.js';
 import { wireThemeToggle } from './theme.js';
 import { wireNavDrawer } from './nav-drawer.js';
@@ -367,13 +368,13 @@ function openEdit(id, open) {
   if (el) el.classList.toggle('open', open);
 }
 
-function saveEdit(id) {
+async function saveEdit(id) {
   const card = document.querySelector(`.card[data-id="${id.replace(/"/g, '\\"')}"]`);
   if (!card) return;
   const code = card.querySelector('.inp-code')?.value?.trim() || '';
   const label = card.querySelector('.inp-label')?.value?.trim() || '';
   if (!code || !label) {
-    alert('Renseignez le code et le libellé.');
+    await showAlert('Renseignez le code et le libellé.');
     return;
   }
   if (!validateIcd10Code(code)) {
@@ -559,11 +560,11 @@ function renderSessionsPanel() {
     </div>`;
   }).join('');
   root.querySelectorAll('[data-load]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const name = btn.getAttribute('data-load');
       const sess = loadNamedSession(name);
       if (!sess) return;
-      if (!confirm(`Charger la session « ${name} » ? La session en cours sera remplacée.`)) return;
+      if (!await showConfirm(`Charger la session « ${name} » ? La session en cours sera remplacée.`)) return;
       validated = sess.validated || [];
       const ta = document.getElementById('cr-text');
       if (ta) { ta.value = sess.compteRendu || ''; window.__savedCrText = ta.value; }
@@ -751,8 +752,8 @@ export function mountHomePage() {
     });
   });
 
-  document.getElementById('btn-new-session')?.addEventListener('click', () => {
-    if (!confirm('Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.')) return;
+  document.getElementById('btn-new-session')?.addEventListener('click', async () => {
+    if (!await showConfirm('Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.')) return;
     ta.value = '';
     window.__savedCrText = '';
     validated = [];

@@ -2252,3 +2252,63 @@ footer.app-footer {
   color: var(--muted);
   font-style: italic;
 }
+
+/* ---------- App Dialog (custom alert / confirm) ---------- */
+
+.app-dialog {
+  border: none;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow:
+    var(--shadow-panel),
+    0 0 0 1px var(--surface2);
+  padding: 0;
+  max-width: min(90vw, 420px);
+  width: 100%;
+  animation: app-dialog-in 0.2s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.app-dialog::backdrop {
+  background: color-mix(in srgb, #000 50%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: app-dialog-backdrop-in 0.18s ease both;
+}
+
+@keyframes app-dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes app-dialog-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.app-dialog-body {
+  padding: 1.75rem 1.6rem 1.35rem;
+}
+
+.app-dialog-message {
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.app-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.app-dialog-actions button {
+  min-width: 86px;
+}
