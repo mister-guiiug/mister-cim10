@@ -21,6 +21,24 @@ import {
   shareExport,
 } from './export-report.js';
 import { buildHomeWorkspaceHtml } from './home-html.js';
+import {
+  loadCrHistory,
+  saveCrHistory,
+  clearCrHistory,
+  saveValidatedSession as saveValidatedSessionToStorage,
+  loadValidatedSession,
+  clearValidatedSession,
+  loadNamedSessions,
+  saveNamedSession,
+  loadNamedSession,
+  deleteNamedSession,
+  LS_CR_HISTORY,
+} from './storage.js';
+
+/** Sauvegarde l'état `validated` courant dans localStorage. */
+function saveValidatedSession() {
+  saveValidatedSessionToStorage(validated);
+}
 
 /** @type {{ id: string; code: string; label: string; statut: 'validé' | 'modifié'; matchedTerm?: string }[]} */
 let validated = [];
@@ -31,10 +49,6 @@ let dictationPrefix = '';
 let recognizer = null;
 let listening = false;
 let lastAnalyze = { ran: false, hadText: false, count: 0 };
-
-const LS_CR_HISTORY = 'cr_history';
-const LS_VALIDATED = 'validated_session';
-const LS_SESSIONS = 'named_sessions';
 
 /** @type {Array<{validated: any[], compteRendu: string}>} */
 let undoStack = [];
@@ -47,37 +61,6 @@ function pushUndo(cr) {
 function popUndo() {
   return undoStack.pop() || null;
 }
-const HISTORY_MAX = 5;
-
-function loadCrHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(LS_CR_HISTORY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveCrHistory(text) {
-  const h = loadCrHistory().filter((t) => t !== text);
-  h.unshift(text);
-  localStorage.setItem(LS_CR_HISTORY, JSON.stringify(h.slice(0, HISTORY_MAX)));
-}
-
-function saveValidatedSession() {
-  try {
-    localStorage.setItem(LS_VALIDATED, JSON.stringify(validated));
-  } catch {}
-}
-
-function loadValidatedSession() {
-  try {
-    const raw = localStorage.getItem(LS_VALIDATED);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
 function renderCrHistory() {
   const ta = /** @type {HTMLTextAreaElement} */ (document.getElementById('cr-text'));
   const root = document.getElementById('cr-history-root');
@@ -131,7 +114,7 @@ function renderCrHistory() {
   });
   root.querySelector('.cr-history-clear')?.addEventListener('click', (e) => {
     e.stopPropagation();
-    localStorage.removeItem(LS_CR_HISTORY);
+    clearCrHistory();
     renderCrHistory();
   });
 }
@@ -552,27 +535,6 @@ function toggleDictation(ta, micBtn) {
   }
 }
 
-function loadNamedSessions() {
-  try { return JSON.parse(localStorage.getItem(LS_SESSIONS) || '{}'); } catch { return {}; }
-}
-
-function saveNamedSession(name, cr) {
-  const sessions = loadNamedSessions();
-  sessions[name] = { validated: JSON.parse(JSON.stringify(validated)), compteRendu: cr, savedAt: new Date().toISOString() };
-  localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions));
-}
-
-function loadNamedSession(name) {
-  const sessions = loadNamedSessions();
-  return sessions[name] || null;
-}
-
-function deleteNamedSession(name) {
-  const sessions = loadNamedSessions();
-  delete sessions[name];
-  localStorage.setItem(LS_SESSIONS, JSON.stringify(sessions));
-}
-
 function renderSessionsPanel() {
   const root = document.getElementById('sessions-root');
   if (!root) return;
@@ -797,7 +759,7 @@ export function mountHomePage() {
     suggestions = [];
     suggestionState.clear();
     lastAnalyze = { ran: false, hadText: false, count: 0 };
-    localStorage.removeItem(LS_VALIDATED);
+    clearValidatedSession();
     hideAnalyzeError();
     renderSuggestions();
     renderValidated();
