@@ -2,10 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "npm: dev",
-      "type": "npm",
-      "script": "dev",
+      "label": "dev: Vite",
+      "type": "shell",
+      "command": "npm run dev",
       "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "cmd.exe",
+          "args": ["/d", "/c"]
+        }
+      },
       "presentation": {
         "reveal": "silent",
         "panel": "shared"
@@ -19,6 +26,27 @@
           "endsPattern": "(Local:.*5173|ready in [0-9]+ ms)"
         }
       }
+    },
+    {
+      "label": "test: Vitest",
+      "type": "shell",
+      "command": "npm test",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "cmd.exe",
+          "args": ["/d", "/c"]
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
     }
   ]
 }
