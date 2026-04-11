@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 const GTM_ID = 'GTM-W4SRNX5C';
 const GA_ID = 'G-64VBY2ZJBX';
+const GSC_TOKEN = 'iUfQ7_dOztC3XoSGesC2b7IkxyNL2O9fegKXECoOg30';
 
 /** Injecte Google Tag Manager et Google Analytics uniquement dans le build de production (GitHub Pages). */
 function analyticsPlugin() {
@@ -14,7 +15,7 @@ function analyticsPlugin() {
         const ga4Snippet = `<!-- Google tag (gtag.js) -->\n    <script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');</script>`;
         const bodySnippet = `<!-- Google Tag Manager (noscript) -->\n    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>\n    <!-- End Google Tag Manager (noscript) -->`;
         return html
-          .replace('</head>', `    ${gtmHeadSnippet}\n    ${ga4Snippet}\n  </head>`)
+          .replace('</head>', `    ${gtmHeadSnippet}\n    ${ga4Snippet}\n    <meta name="google-site-verification" content="${GSC_TOKEN}" />\n  </head>`)
           .replace('<body>', `<body>\n    ${bodySnippet}`);
       },
     },
