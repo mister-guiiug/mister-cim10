@@ -83,6 +83,15 @@ export function buildSettingsFormHtml() {
             </div>
             <p class="settings-share-feedback" id="settings-share-feedback" hidden role="status"></p>
           </div>
+          <div class="settings-block">
+            <p class="settings-block-title">Sauvegarde et Restauration</p>
+            <p class="settings-hint">Téléchargez toutes vos données (favoris, historique, sessions, paramètres) dans un fichier pour les sauvegarder ou les transférer.</p>
+            <div class="toolbar">
+              <button type="button" class="secondary" id="btn-export-all">Sauvegarder tout (.json)</button>
+              <button type="button" class="secondary" id="btn-trigger-import">Restaurer tout…</button>
+              <input type="file" id="input-import-all" accept=".json" hidden />
+            </div>
+          </div>
           <div class="settings-block settings-display-block">
             <p class="settings-block-title">Préférences d'affichage</p>
             <p class="settings-hint">Éléments masqués manuellement que vous pouvez réafficher.</p>

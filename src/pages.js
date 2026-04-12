@@ -14,6 +14,9 @@ import {
 } from './app-settings.js';
 import { refreshWorkspaceChrome } from './header-chrome.js';
 import { tryImportSettingsFromHash, wireSettingsShare } from './settings-share.js';
+import { exportAppData, importAppData } from './storage.js';
+import { downloadBlob, dateSlug } from './export-report.js';
+import { showAlert, showConfirm } from './dialog-ui.js';
 
 const app = () => document.getElementById('app');
 
@@ -65,6 +68,35 @@ export function mountParametresPage() {
   if (importBanner) importBanner.hidden = !importedFromLink;
 
   const btnResetDisclaimer = document.getElementById('btn-reset-disclaimer');
+  const btnExport = document.getElementById('btn-export-all');
+  btnExport?.addEventListener('click', () => {
+    const json = exportAppData();
+    const blob = new Blob([json], { type: 'application/json' });
+    downloadBlob(blob, `mister-cim10-backup-${dateSlug()}.json`);
+  });
+
+  const btnTriggerImport = document.getElementById('btn-trigger-import');
+  const inputImport = document.getElementById('input-import-all');
+  btnTriggerImport?.addEventListener('click', () => inputImport?.click());
+  inputImport?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const content = evt.target?.result;
+      if (typeof content !== 'string') return;
+      if (await showConfirm('Restaurer les données ? Les paramètres et données actuels seront écrasés. L’application va redémarrer.')) {
+        if (importAppData(content)) {
+          window.location.reload();
+        } else {
+          await showAlert('Erreur lors de l’import. Fichier invalide.');
+        }
+      }
+      inputImport.value = '';
+    };
+    reader.readAsText(file);
+  });
+
   if (btnResetDisclaimer) {
     btnResetDisclaimer.addEventListener('click', () => {
       localStorage.removeItem('disclaimer_dismissed');
