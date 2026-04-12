@@ -33,6 +33,8 @@ import {
   saveNamedSession,
   loadNamedSession,
   deleteNamedSession,
+  loadFavorites,
+  toggleFavorite,
   LS_CR_HISTORY,
 } from './storage.js';
 
@@ -250,6 +252,7 @@ function renderSuggestions() {
   const root = document.getElementById('suggestions-root');
   if (!root) return;
 
+  const favs = loadFavorites();
   const visible = suggestions.filter((s) => suggestionState.get(s.id) === 'pending');
   const sugTitle = document.getElementById('sug-label');
   if (sugTitle) {
@@ -287,10 +290,14 @@ function renderSuggestions() {
       const srcBadge = isWho
         ? '<span class="badge who11" title="Suggestion issue du service de classification de l’OMS">OMS</span>'
         : '<span class="badge local" title="Suggestion issue du dictionnaire de l’application">Intégré</span>';
+      const isFav = favs.some((f) => f.code === s.code);
       const confBadge = `<span class="badge conf ${conf.cls}" title="Pertinence estimée">${conf.text}</span>`;
       return `
       <article class="card" data-id="${escapeHtml(s.id)}">
         <div class="card-header">
+          <button type="button" class="fav-toggle ${isFav ? 'is-fav' : ''}" data-fav-code="${escapeHtml(s.code)}" data-fav-label="${escapeHtml(s.label)}" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+            ${isFav ? '★' : '☆'}
+          </button>
           <span class="code">${escapeHtml(s.code)}</span>
           <span class="label">${escapeHtml(s.label)}</span>
           ${srcBadge}
@@ -323,6 +330,14 @@ function renderSuggestions() {
     card.querySelector('[data-action="edit"]')?.addEventListener('click', () => openEdit(id, true));
     card.querySelector('[data-action="save-edit"]')?.addEventListener('click', () => saveEdit(id));
     card.querySelector('[data-action="cancel-edit"]')?.addEventListener('click', () => openEdit(id, false));
+    card.querySelector('.fav-toggle')?.addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      const code = btn.getAttribute('data-fav-code');
+      const label = btn.getAttribute('data-fav-label');
+      toggleFavorite(code, label);
+      renderSuggestions();
+      renderFavorites();
+    });
   });
 }
 
@@ -587,14 +602,21 @@ function renderManualHits(hits, results, inp) {
     results.innerHTML = '<p class="manual-search-empty">Aucun résultat trouvé.</p>';
     return;
   }
+  const favs = loadFavorites();
   results.innerHTML = hits.map((h) => {
     const parent = findParentEntry(h.code);
     const parentHtml = parent ? `<span class="manual-search-parent">${escapeHtml(parent.code)} — ${escapeHtml(parent.label)}</span>` : '';
-    return `<button type="button" class="manual-search-hit" data-code="${escapeHtml(h.code)}" data-label="${escapeHtml(h.label)}">
-      <span class="code">${escapeHtml(h.code)}</span>
-      <span class="manual-search-hit-label">${escapeHtml(h.label)}</span>
-      ${parentHtml}
-    </button>`;
+    const isFav = favs.some((f) => f.code === h.code);
+    return `<div class="manual-search-hit-row">
+      <button type="button" class="manual-search-hit" data-code="${escapeHtml(h.code)}" data-label="${escapeHtml(h.label)}">
+        <span class="code">${escapeHtml(h.code)}</span>
+        <span class="manual-search-hit-label">${escapeHtml(h.label)}</span>
+        ${parentHtml}
+      </button>
+      <button type="button" class="fav-toggle ${isFav ? 'is-fav' : ''}" data-fav-code="${escapeHtml(h.code)}" data-fav-label="${escapeHtml(h.label)}" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+        ${isFav ? '★' : '☆'}
+      </button>
+    </div>`;
   }).join('');
   results.querySelectorAll('.manual-search-hit').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -606,6 +628,55 @@ function renderManualHits(hits, results, inp) {
       inp.value = '';
       results.innerHTML = '';
       inp.focus();
+    });
+  });
+  results.querySelectorAll('.fav-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = btn.getAttribute('data-fav-code');
+      const label = btn.getAttribute('data-fav-label');
+      toggleFavorite(code, label);
+      doSearch(); // rafraichir la recherche manuelle
+      renderFavorites();
+      renderSuggestions();
+    });
+  });
+}
+
+function renderFavorites() {
+  const root = document.getElementById('favorites-root');
+  if (!root) return;
+  const favorites = loadFavorites();
+  if (!favorites.length) {
+    root.innerHTML = '<p class="empty">Aucun favori enregistré. Utilisez l’étoile sur un code pour l’ajouter.</p>';
+    return;
+  }
+  root.innerHTML = `<div class="fav-list">${favorites.map((f) => `
+    <div class="fav-item">
+      <button type="button" class="fav-item-btn" data-code="${escapeHtml(f.code)}" data-label="${escapeHtml(f.label)}">
+        <span class="code">${escapeHtml(f.code)}</span>
+        <span class="fav-label">${escapeHtml(f.label)}</span>
+      </button>
+      <button type="button" class="fav-del ghost" data-del-code="${escapeHtml(f.code)}" title="Retirer des favoris">×</button>
+    </div>
+  `).join('')}</div>`;
+
+  root.querySelectorAll('.fav-item-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const code = btn.getAttribute('data-code');
+      const label = btn.getAttribute('data-label');
+      validated.push({ id: randomId(), code, label, statut: 'validé' });
+      saveValidatedSession();
+      renderValidated();
+    });
+  });
+  root.querySelectorAll('.fav-del').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const code = btn.getAttribute('data-del-code');
+      const favs = loadFavorites();
+      saveFavorites(favs.filter((f) => f.code !== code));
+      renderFavorites();
+      renderSuggestions();
     });
   });
 }
@@ -716,16 +787,55 @@ export function mountHomePage() {
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
-      const prev = popUndo();
-      if (!prev) return;
-      e.preventDefault();
-      validated = prev.validated;
-      const el = document.getElementById('cr-text');
-      if (el) { el.value = prev.compteRendu; window.__savedCrText = prev.compteRendu; }
-      saveValidatedSession();
-      renderValidated();
-      renderSuggestions();
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      if (e.key === 'z') {
+        const prev = popUndo();
+        if (!prev) return;
+        e.preventDefault();
+        validated = prev.validated;
+        const el = document.getElementById('cr-text');
+        if (el) {
+          el.value = prev.compteRendu;
+          window.__savedCrText = prev.compteRendu;
+        }
+        saveValidatedSession();
+        renderValidated();
+        renderSuggestions();
+        return;
+      }
+    }
+
+    // Nouveaux raccourcis Alt
+    if (e.altKey) {
+      if (e.key === 'v') {
+        // Valider la première suggestion en attente
+        const first = suggestions.find((s) => suggestionState.get(s.id) === 'pending');
+        if (first) {
+          e.preventDefault();
+          acceptSuggestion(first.id, false);
+        }
+      } else if (e.key === 'r') {
+        // Rejeter la première suggestion en attente
+        const first = suggestions.find((s) => suggestionState.get(s.id) === 'pending');
+        if (first) {
+          e.preventDefault();
+          rejectSuggestion(first.id);
+        }
+      } else if (e.key === 't') {
+        // Focus sur le compte-rendu
+        const el = document.getElementById('cr-text');
+        if (el) {
+          e.preventDefault();
+          el.focus();
+        }
+      } else if (e.key === 's') {
+        // Focus sur la recherche manuelle
+        const el = document.getElementById('manual-search-inp');
+        if (el) {
+          e.preventDefault();
+          el.focus();
+        }
+      }
     }
   });
 
@@ -789,4 +899,5 @@ export function mountHomePage() {
   renderValidated();
   renderCrHistory();
   wireManualSearch();
+  renderFavorites();
 }

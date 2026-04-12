@@ -1983,6 +1983,84 @@ footer.app-footer {
   color: var(--text);
 }
 
+/* ── Favoris ───────────────────────────────────────────────── */
+.favorites-details {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+.favorites-summary {
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.fav-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+.fav-item {
+  display: flex;
+  align-items: center;
+  background: var(--surface1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fav-item-btn {
+  background: none;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.85rem;
+  text-align: left;
+}
+.fav-item-btn:hover {
+  background: var(--surface2);
+}
+.fav-del {
+  padding: 0.3rem 0.5rem;
+  font-size: 1rem;
+  border-left: 1px solid var(--border-subtle) !important;
+  border-radius: 0 !important;
+}
+.fav-toggle {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.2s, transform 0.1s;
+  padding: 4px;
+  line-height: 1;
+}
+.fav-toggle:hover {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+.fav-toggle.is-fav {
+  color: #ffc107;
+}
+
+.manual-search-hit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+.manual-search-hit {
+  flex: 1;
+}
+
 /* ── Historique des textes analysés ─────────────────────────── */
 .cr-history-details {
   margin-top: 0.6rem;
