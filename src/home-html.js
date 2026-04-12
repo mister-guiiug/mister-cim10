@@ -46,6 +46,10 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
       <div class="panel-head">
         <h2 id="val-label" class="panel-title">Diagnostics retenus</h2>
       </div>
+      <details class="favorites-details">
+        <summary class="favorites-summary">⭐ Favoris</summary>
+        <div id="favorites-root" class="favorites-root"></div>
+      </details>
       <form id="manual-search-form" class="manual-search-form" action="#" method="get" autocomplete="off">
         <label for="manual-search-inp" class="manual-search-label">Ajouter un code manuellement</label>
         <div class="manual-search-row">
