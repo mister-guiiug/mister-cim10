@@ -21,7 +21,8 @@ export function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', t);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    meta.setAttribute('content', t === 'light' ? '#eef2f7' : '#0c1222');
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+    meta.setAttribute('content', bg);
   }
 }
 
