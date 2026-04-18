@@ -4,6 +4,8 @@ import { randomId } from './random-id.js';
 import { createSpeechRecognizer, isSpeechRecognitionSupported } from './speech.js';
 import { escapeHtml } from './html-utils.js';
 import { showConfirm, showAlert } from './dialog-ui.js';
+// UI Enhancements
+import * as UI from './ui-helpers.js';
 import { buildAppHeaderHtml } from './header-html.js';
 import { wireThemeToggle } from './theme.js';
 import { wireNavDrawer } from './nav-drawer.js';
