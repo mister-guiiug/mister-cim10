@@ -1,8 +1,8 @@
+import { registerSW } from 'virtual:pwa-register';
+
 const UPDATE_BANNER_ID = 'sw-update-banner';
 
-let reloadOnNextController = false;
-
-function showUpdateBanner(registration) {
+function showUpdateBanner(updateServiceWorker) {
   if (document.getElementById(UPDATE_BANNER_ID)) return;
   const bar = document.createElement('div');
   bar.id = UPDATE_BANNER_ID;
@@ -15,40 +15,25 @@ function showUpdateBanner(registration) {
   `;
   document.body.appendChild(bar);
   bar.querySelector('.sw-update-banner__btn')?.addEventListener('click', () => {
-    const w = registration.waiting;
-    if (w) {
-      reloadOnNextController = true;
-      w.postMessage({ type: 'SKIP_WAITING' });
-    } else {
-      window.location.reload();
-    }
+    updateServiceWorker(true);
   });
 }
 
 export function registerServiceWorker() {
-  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+  if (!import.meta.env.PROD) return;
 
-  const base = import.meta.env.BASE_URL;
-
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloadOnNextController) {
-      reloadOnNextController = false;
-      window.location.reload();
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      showUpdateBanner(() => updateSW(true));
+    },
+    onOfflineReady() {
+      console.log('[PWA] App ready to work offline');
+    },
+    onRegistered(registration) {
+      console.log('[PWA] Service worker registered', registration);
+    },
+    onRegisterError(error) {
+      console.error('[PWA] Service worker registration error', error);
     }
   });
-
-  navigator.serviceWorker
-    .register(`${base}sw.js`, { scope: base })
-    .then((registration) => {
-      registration.addEventListener('updatefound', () => {
-        const nw = registration.installing;
-        if (!nw) return;
-        nw.addEventListener('statechange', () => {
-          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateBanner(registration);
-          }
-        });
-      });
-    })
-    .catch(() => {});
 }
