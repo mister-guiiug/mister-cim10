@@ -38,6 +38,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
     <section class="panel" aria-labelledby="sug-label">
       <div class="panel-head">
         <h2 id="sug-label" class="panel-title">Suggestions</h2>
+        <div id="analyze-timer-root"></div>
       </div>
       <div id="suggestions-root"></div>
     </section>

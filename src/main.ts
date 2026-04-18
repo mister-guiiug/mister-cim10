@@ -6,6 +6,9 @@ import { mountParametresPage, mountAidePage } from './pages.js';
 import { registerServiceWorker } from './register-sw.js';
 import { focusMainContent } from './focus-utils.js';
 import { initWebVitals } from './monitoring/web-vitals.js';
+// UI Enhancements
+import * as UI from './ui-helpers.js';
+import './enhancements-integration.js';
 
 const app = document.getElementById('app');
 

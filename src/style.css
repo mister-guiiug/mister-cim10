@@ -1,6 +1,9 @@
 /* Accessibilité (skip link, bannière SW) : styles/a11y.css */
 @import './styles/a11y.css';
 
+/* Enhancements: toast, loading, micro-interactions, etc. */
+@import './styles/enhancements.css';
+
 html[data-theme='dark'] {
   color-scheme: dark;
   --bg: #0c1222;
