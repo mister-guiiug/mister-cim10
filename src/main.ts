@@ -5,6 +5,7 @@ import { mountHomePage } from './workspace.js';
 import { mountParametresPage, mountAidePage } from './pages.js';
 import { registerServiceWorker } from './register-sw.js';
 import { focusMainContent } from './focus-utils.js';
+import { initWebVitals } from './monitoring/web-vitals.js';
 
 const app = document.getElementById('app');
 
@@ -22,5 +23,9 @@ window.__savedCrText = window.__savedCrText || '';
 applyResolvedTheme();
 wireSystemThemeListener();
 registerServiceWorker();
+
+// Initialiser le monitoring des Web Vitals
+initWebVitals();
+
 startRouter(() => mountApp());
 mountApp();

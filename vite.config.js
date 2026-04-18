@@ -50,6 +50,29 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    sourcemap: true,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+
+          const norm = id.replace(/\\/g, '/')
+
+          // Séparer PWA
+          if (norm.includes('/vite-plugin-pwa/') || norm.includes('/workbox-')) {
+            return 'pwa'
+          }
+
+          // PNGJS pour les images
+          if (norm.includes('/pngjs/')) {
+            return 'image-processing'
+          }
+
+          return 'vendor'
+        },
+      },
+    },
   },
   plugins: command === 'build' ? [analyticsPlugin()] : [],
 }));
