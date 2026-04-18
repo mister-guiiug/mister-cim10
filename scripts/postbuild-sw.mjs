@@ -41,7 +41,7 @@ const html = fs.readFileSync(distHtml, 'utf8');
 const precache = extractPrecachePaths(html);
 
 const swSource = `/* Généré par scripts/postbuild-sw.mjs — ne pas éditer à la main */
-const CACHE = 'mister-cim10-v3';
+const CACHE = 'mister-cim10-v4';
 const PRECACHE_URLS = ${JSON.stringify(precache)};
 
 self.addEventListener('install', (event) => {
