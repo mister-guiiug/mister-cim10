@@ -190,6 +190,6 @@ docs/context.md      Contexte produit détaillé
 
 ## Licence
 
-[MIT](LICENSE) — Copyright © 2026 Guillaume GUERIN.
+[MIT](LICENSE) — Copyright © 2026 Guillaume GUERIN. 
 
 Utilisation sous votre entière responsabilité. Cet outil ne remplace pas les référentiels officiels ni le jugement clinique.
