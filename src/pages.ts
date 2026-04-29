@@ -10,6 +10,7 @@ import {
   isSettingsReadyForDailyUse,
   MODE_SUMMARY_LABEL,
   initAnalyzeModeUi,
+  initConfidenceThresholdUi,
   initWhoSettingsUi,
 } from './app-settings.js';
 import { refreshWorkspaceChrome } from './header-chrome.js';
@@ -60,6 +61,7 @@ export function mountParametresPage() {
   const importedFromLink = tryImportSettingsFromHash();
   initAnalyzeModeUi(chrome);
   initWhoSettingsUi(chrome);
+  initConfidenceThresholdUi();
   wireSettingsShare();
   wireNavDrawer();
   wireThemeToggle();

@@ -36,6 +36,7 @@ import {
   loadNamedSession,
   deleteNamedSession,
   loadFavorites,
+  saveFavorites,
   toggleFavorite,
   LS_CR_HISTORY,
 } from './storage.js';
@@ -50,22 +51,224 @@ let validated = [];
 /** @type {Map<string, 'pending' | 'accepted' | 'rejected'>} */
 const suggestionState = new Map();
 let suggestions = [];
+let activeSuggestionId = null;
+let selectedHighlightTerm = '';
+let suggestionFilterQuery = '';
 let dictationPrefix = '';
 let recognizer = null;
 let listening = false;
 let lastAnalyze = { ran: false, hadText: false, count: 0 };
 
-/** @type {Array<{validated: any[], compteRendu: string}>} */
+/** @type {Array<{validated: any[], compteRendu: string, suggestionEntries: Array<[string, 'pending' | 'accepted' | 'rejected']>, activeSuggestionId: string | null}>} */
 let undoStack = [];
+/** @type {Array<{validated: any[], compteRendu: string, suggestionEntries: Array<[string, 'pending' | 'accepted' | 'rejected']>, activeSuggestionId: string | null}>} */
+let redoStack = [];
+
+function captureState(cr) {
+  return {
+    validated: JSON.parse(JSON.stringify(validated)),
+    compteRendu: cr,
+    suggestionEntries: Array.from(suggestionState.entries()),
+    activeSuggestionId,
+  };
+}
+
+function restoreState(state) {
+  validated = JSON.parse(JSON.stringify(state.validated || []));
+  suggestionState.clear();
+  for (const [id, status] of state.suggestionEntries || []) {
+    suggestionState.set(id, status);
+  }
+  activeSuggestionId = state.activeSuggestionId || null;
+}
 
 function pushUndo(cr) {
-  undoStack.push({ validated: JSON.parse(JSON.stringify(validated)), compteRendu: cr });
+  undoStack.push(captureState(cr));
   if (undoStack.length > 20) undoStack.shift();
+  redoStack = [];
+  renderUndoRedoButtons();
 }
 
-function popUndo() {
-  return undoStack.pop() || null;
+function performUndo() {
+  const currentCr = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'))?.value || '';
+  const prev = undoStack.pop();
+  if (!prev) return;
+
+  redoStack.push(captureState(currentCr));
+  restoreState(prev);
+
+  const el = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  if (el) {
+    el.value = prev.compteRendu;
+    window.__savedCrText = prev.compteRendu;
+  }
+
+  saveValidatedSession();
+  renderValidated();
+  renderSuggestions();
+  renderUndoRedoButtons();
 }
+
+function performRedo() {
+  const currentCr = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'))?.value || '';
+  const next = redoStack.pop();
+  if (!next) return;
+
+  undoStack.push(captureState(currentCr));
+  restoreState(next);
+
+  const el = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  if (el) {
+    el.value = next.compteRendu;
+    window.__savedCrText = next.compteRendu;
+  }
+
+  saveValidatedSession();
+  renderValidated();
+  renderSuggestions();
+  renderUndoRedoButtons();
+}
+
+function renderUndoRedoButtons() {
+  const undoBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('btn-undo'));
+  const redoBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('btn-redo'));
+  if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+}
+
+function getPendingSuggestions() {
+  return suggestions.filter((s) => suggestionState.get(s.id) === 'pending');
+}
+
+function getVisiblePendingSuggestions() {
+  const cfg = readAnalyzeSettings();
+  const minConfidence = Number.isFinite(cfg.minConfidence) ? cfg.minConfidence : 0.4;
+  return getPendingSuggestions().filter((s) => s.confidence >= minConfidence);
+}
+
+function suggestionMatchesFilter(s, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const haystack = `${s.code} ${s.label} ${s.matchedTerm || ''}`.toLowerCase();
+  return haystack.includes(q);
+}
+
+function getFilteredVisibleSuggestions() {
+  const visible = getVisiblePendingSuggestions();
+  if (!suggestionFilterQuery.trim()) return visible;
+  return visible.filter((s) => suggestionMatchesFilter(s, suggestionFilterQuery));
+}
+
+function updateSuggestionFilterUi(filteredCount, visibleCount) {
+  const countEl = document.getElementById('suggestion-filter-count');
+  const acceptBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('btn-accept-filtered'));
+  const rejectBtn = /** @type {HTMLButtonElement | null} */ (document.getElementById('btn-reject-filtered'));
+  if (countEl) {
+    if (!suggestionFilterQuery.trim()) {
+      countEl.textContent = visibleCount ? `${visibleCount} suggestion(s) en attente` : '';
+    } else {
+      countEl.textContent = `${filteredCount} / ${visibleCount} affichée(s)`;
+    }
+  }
+  if (acceptBtn) acceptBtn.disabled = filteredCount === 0;
+  if (rejectBtn) rejectBtn.disabled = filteredCount === 0;
+}
+
+function applyBulkSuggestionAction(action) {
+  const filtered = getFilteredVisibleSuggestions();
+  if (!filtered.length) return;
+
+  const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  pushUndo(ta?.value || '');
+
+  if (action === 'accept') {
+    for (const s of filtered) {
+      suggestionState.set(s.id, 'accepted');
+      validated.push({
+        id: randomId(),
+        code: s.code,
+        label: s.label,
+        statut: 'validé',
+        matchedTerm: s.matchedTerm,
+      });
+    }
+    saveValidatedSession();
+    renderValidated();
+    flashValidated();
+  } else {
+    for (const s of filtered) {
+      suggestionState.set(s.id, 'rejected');
+    }
+  }
+
+  const pending = getFilteredVisibleSuggestions();
+  activeSuggestionId = pending.length ? pending[0].id : null;
+  renderSuggestions();
+  renderCrHighlights();
+  renderUndoRedoButtons();
+}
+
+function getActiveSuggestionId() {
+  const pending = getFilteredVisibleSuggestions();
+  if (!pending.length) return null;
+  if (activeSuggestionId && pending.some((s) => s.id === activeSuggestionId)) return activeSuggestionId;
+  activeSuggestionId = pending[0].id;
+  return activeSuggestionId;
+}
+
+function moveActiveSuggestion(delta) {
+  const pending = getFilteredVisibleSuggestions();
+  if (!pending.length) return;
+  const currentId = getActiveSuggestionId();
+  const idx = pending.findIndex((s) => s.id === currentId);
+  const safeIdx = idx === -1 ? 0 : idx;
+  const nextIdx = (safeIdx + delta + pending.length) % pending.length;
+  activeSuggestionId = pending[nextIdx].id;
+  renderSuggestions();
+  const card = document.querySelector(`.card[data-id="${activeSuggestionId.replace(/"/g, '\\"')}"]`);
+  if (card instanceof HTMLElement) card.focus();
+}
+
+function isTypingTarget(target) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable) return true;
+  const tag = target.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+function handleSuggestionShortcuts(e) {
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if (isTypingTarget(e.target)) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    moveActiveSuggestion(1);
+    return;
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    moveActiveSuggestion(-1);
+    return;
+  }
+
+  const currentId = getActiveSuggestionId();
+  if (!currentId) return;
+
+  if (e.key === '1') {
+    e.preventDefault();
+    acceptSuggestion(currentId, false);
+  } else if (e.key === '2') {
+    e.preventDefault();
+    rejectSuggestion(currentId);
+  } else if (e.key === '3') {
+    e.preventDefault();
+    openEdit(currentId, true);
+    const card = document.querySelector(`.card[data-id="${currentId.replace(/"/g, '\\"')}"]`);
+    const codeInput = card?.querySelector('.inp-code');
+    if (codeInput instanceof HTMLElement) codeInput.focus();
+  }
+}
+
 function renderCrHistory() {
   const ta = /** @type {HTMLTextAreaElement} */ (document.getElementById('cr-text'));
   const root = document.getElementById('cr-history-root');
@@ -140,6 +343,66 @@ function showAnalyzeError(msg) {
     el.textContent = msg;
     el.hidden = false;
   }
+}
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function findTermInCr(term) {
+  const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  if (!ta || !term) return false;
+  const haystack = ta.value.toLowerCase();
+  const needle = term.trim().toLowerCase();
+  if (!needle) return false;
+  const idx = haystack.indexOf(needle);
+  if (idx === -1) return false;
+  ta.focus();
+  ta.setSelectionRange(idx, idx + needle.length);
+  return true;
+}
+
+function renderCrHighlights() {
+  const root = document.getElementById('cr-highlight-root');
+  const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  if (!root || !ta) return;
+
+  const text = ta.value;
+  if (!text.trim()) {
+    root.hidden = true;
+    root.innerHTML = '';
+    return;
+  }
+
+  const terms = Array.from(
+    new Set(
+      suggestions
+        .filter((s) => suggestionState.get(s.id) === 'pending')
+        .map((s) => (s.matchedTerm || '').trim())
+        .filter((t) => t.length >= 2)
+    )
+  );
+
+  if (!terms.length) {
+    root.hidden = true;
+    root.innerHTML = '';
+    return;
+  }
+
+  // Priorise les termes longs pour éviter qu'un terme court casse le surlignage.
+  terms.sort((a, b) => b.length - a.length);
+
+  let html = escapeHtml(text);
+  for (const term of terms) {
+    const cls = selectedHighlightTerm && term.toLowerCase() === selectedHighlightTerm.toLowerCase()
+      ? 'cr-hit cr-hit-active'
+      : 'cr-hit';
+    const safeTerm = escapeRegExp(escapeHtml(term));
+    html = html.replace(new RegExp(safeTerm, 'gi'), (m) => `<mark class="${cls}">${m}</mark>`);
+  }
+
+  root.hidden = false;
+  root.innerHTML = `<p class="cr-highlight-label">Termes repérés dans le texte</p><p class="cr-highlight-preview">${html}</p>`;
 }
 
 async function runAnalyze() {
@@ -217,6 +480,7 @@ async function runAnalyze() {
 
     suggestionState.clear();
     for (const s of suggestions) suggestionState.set(s.id, 'pending');
+    selectedHighlightTerm = '';
 
     lastAnalyze = {
       ran: true,
@@ -225,6 +489,7 @@ async function runAnalyze() {
     };
 
     renderSuggestions();
+    renderCrHighlights();
     renderCrHistory();
   } finally {
     if (btn) btn.disabled = false;
@@ -255,13 +520,18 @@ function renderSuggestions() {
   if (!root) return;
 
   const favs = loadFavorites();
-  const visible = suggestions.filter((s) => suggestionState.get(s.id) === 'pending');
+  const visibleByThreshold = getVisiblePendingSuggestions();
+  const visible = getFilteredVisibleSuggestions();
+  const hiddenByThreshold = getPendingSuggestions().length - visibleByThreshold.length;
+  const hiddenByFilter = visibleByThreshold.length - visible.length;
+  const activeId = getActiveSuggestionId();
   const sugTitle = document.getElementById('sug-label');
   if (sugTitle) {
     sugTitle.textContent = visible.length
       ? `Suggestions (${visible.length} en attente)`
       : 'Suggestions';
   }
+  updateSuggestionFilterUi(visible.length, visibleByThreshold.length);
   if (!visible.length) {
     let msg =
       '<p class="empty">Lancez <strong>Analyser</strong> pour obtenir des propositions de codes à partir du texte saisi.</p>';
@@ -273,6 +543,12 @@ function renderSuggestions() {
         '<p class="empty">Aucune suggestion pour ce texte. Reformulez ou précisez les diagnostics (ex. diabète type 2, hypertension, asthme).</p>';
     } else if (lastAnalyze.ran && !lastAnalyze.hadText) {
       msg = '<p class="empty">Saisissez d’abord un compte-rendu ou des diagnostics, puis lancez l’analyse.</p>';
+    }
+    if (hiddenByThreshold > 0) {
+      msg += '<p class="hint">Des suggestions existent mais restent masquées par le seuil de confiance configuré dans Paramètres.</p>';
+    }
+    if (hiddenByFilter > 0) {
+      msg += '<p class="hint">Ajustez le filtre pour afficher des suggestions correspondantes.</p>';
     }
     root.innerHTML = msg;
     return;
@@ -295,7 +571,7 @@ function renderSuggestions() {
       const isFav = favs.some((f) => f.code === s.code);
       const confBadge = `<span class="badge conf ${conf.cls}" title="Pertinence estimée">${conf.text}</span>`;
       return `
-      <article class="card" data-id="${escapeHtml(s.id)}">
+      <article class="card ${activeId === s.id ? 'is-active' : ''}" data-id="${escapeHtml(s.id)}" tabindex="0">
         <div class="card-header">
           <button type="button" class="fav-toggle ${isFav ? 'is-fav' : ''}" data-fav-code="${escapeHtml(s.code)}" data-fav-label="${escapeHtml(s.label)}" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
             ${isFav ? '★' : '☆'}
@@ -311,6 +587,7 @@ function renderSuggestions() {
           <button type="button" class="accept" data-action="accept">Valider</button>
           <button type="button" class="edit" data-action="edit">Modifier</button>
           <button type="button" class="reject" data-action="reject">Rejeter</button>
+          <button type="button" class="ghost" data-action="locate">Voir dans le texte</button>
         </div>
         <div class="edit-form" id="edit-${escapeHtml(s.id)}">
           <label>Code diagnostic <input type="text" class="inp-code" value="${escapeHtml(s.code)}" /></label>
@@ -327,9 +604,21 @@ function renderSuggestions() {
 
   root.querySelectorAll('.card').forEach((card) => {
     const id = card.getAttribute('data-id');
+    card.addEventListener('focus', () => {
+      activeSuggestionId = id;
+      root.querySelectorAll('.card').forEach((c) => c.classList.remove('is-active'));
+      card.classList.add('is-active');
+    });
     card.querySelector('[data-action="accept"]')?.addEventListener('click', () => acceptSuggestion(id, false));
     card.querySelector('[data-action="reject"]')?.addEventListener('click', () => rejectSuggestion(id));
     card.querySelector('[data-action="edit"]')?.addEventListener('click', () => openEdit(id, true));
+    card.querySelector('[data-action="locate"]')?.addEventListener('click', () => {
+      const s = findSuggestion(id);
+      if (!s?.matchedTerm) return;
+      selectedHighlightTerm = s.matchedTerm;
+      renderCrHighlights();
+      findTermInCr(s.matchedTerm);
+    });
     card.querySelector('[data-action="save-edit"]')?.addEventListener('click', () => saveEdit(id));
     card.querySelector('[data-action="cancel-edit"]')?.addEventListener('click', () => openEdit(id, false));
     card.querySelector('.fav-toggle')?.addEventListener('click', (e) => {
@@ -341,28 +630,34 @@ function renderSuggestions() {
       renderFavorites();
     });
   });
+
+  renderCrHighlights();
 }
 
 function findSuggestion(id) {
   return suggestions.find((x) => x.id === id);
 }
 
-function acceptSuggestion(id, modified, code, label) {
+function acceptSuggestion(id, modified, code = '', label = '') {
   const s = findSuggestion(id);
   if (!s) return;
   const ta = document.getElementById('cr-text');
   pushUndo(ta?.value || '');
+  const finalCode = modified && code ? code : s.code;
+  const finalLabel = modified && label ? label : s.label;
   suggestionState.set(id, 'accepted');
   validated.push({
     id: randomId(),
-    code: modified ? code : s.code,
-    label: modified ? label : s.label,
+    code: finalCode,
+    label: finalLabel,
     statut: modified ? 'modifié' : 'validé',
     matchedTerm: s.matchedTerm,
   });
   saveValidatedSession();
   renderSuggestions();
+  renderCrHighlights();
   renderValidated();
+  renderUndoRedoButtons();
   flashValidated();
 }
 
@@ -376,8 +671,13 @@ function flashValidated() {
 }
 
 function rejectSuggestion(id) {
+  const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+  pushUndo(ta?.value || '');
   suggestionState.set(id, 'rejected');
+  const pending = getVisiblePendingSuggestions();
+  activeSuggestionId = pending.length ? pending[0].id : null;
   renderSuggestions();
+  renderCrHighlights();
 }
 
 function openEdit(id, open) {
@@ -442,6 +742,8 @@ function renderValidated() {
       const id = btn.getAttribute('data-up');
       const idx = validated.findIndex((x) => x.id === id);
       if (idx > 0) {
+        const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+        pushUndo(ta?.value || '');
         [validated[idx - 1], validated[idx]] = [validated[idx], validated[idx - 1]];
         saveValidatedSession();
         renderValidated();
@@ -454,6 +756,8 @@ function renderValidated() {
       const id = btn.getAttribute('data-down');
       const idx = validated.findIndex((x) => x.id === id);
       if (idx !== -1 && idx < validated.length - 1) {
+        const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+        pushUndo(ta?.value || '');
         [validated[idx], validated[idx + 1]] = [validated[idx + 1], validated[idx]];
         saveValidatedSession();
         renderValidated();
@@ -487,7 +791,12 @@ function renderValidated() {
       const ta3 = form?.querySelector('.validated-note-inp');
       const note = ta3?.value?.trim() || '';
       const item = validated.find((x) => x.id === id);
-      if (item) { item.note = note; saveValidatedSession(); }
+      if (item) {
+        const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+        pushUndo(ta?.value || '');
+        item.note = note;
+        saveValidatedSession();
+      }
       renderValidated();
     });
   });
@@ -667,6 +976,8 @@ function renderFavorites() {
     btn.addEventListener('click', () => {
       const code = btn.getAttribute('data-code');
       const label = btn.getAttribute('data-label');
+      const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+      pushUndo(ta?.value || '');
       validated.push({ id: randomId(), code, label, statut: 'validé' });
       saveValidatedSession();
       renderValidated();
@@ -767,9 +1078,13 @@ export function mountHomePage() {
     window.__savedCrText = '';
     suggestions = [];
     suggestionState.clear();
+    suggestionFilterQuery = '';
+    const filterInput = /** @type {HTMLInputElement | null} */ (document.getElementById('suggestion-filter-inp'));
+    if (filterInput) filterInput.value = '';
     lastAnalyze = { ran: false, hadText: false, count: 0 };
     hideAnalyzeError();
     renderSuggestions();
+    renderCrHighlights();
   });
 
   const micBtn = document.getElementById('btn-mic');
@@ -779,7 +1094,25 @@ export function mountHomePage() {
 
   ta.addEventListener('input', () => {
     window.__savedCrText = ta.value;
+    renderCrHighlights();
   });
+
+  const suggestionFilterInput = /** @type {HTMLInputElement | null} */ (document.getElementById('suggestion-filter-inp'));
+  suggestionFilterInput?.addEventListener('input', () => {
+    suggestionFilterQuery = suggestionFilterInput.value || '';
+    activeSuggestionId = null;
+    renderSuggestions();
+  });
+
+  document.getElementById('btn-clear-suggestion-filter')?.addEventListener('click', () => {
+    suggestionFilterQuery = '';
+    if (suggestionFilterInput) suggestionFilterInput.value = '';
+    activeSuggestionId = null;
+    renderSuggestions();
+  });
+
+  document.getElementById('btn-accept-filtered')?.addEventListener('click', () => applyBulkSuggestionAction('accept'));
+  document.getElementById('btn-reject-filtered')?.addEventListener('click', () => applyBulkSuggestionAction('reject'));
 
   ta.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -789,36 +1122,40 @@ export function mountHomePage() {
   });
 
   document.addEventListener('keydown', (e) => {
+    handleSuggestionShortcuts(e);
+
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
       if (e.key === 'z') {
-        const prev = popUndo();
-        if (!prev) return;
         e.preventDefault();
-        validated = prev.validated;
-        const el = document.getElementById('cr-text');
-        if (el) {
-          el.value = prev.compteRendu;
-          window.__savedCrText = prev.compteRendu;
-        }
-        saveValidatedSession();
-        renderValidated();
-        renderSuggestions();
+        performUndo();
         return;
       }
+
+      if (e.key === 'y') {
+        e.preventDefault();
+        performRedo();
+        return;
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      performRedo();
+      return;
     }
 
     // Nouveaux raccourcis Alt
     if (e.altKey) {
       if (e.key === 'v') {
         // Valider la première suggestion en attente
-        const first = suggestions.find((s) => suggestionState.get(s.id) === 'pending');
+        const first = getVisiblePendingSuggestions()[0];
         if (first) {
           e.preventDefault();
           acceptSuggestion(first.id, false);
         }
       } else if (e.key === 'r') {
         // Rejeter la première suggestion en attente
-        const first = suggestions.find((s) => suggestionState.get(s.id) === 'pending');
+        const first = getVisiblePendingSuggestions()[0];
         if (first) {
           e.preventDefault();
           rejectSuggestion(first.id);
@@ -871,12 +1208,15 @@ export function mountHomePage() {
     validated = [];
     suggestions = [];
     suggestionState.clear();
+    suggestionFilterQuery = '';
+    if (suggestionFilterInput) suggestionFilterInput.value = '';
     lastAnalyze = { ran: false, hadText: false, count: 0 };
     clearValidatedSession();
     hideAnalyzeError();
     renderSuggestions();
     renderValidated();
     renderCrHistory();
+    renderCrHighlights();
   });
 
   document.getElementById('btn-print')?.addEventListener('click', () => window.print());
@@ -894,12 +1234,17 @@ export function mountHomePage() {
 
   renderSessionsPanel();
 
+  document.getElementById('btn-undo')?.addEventListener('click', () => performUndo());
+  document.getElementById('btn-redo')?.addEventListener('click', () => performRedo());
+
   wireNavDrawer();
   wireThemeToggle();
   refreshWorkspaceChrome();
   renderSuggestions();
   renderValidated();
+  renderUndoRedoButtons();
   renderCrHistory();
+  renderCrHighlights();
   wireManualSearch();
   renderFavorites();
 }

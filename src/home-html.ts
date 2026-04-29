@@ -31,6 +31,7 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
         </div>
       </form>
       <p class="hint">Vous pouvez dicter : micro du clavier sur mobile ou bouton Dictée si proposé.</p>
+      <div id="cr-highlight-root" class="cr-highlight-root" hidden></div>
       <div id="cr-history-root" hidden></div>
       <p class="hint error" id="analyze-error" hidden role="alert"></p>
     </section>
@@ -40,12 +41,32 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
         <h2 id="sug-label" class="panel-title">Suggestions</h2>
         <div id="analyze-timer-root"></div>
       </div>
+      <p class="hint">Raccourcis: ↑/↓ pour naviguer, 1 valider, 2 rejeter, 3 modifier.</p>
+      <div class="suggestion-filter-row">
+        <input
+          id="suggestion-filter-inp"
+          type="search"
+          class="suggestion-filter-inp"
+          placeholder="Filtrer (code, libellé, terme repéré)"
+          aria-label="Filtrer les suggestions"
+        />
+        <button type="button" class="ghost" id="btn-clear-suggestion-filter">Effacer filtre</button>
+      </div>
+      <div class="toolbar suggestion-bulk-toolbar">
+        <button type="button" class="secondary" id="btn-accept-filtered">Valider filtrées</button>
+        <button type="button" class="secondary" id="btn-reject-filtered">Rejeter filtrées</button>
+        <span class="hint suggestion-filter-count" id="suggestion-filter-count"></span>
+      </div>
       <div id="suggestions-root"></div>
     </section>
 
     <section class="panel" aria-labelledby="val-label">
       <div class="panel-head">
         <h2 id="val-label" class="panel-title">Diagnostics retenus</h2>
+        <div class="panel-head-actions">
+          <button type="button" class="ghost" id="btn-undo" title="Annuler la dernière action (Ctrl/Cmd+Z)">Annuler</button>
+          <button type="button" class="ghost" id="btn-redo" title="Rétablir (Ctrl+Y ou Ctrl/Cmd+Shift+Z)">Rétablir</button>
+        </div>
       </div>
       <details class="favorites-details">
         <summary class="favorites-summary">⭐ Favoris</summary>

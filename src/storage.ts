@@ -138,6 +138,7 @@ export function exportAppData() {
     'who_icd_release',
     'who_icd_lang',
     'who_icd_proxy_url',
+    'min_confidence_threshold',
     'app_theme',
     'disclaimer_dismissed',
   ];

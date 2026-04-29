@@ -12,6 +12,7 @@ export const LS_WHO_CLIENT_SECRET = 'who_icd_client_secret';
 export const LS_WHO_RELEASE = 'who_icd_release';
 export const LS_WHO_LANG = 'who_icd_lang';
 export const LS_WHO_PROXY = 'who_icd_proxy_url';
+export const LS_MIN_CONFIDENCE = 'min_confidence_threshold';
 
 export const MODE_SUMMARY_LABEL = {
   local: 'Intégré',
@@ -41,7 +42,20 @@ export function readWhoSettings() {
 }
 
 export function readAnalyzeSettings() {
-  return { mode: getStoredAnalyzeMode(), ...readWhoSettings() };
+  return {
+    mode: getStoredAnalyzeMode(),
+    minConfidence: readMinConfidenceThreshold(),
+    ...readWhoSettings(),
+  };
+}
+
+export function readMinConfidenceThreshold() {
+  const raw = localStorage.getItem(LS_MIN_CONFIDENCE);
+  const parsed = Number.parseFloat(raw || '');
+  if (!Number.isFinite(parsed)) return 0.4;
+  if (parsed < 0.1) return 0.1;
+  if (parsed > 1) return 1;
+  return Math.round(parsed * 100) / 100;
 }
 
 export function isSettingsReadyForDailyUse() {
@@ -118,6 +132,25 @@ export function initWhoSettingsUi(refreshChrome) {
     clearWhoCaches();
     refreshChrome?.();
   });
+}
+
+export function initConfidenceThresholdUi() {
+  const slider = document.getElementById('min-confidence-threshold');
+  const output = document.getElementById('min-confidence-value');
+  if (!(slider instanceof HTMLInputElement) || !(output instanceof HTMLElement)) return;
+
+  const apply = (value) => {
+    const normalized = Number.parseFloat(String(value));
+    const safe = Number.isFinite(normalized)
+      ? Math.max(0.1, Math.min(1, normalized))
+      : 0.4;
+    localStorage.setItem(LS_MIN_CONFIDENCE, safe.toFixed(2));
+    slider.value = safe.toFixed(2);
+    output.textContent = `${Math.round(safe * 100)}%`;
+  };
+
+  apply(readMinConfidenceThreshold());
+  slider.addEventListener('input', () => apply(slider.value));
 }
 
 /** @param {AnalyzeMode} mode */

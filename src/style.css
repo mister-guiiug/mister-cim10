@@ -1205,7 +1205,17 @@ section.panel {
 }
 
 .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.9rem;
+}
+
+.panel-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .panel-title {
@@ -1256,6 +1266,23 @@ section.panel {
 .export-hint strong {
   color: var(--text);
   font-weight: 600;
+}
+
+.settings-threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.settings-threshold-row input[type='range'] {
+  width: min(22rem, 100%);
+}
+
+.settings-threshold-value {
+  min-width: 3.2rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 section:not(.panel) {
@@ -1418,10 +1445,76 @@ button.ghost:hover {
   margin-top: 0.65rem;
 }
 
+.cr-highlight-root {
+  margin-top: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px dashed var(--surface2);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 82%, var(--bg));
+}
+
+.cr-highlight-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.cr-highlight-preview {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.cr-hit {
+  background: color-mix(in srgb, var(--warn) 26%, transparent);
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 0.12rem;
+}
+
+.cr-hit-active {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .cards {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+}
+
+.suggestion-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  margin: 0.55rem 0 0.25rem;
+}
+
+.suggestion-filter-inp {
+  flex: 1;
+  min-width: 15rem;
+  border: 1px solid var(--surface2);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.5rem 0.65rem;
+}
+
+.suggestion-filter-inp:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.suggestion-bulk-toolbar {
+  margin-top: 0.35rem;
+}
+
+.suggestion-filter-count {
+  margin-left: auto;
 }
 
 .card {
@@ -1435,6 +1528,16 @@ button.ghost:hover {
 .card:hover {
   border-color: color-mix(in srgb, var(--accent) 22%, var(--surface2));
   box-shadow: var(--shadow-card);
+}
+
+.card.is-active {
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--surface2));
+  box-shadow: var(--shadow-card);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .card-header {

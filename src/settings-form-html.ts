@@ -14,6 +14,18 @@ export function buildSettingsFormHtml() {
             Par défaut, tout se fait dans la page. Si vous choisissez une option avec OMS, les champs de connexion s’affichent : compte OMS et adresse de passerelle requis.
           </p>
 
+          <div class="settings-block">
+            <p class="settings-block-title">Seuil de confiance minimal</p>
+            <p class="settings-hint">Les suggestions avec une confiance inférieure à ce seuil restent ignorées par défaut dans la liste.</p>
+            <div class="settings-threshold-row">
+              <label class="who-field" for="min-confidence-threshold">
+                <span class="who-field-label">Afficher à partir de</span>
+                <input type="range" id="min-confidence-threshold" min="0.10" max="1" step="0.05" />
+              </label>
+              <output id="min-confidence-value" class="settings-threshold-value" for="min-confidence-threshold">40%</output>
+            </div>
+          </div>
+
           <div class="settings-block api-section api-section--compact" id="who-api-section" hidden>
             <div class="api-compact-bar">
               <span class="api-compact-heading" id="who-api-heading">Connexion OMS</span>
