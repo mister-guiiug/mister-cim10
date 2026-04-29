@@ -12,7 +12,10 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
     </div>
     <section class="panel panel--cr" aria-labelledby="cr-label">
       <div class="panel-head">
-        <h2 id="cr-label" class="panel-title">Compte-rendu</h2>
+        <h2 id="cr-label" class="panel-title">
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 2v1h6V4H5zm0 2.5v1h6v-1H5zm0 2.5v1h4v-1H5z"/></svg>
+          <span class="panel-title-text">Compte-rendu</span>
+        </h2>
       </div>
       <form id="cr-form" action="#" method="get">
         <textarea class="cr" id="cr-text" name="cr" placeholder="Ex. : Patient diabétique type 2, HTA, suivi pour BPCO…" aria-label="Texte du compte-rendu"></textarea>
@@ -36,9 +39,12 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
       <p class="hint error" id="analyze-error" hidden role="alert"></p>
     </section>
 
-    <section class="panel" aria-labelledby="sug-label">
+    <section class="panel panel--suggestions" aria-labelledby="sug-label">
       <div class="panel-head">
-        <h2 id="sug-label" class="panel-title">Suggestions</h2>
+        <h2 id="sug-label" class="panel-title">
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 0 0-2.5 9.33V12h5v-1.67A5 5 0 0 0 8 1zM6.5 13v1.5h3V13h-3z"/></svg>
+          <span class="panel-title-text">Suggestions</span>
+        </h2>
         <div id="analyze-timer-root"></div>
       </div>
       <p class="hint">Raccourcis: ↑/↓ pour naviguer, 1 valider, 2 rejeter, 3 modifier.</p>
@@ -60,9 +66,12 @@ export function buildHomeWorkspaceHtml(micSupported, shareSupported, hasValidate
       <div id="suggestions-root"></div>
     </section>
 
-    <section class="panel" aria-labelledby="val-label">
+    <section class="panel panel--validated" aria-labelledby="val-label">
       <div class="panel-head">
-        <h2 id="val-label" class="panel-title">Diagnostics retenus</h2>
+        <h2 id="val-label" class="panel-title">
+          <svg aria-hidden="true" width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M13.854 3.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 9.793l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+          <span class="panel-title-text">Diagnostics retenus</span>
+        </h2>
         <div class="panel-head-actions">
           <button type="button" class="ghost" id="btn-undo" title="Annuler la dernière action (Ctrl/Cmd+Z)">Annuler</button>
           <button type="button" class="ghost" id="btn-redo" title="Rétablir (Ctrl+Y ou Ctrl/Cmd+Shift+Z)">Rétablir</button>

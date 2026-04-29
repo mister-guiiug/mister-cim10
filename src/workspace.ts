@@ -4,8 +4,6 @@ import { randomId } from './random-id.js';
 import { createSpeechRecognizer, isSpeechRecognitionSupported } from './speech.js';
 import { escapeHtml } from './html-utils.js';
 import { showConfirm, showAlert } from './dialog-ui.js';
-// UI Enhancements
-import * as UI from './ui-helpers.js';
 import { buildAppHeaderHtml } from './header-html.js';
 import { wireThemeToggle } from './theme.js';
 import { wireNavDrawer } from './nav-drawer.js';
@@ -527,7 +525,8 @@ function renderSuggestions() {
   const activeId = getActiveSuggestionId();
   const sugTitle = document.getElementById('sug-label');
   if (sugTitle) {
-    sugTitle.textContent = visible.length
+    const sugTitleText = sugTitle.querySelector('.panel-title-text') || sugTitle;
+    sugTitleText.textContent = visible.length
       ? `Suggestions (${visible.length} en attente)`
       : 'Suggestions';
   }
@@ -571,7 +570,7 @@ function renderSuggestions() {
       const isFav = favs.some((f) => f.code === s.code);
       const confBadge = `<span class="badge conf ${conf.cls}" title="Pertinence estimée">${conf.text}</span>`;
       return `
-      <article class="card ${activeId === s.id ? 'is-active' : ''}" data-id="${escapeHtml(s.id)}" tabindex="0">
+      <article class="card ${activeId === s.id ? 'is-active' : ''}" data-id="${escapeHtml(s.id)}" data-conf="${conf.cls.slice(5)}" tabindex="0">
         <div class="card-header">
           <button type="button" class="fav-toggle ${isFav ? 'is-fav' : ''}" data-fav-code="${escapeHtml(s.code)}" data-fav-label="${escapeHtml(s.label)}" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
             ${isFav ? '★' : '☆'}
@@ -715,22 +714,37 @@ function renderValidated() {
   list.innerHTML = validated
     .map(
       (v, i) => `
-    <li class="validated-item">
+    <li class="validated-item" draggable="true" data-id="${escapeHtml(v.id)}">
+      <span class="validated-drag-handle" aria-hidden="true" title="Réordonner par glisser-déposer">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor" aria-hidden="true"><circle cx="3" cy="3" r="1.5"/><circle cx="7" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="7" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="7" cy="13" r="1.5"/></svg>
+      </span>
       <div class="validated-reorder">
         <button type="button" class="ghost icon-btn" data-up="${escapeHtml(v.id)}" aria-label="Monter" ${i === 0 ? 'disabled' : ''}>↑</button>
         <button type="button" class="ghost icon-btn" data-down="${escapeHtml(v.id)}" aria-label="Descendre" ${i === validated.length - 1 ? 'disabled' : ''}>↓</button>
       </div>
-      <span class="code">${escapeHtml(v.code)}</span>
-      <span class="validated-label">${escapeHtml(v.label)}</span>
-      <span class="badge ${v.statut === 'modifié' ? 'modified' : ''}">${escapeHtml(v.statut)}</span>
-      <button type="button" class="ghost icon-btn" data-annotate="${escapeHtml(v.id)}" title="Ajouter une note">&#128221;</button>
-      <button type="button" class="ghost" data-rid="${escapeHtml(v.id)}">Retirer</button>
-      ${v.note ? `<p class="validated-note">${escapeHtml(v.note)}</p>` : ''}
-      <div class="validated-note-form" id="note-form-${escapeHtml(v.id)}" hidden>
-        <textarea class="validated-note-inp" rows="2" placeholder="Note clinique (praticien, date, précision)…">${escapeHtml(v.note || '')}</textarea>
-        <div class="toolbar">
-          <button type="button" class="primary" style="font-size:0.8rem;padding:0.3rem 0.7rem" data-save-note="${escapeHtml(v.id)}">Enregistrer</button>
-          <button type="button" class="ghost" style="font-size:0.8rem" data-cancel-note="${escapeHtml(v.id)}">Annuler</button>
+      <div class="validated-body">
+        <div class="validated-top">
+          <span class="code">${escapeHtml(v.code)}</span>
+          <span class="validated-label">${escapeHtml(v.label)}</span>
+          <span class="badge ${v.statut === 'modifié' ? 'modified' : ''}">${escapeHtml(v.statut)}</span>
+        </div>
+        <div class="validated-actions">
+          <button type="button" class="ghost icon-btn" data-annotate="${escapeHtml(v.id)}" title="Ajouter une note" aria-label="Ajouter une note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span class="btn-text">Note</span>
+          </button>
+          <button type="button" class="ghost icon-btn" data-rid="${escapeHtml(v.id)}" title="Retirer" aria-label="Retirer ce diagnostic">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <span class="btn-text">Retirer</span>
+          </button>
+        </div>
+        ${v.note ? `<p class="validated-note">${escapeHtml(v.note)}</p>` : ''}
+        <div class="validated-note-form" id="note-form-${escapeHtml(v.id)}">
+          <textarea class="validated-note-inp" rows="2" placeholder="Note clinique (praticien, date, précision)…">${escapeHtml(v.note || '')}</textarea>
+          <div class="toolbar">
+            <button type="button" class="primary" style="font-size:0.8rem;padding:0.3rem 0.7rem" data-save-note="${escapeHtml(v.id)}">Enregistrer</button>
+            <button type="button" class="ghost" style="font-size:0.8rem" data-cancel-note="${escapeHtml(v.id)}">Annuler</button>
+          </div>
         </div>
       </div>
     </li>`
@@ -780,7 +794,7 @@ function renderValidated() {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-annotate');
       const form = document.getElementById(`note-form-${id}`);
-      if (form) form.hidden = !form.hidden;
+      if (form) form.classList.toggle('open');
     });
   });
 
@@ -805,7 +819,43 @@ function renderValidated() {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-cancel-note');
       const form = document.getElementById(`note-form-${id}`);
-      if (form) form.hidden = true;
+      if (form) form.classList.remove('open');
+    });
+  });
+
+  // Drag-to-reorder
+  let dragSrcId = null;
+  list.querySelectorAll('.validated-item').forEach((item) => {
+    item.addEventListener('dragstart', () => {
+      dragSrcId = item.getAttribute('data-id');
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      list.querySelectorAll('.validated-item').forEach((i) => i.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      list.querySelectorAll('.validated-item').forEach((i) => i.classList.remove('drag-over'));
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const destId = item.getAttribute('data-id');
+      if (!dragSrcId || dragSrcId === destId) return;
+      const srcIdx = validated.findIndex((x) => x.id === dragSrcId);
+      const destIdx = validated.findIndex((x) => x.id === destId);
+      if (srcIdx === -1 || destIdx === -1) return;
+      const ta = /** @type {HTMLTextAreaElement | null} */ (document.getElementById('cr-text'));
+      pushUndo(ta?.value || '');
+      const [moved] = validated.splice(srcIdx, 1);
+      validated.splice(destIdx, 0, moved);
+      dragSrcId = null;
+      saveValidatedSession();
+      renderValidated();
     });
   });
 
@@ -819,7 +869,8 @@ function renderValidated() {
 
   const titleEl = document.getElementById('val-label');
   if (titleEl) {
-    titleEl.textContent = validated.length
+    const titleText = titleEl.querySelector('.panel-title-text') || titleEl;
+    titleText.textContent = validated.length
       ? `Diagnostics retenus (${validated.length})`
       : 'Diagnostics retenus';
   }

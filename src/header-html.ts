@@ -66,9 +66,27 @@ export function buildAppHeaderHtml(escapeHtml, opts) {
           <div class="app-header-top">
             <a href="#/" class="brand-block brand-link" aria-label="Accueil — Mister CIM-10">
               <div class="brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-mark-svg">
-                  <rect x="6" y="4" width="20" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
-                  <path d="M10 10h12M10 15h12M10 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" class="brand-mark-svg">
+                  <defs>
+                    <linearGradient id="bmBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#1e3a5f"/>
+                      <stop offset="100%" style="stop-color:#0c1222"/>
+                    </linearGradient>
+                    <linearGradient id="bmAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#38bdf8"/>
+                      <stop offset="100%" style="stop-color:#0ea5e9"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="64" height="64" rx="14" fill="url(#bmBgGrad)"/>
+                  <g fill="url(#bmAccentGrad)">
+                    <rect x="26" y="14" width="12" height="36" rx="2"/>
+                    <rect x="14" y="26" width="36" height="12" rx="2"/>
+                  </g>
+                  <g fill="#38bdf8" opacity="0.9">
+                    <circle cx="48" cy="20" r="4"/>
+                    <circle cx="48" cy="44" r="4"/>
+                  </g>
+                  <rect x="8" y="8" width="24" height="24" rx="8" fill="#ffffff" opacity="0.08"/>
                 </svg>
               </div>
               <div class="brand-text">
