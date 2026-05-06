@@ -1,0 +1,18 @@
+# CI déléguée au reusable workflow famille (dev-wpa-config).
+# E2E activé : critical sur chaque PR/push.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    uses: mister-guiiug/dev-wpa-config/.github/workflows/pwa-ci.yml@v1
+    secrets: inherit
+    with:
+      run-e2e: true
+      e2e-grep: '@critical'
+      e2e-project: chromium
