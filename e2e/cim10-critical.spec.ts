@@ -4,7 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 
-test.describe('mister-cim10 - Fonctionnalités critiques', () => {
+test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
