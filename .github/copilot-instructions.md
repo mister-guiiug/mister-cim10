@@ -8,31 +8,31 @@ PWA sans backend pour aider les professionnels de santé à coter des diagnostic
 
 ## Architecture des modules (`src/`)
 
-| Fichier | Responsabilité |
-|---|---|
-| `analyzer.ts` | Moteur de suggestions : matching textuel exact + flou (trigrammes Jaccard) sur `icdEntries`. **Aucun effet de bord.** Entrée : texte brut. Sortie : tableau de hits avec `code`, `label`, `score`, `confidence`. |
-| `icd10-data.ts` | Référentiel CIM-10 embarqué (échantillon). Tableau `icdEntries[]` : `{ code, label, synonyms[] }`. À remplacer ou enrichir pour un usage production. |
-| `workspace.ts` | État de session (diagnostics validés, suggestions en cours, dictée). Gère l'UI de la page principale, orchestre `analyzer`, `storage`, `speech`, `export-report`. |
-| `storage.ts` | Couche localStorage isolée. Toutes les clés `LS_*` sont déclarées ici. Aucune logique métier. |
-| `app-settings.ts` | Lecture/écriture des paramètres utilisateur (mode d'analyse, crédentiels OMS, proxy, seuil de confiance). |
-| `app-constants.ts` | Constantes UI globales (texte du footer). |
-| `router.ts` | Routeur hash (`#/`, `#/parametres`, `#/aide`). Pas de framework. |
-| `who-icd-api.ts` | Appels à l'API OMS ICD-11 (OAuth2 via proxy). Token mis en cache en mémoire. Jamais appelé sans action explicite de l'utilisateur. |
-| `export-report.ts` | Génération des exports TXT, CSV, JSON, mailto, Web Share. Sans effet de bord sur l'état. |
-| `speech.ts` | Abstraction `SpeechRecognition` navigateur (`lang: 'fr-FR'`, continu, résultats intérimaires). |
-| `dialog-ui.ts` | `showConfirm` / `showAlert` — dialogues accessibles sans dépendance UI externe. |
-| `html-utils.ts` | `escapeHtml` et utilitaires de construction HTML en chaîne. |
-| `home-html.ts`, `header-html.ts`, `header-chrome.ts`, `help-page-html.ts`, `settings-form-html.ts` | Templates HTML rendus en chaîne de caractères. Pas de Virtual DOM, pas de framework. |
-| `theme.ts` | Bascule clair/sombre via attribut `data-theme` sur `<html>`. |
-| `nav-drawer.ts` | Tiroir de navigation mobile. |
-| `pages.ts` | Orchestration du rendu des pages selon la route courante. |
-| `main.ts` | Point d'entrée Vite. Monte l'application. |
-| `register-sw.ts` | Enregistrement du service worker PWA. |
-| `monitoring/web-vitals.ts` | Collecte des Web Vitals (lecture seule, pas de logique métier). |
-| `random-id.ts` | Génère des identifiants uniques (`crypto.randomUUID` ou fallback). |
-| `focus-utils.ts` | Gestion du focus clavier (accessibilité). |
-| `enhancements-integration.ts` | Point d'intégration des améliorations UI progressives. |
-| `ui-helpers.js` | Utilitaires UI bas niveau (animations, classes, etc.). |
+| Fichier                                                                                            | Responsabilité                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `analyzer.ts`                                                                                      | Moteur de suggestions : matching textuel exact + flou (trigrammes Jaccard) sur `icdEntries`. **Aucun effet de bord.** Entrée : texte brut. Sortie : tableau de hits avec `code`, `label`, `score`, `confidence`. |
+| `icd10-data.ts`                                                                                    | Référentiel CIM-10 embarqué (échantillon). Tableau `icdEntries[]` : `{ code, label, synonyms[] }`. À remplacer ou enrichir pour un usage production.                                                             |
+| `workspace.ts`                                                                                     | État de session (diagnostics validés, suggestions en cours, dictée). Gère l'UI de la page principale, orchestre `analyzer`, `storage`, `speech`, `export-report`.                                                |
+| `storage.ts`                                                                                       | Couche localStorage isolée. Toutes les clés `LS_*` sont déclarées ici. Aucune logique métier.                                                                                                                    |
+| `app-settings.ts`                                                                                  | Lecture/écriture des paramètres utilisateur (mode d'analyse, crédentiels OMS, proxy, seuil de confiance).                                                                                                        |
+| `app-constants.ts`                                                                                 | Constantes UI globales (texte du footer).                                                                                                                                                                        |
+| `router.ts`                                                                                        | Routeur hash (`#/`, `#/parametres`, `#/aide`). Pas de framework.                                                                                                                                                 |
+| `who-icd-api.ts`                                                                                   | Appels à l'API OMS ICD-11 (OAuth2 via proxy). Token mis en cache en mémoire. Jamais appelé sans action explicite de l'utilisateur.                                                                               |
+| `export-report.ts`                                                                                 | Génération des exports TXT, CSV, JSON, mailto, Web Share. Sans effet de bord sur l'état.                                                                                                                         |
+| `speech.ts`                                                                                        | Abstraction `SpeechRecognition` navigateur (`lang: 'fr-FR'`, continu, résultats intérimaires).                                                                                                                   |
+| `dialog-ui.ts`                                                                                     | `showConfirm` / `showAlert` — dialogues accessibles sans dépendance UI externe.                                                                                                                                  |
+| `html-utils.ts`                                                                                    | `escapeHtml` et utilitaires de construction HTML en chaîne.                                                                                                                                                      |
+| `home-html.ts`, `header-html.ts`, `header-chrome.ts`, `help-page-html.ts`, `settings-form-html.ts` | Templates HTML rendus en chaîne de caractères. Pas de Virtual DOM, pas de framework.                                                                                                                             |
+| `theme.ts`                                                                                         | Bascule clair/sombre via attribut `data-theme` sur `<html>`.                                                                                                                                                     |
+| `nav-drawer.ts`                                                                                    | Tiroir de navigation mobile.                                                                                                                                                                                     |
+| `pages.ts`                                                                                         | Orchestration du rendu des pages selon la route courante.                                                                                                                                                        |
+| `main.ts`                                                                                          | Point d'entrée Vite. Monte l'application.                                                                                                                                                                        |
+| `register-sw.ts`                                                                                   | Enregistrement du service worker PWA.                                                                                                                                                                            |
+| `monitoring/web-vitals.ts`                                                                         | Collecte des Web Vitals (lecture seule, pas de logique métier).                                                                                                                                                  |
+| `random-id.ts`                                                                                     | Génère des identifiants uniques (`crypto.randomUUID` ou fallback).                                                                                                                                               |
+| `focus-utils.ts`                                                                                   | Gestion du focus clavier (accessibilité).                                                                                                                                                                        |
+| `enhancements-integration.ts`                                                                      | Point d'intégration des améliorations UI progressives.                                                                                                                                                           |
+| `ui-helpers.js`                                                                                    | Utilitaires UI bas niveau (animations, classes, etc.).                                                                                                                                                           |
 
 ---
 

@@ -17,7 +17,7 @@ function corsHeaders(request, env) {
   const allowed = raw
     ? raw
         .split(',')
-        .map((s) => s.trim())
+        .map(s => s.trim())
         .filter(Boolean)
     : [];
   let allowOrigin = '*';
@@ -40,10 +40,13 @@ export default {
   async fetch(request, env) {
     const ch = corsHeaders(request, env);
     if (!ch) {
-      return new Response(JSON.stringify({ error: 'Origin non autorisée pour ce proxy.' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'Origin non autorisée pour ce proxy.' }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     if (request.method === 'OPTIONS') {
@@ -59,10 +62,13 @@ export default {
         const clientId = body?.clientId;
         const clientSecret = body?.clientSecret;
         if (!clientId || !clientSecret) {
-          return new Response(JSON.stringify({ error: 'clientId et clientSecret requis' }), {
-            status: 400,
-            headers: { ...ch, 'Content-Type': 'application/json' },
-          });
+          return new Response(
+            JSON.stringify({ error: 'clientId et clientSecret requis' }),
+            {
+              status: 400,
+              headers: { ...ch, 'Content-Type': 'application/json' },
+            }
+          );
         }
         const params = new URLSearchParams({
           grant_type: 'client_credentials',
@@ -87,17 +93,22 @@ export default {
       if (path === 'autocode' && request.method === 'GET') {
         const auth = request.headers.get('Authorization');
         if (!auth || !auth.startsWith('Bearer ')) {
-          return new Response(JSON.stringify({ error: 'Authorization Bearer requis' }), {
-            status: 401,
-            headers: { ...ch, 'Content-Type': 'application/json' },
-          });
+          return new Response(
+            JSON.stringify({ error: 'Authorization Bearer requis' }),
+            {
+              status: 401,
+              headers: { ...ch, 'Content-Type': 'application/json' },
+            }
+          );
         }
         const releaseId = url.searchParams.get('releaseId') || '2025-01';
         const searchText = url.searchParams.get('searchText') || '';
         const lang = url.searchParams.get('lang') || 'fr';
         const matchThreshold = url.searchParams.get('matchThreshold');
 
-        const target = new URL(`${API_BASE}/icd/release/11/${releaseId}/mms/autocode`);
+        const target = new URL(
+          `${API_BASE}/icd/release/11/${releaseId}/mms/autocode`
+        );
         target.searchParams.set('searchText', searchText);
         if (matchThreshold != null && matchThreshold !== '') {
           target.searchParams.set('matchThreshold', matchThreshold);
@@ -114,7 +125,12 @@ export default {
         const text = await res.text();
         return new Response(text, {
           status: res.status,
-          headers: { ...ch, 'Content-Type': res.headers.get('Content-Type') || 'application/json; charset=utf-8' },
+          headers: {
+            ...ch,
+            'Content-Type':
+              res.headers.get('Content-Type') ||
+              'application/json; charset=utf-8',
+          },
         });
       }
 

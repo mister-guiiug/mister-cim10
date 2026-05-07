@@ -19,32 +19,32 @@ Commence par cette question d'ancrage :
 Après ma réponse, explore successivement (une question à la fois) :
 
 — La fiabilité : le score de pertinence "Élevée / Moyenne / Faible" repose
-  sur quelle hypothèse de départ, et cette hypothèse a-t-elle été validée
-  avec un vrai utilisateur clinique ?
+sur quelle hypothèse de départ, et cette hypothèse a-t-elle été validée
+avec un vrai utilisateur clinique ?
 
 — La confidentialité comme valeur différenciante : si "aucun envoi de données"
-  est ma promesse principale, qu'est-ce qui empêche un concurrent de faire
-  la même promesse avec un meilleur référentiel ?
+est ma promesse principale, qu'est-ce qui empêche un concurrent de faire
+la même promesse avec un meilleur référentiel ?
 
 — Le référentiel d'exemple : en le qualifiant d'"échantillon", à qui
-  je transfère la responsabilité de compléter les données — et est-ce
-  réaliste pour mon utilisateur cible ?
+je transfère la responsabilité de compléter les données — et est-ce
+réaliste pour mon utilisateur cible ?
 
 — L'analyse LLM : si je branchais un LLM local (ex. WebLLM, Transformers.js),
-  quelles propriétés de mon architecture actuelle deviendraient obsolètes,
-  et lesquelles resteraient des atouts ?
+quelles propriétés de mon architecture actuelle deviendraient obsolètes,
+et lesquelles resteraient des atouts ?
 
 — La multi-session : gérer plusieurs dossiers c'est une évolution listée,
-  mais quel problème concret de l'utilisateur cela résout-il aujourd'hui
-  en une seule journée de travail type ?
+mais quel problème concret de l'utilisateur cela résout-il aujourd'hui
+en une seule journée de travail type ?
 
 — L'accessibilité : un praticien qui utilise mon application en consultation
-  a les mains occupées — qu'est-ce que l'interface suppose implicitement
-  sur son contexte physique d'usage ?
+a les mains occupées — qu'est-ce que l'interface suppose implicitement
+sur son contexte physique d'usage ?
 
 — La mesure du succès : comment saurais-je, sans analytics, si l'application
-  améliore réellement la qualité de cotation ou si elle crée juste de la
-  vitesse sans fiabilité accrue ?
+améliore réellement la qualité de cotation ou si elle crée juste de la
+vitesse sans fiabilité accrue ?
 
 Termine la séquence en me demandant : "Si tu ne pouvais améliorer qu'une
 seule chose avant ta prochaine mise en production, laquelle aurait le plus

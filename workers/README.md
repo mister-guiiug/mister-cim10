@@ -136,19 +136,19 @@ Une réponse JSON contenant `access_token` indique que le proxy et les identifia
 
 ## Dépannage
 
-| Problème | Piste |
-|----------|--------|
+| Problème                     | Piste                                                                                                                                                                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **403 Origin non autorisée** | Corriger `ALLOWED_ORIGINS` : elle doit **égaler** l’en-tête `Origin` du navigateur (souvent `https://VOTRE_COMPTE.github.io`, y compris pour un site **projet** sous `/nom-du-repo/` — le chemin ne fait pas partie de l’origine). |
-| **404 sur /token** | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`. |
-| **401 OMS** | Client ID / secret invalides sur le portail ICD API. |
-| **502** | Problème réseau entre Cloudflare et les serveurs OMS (rare). |
+| **404 sur /token**           | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`.                                                                                           |
+| **401 OMS**                  | Client ID / secret invalides sur le portail ICD API.                                                                                                                                                                               |
+| **502**                      | Problème réseau entre Cloudflare et les serveurs OMS (rare).                                                                                                                                                                       |
 
 ---
 
 ## Fichiers de ce dossier
 
-| Fichier | Rôle |
-|---------|------|
-| `who-icd-proxy.js` | Code du Worker (à déployer). |
-| `wrangler.toml` | Config Wrangler (`name`, `main`, `compatibility_date`, `vars`). |
-| `wrangler.toml.example` | Exemple commenté (copie de référence). |
+| Fichier                 | Rôle                                                            |
+| ----------------------- | --------------------------------------------------------------- |
+| `who-icd-proxy.js`      | Code du Worker (à déployer).                                    |
+| `wrangler.toml`         | Config Wrangler (`name`, `main`, `compatibility_date`, `vars`). |
+| `wrangler.toml.example` | Exemple commenté (copie de référence).                          |

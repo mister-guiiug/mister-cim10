@@ -71,7 +71,7 @@ async function generateIcons() {
     await sharp(svgBuffer)
       .resize(size, size, {
         fit: 'cover',
-        background: { r: 12, g: 18, b: 34, alpha: 1 }
+        background: { r: 12, g: 18, b: 34, alpha: 1 },
       })
       .png()
       .toFile(outputPath);
@@ -84,9 +84,7 @@ async function generateIcons() {
   const maskableSvg = await generateMaskable(maskableSize);
   const maskablePath = join(publicDir, 'icon-maskable.png');
 
-  await sharp(maskableSvg)
-    .png()
-    .toFile(maskablePath);
+  await sharp(maskableSvg).png().toFile(maskablePath);
 
   console.log(`  ✓ icon-maskable.png (512x512, maskable)`);
 

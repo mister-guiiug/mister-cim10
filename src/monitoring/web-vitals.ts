@@ -3,14 +3,14 @@
  */
 
 interface Metric {
-  name: string
-  value: number
-  id: string
-  navigationType?: string
+  name: string;
+  value: number;
+  id: string;
+  navigationType?: string;
 }
 
 interface MetricWithRating extends Metric {
-  rating: 'good' | 'needs-improvement' | 'poor'
+  rating: 'good' | 'needs-improvement' | 'poor';
 }
 
 /**
@@ -19,11 +19,11 @@ interface MetricWithRating extends Metric {
 function getRating(metric: Metric): 'good' | 'needs-improvement' | 'poor' {
   switch (metric.name) {
     case 'CLS':
-      if (metric.value <= 0.1) return 'good'
-      if (metric.value <= 0.25) return 'needs-improvement'
-      return 'poor'
+      if (metric.value <= 0.1) return 'good';
+      if (metric.value <= 0.25) return 'needs-improvement';
+      return 'poor';
     default:
-      return 'good'
+      return 'good';
   }
 }
 
@@ -31,10 +31,10 @@ function getRating(metric: Metric): 'good' | 'needs-improvement' | 'poor' {
  * Logger pour les Web Vitals
  */
 function logMetric(metric: MetricWithRating): void {
-  const metricWithRating = { ...metric, rating: getRating(metric) }
+  const metricWithRating = { ...metric, rating: getRating(metric) };
 
   if (import.meta.env.DEV) {
-    console.log('[Web Vitals]', metricWithRating)
+    console.log('[Web Vitals]', metricWithRating);
   }
 }
 
@@ -42,17 +42,17 @@ function logMetric(metric: MetricWithRating): void {
  * Initialiser le monitoring des Web Vitals
  */
 export async function initWebVitals(): Promise<void> {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') return;
 
   try {
-    const { onCLS, onFID, onFCP, onLCP, onTTFB } = await import('web-vitals')
+    const { onCLS, onFID, onFCP, onLCP, onTTFB } = await import('web-vitals');
 
-    onCLS(logMetric)
-    onFID(logMetric)
-    onFCP(logMetric)
-    onLCP(logMetric)
-    onTTFB(logMetric)
+    onCLS(logMetric);
+    onFID(logMetric);
+    onFCP(logMetric);
+    onLCP(logMetric);
+    onTTFB(logMetric);
   } catch (error) {
-    console.warn('Failed to initialize Web Vitals:', error)
+    console.warn('Failed to initialize Web Vitals:', error);
   }
 }

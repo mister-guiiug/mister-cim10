@@ -37,38 +37,38 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Analyse
 
-| Fonctionnalité | Ce que ça fait |
-|---|---|
-| **Analyse du texte libre** | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (ICD-11) si configurée |
-| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible |
-| **Terme parent** | Pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est rappelé pour le contexte |
-| **Recherche manuelle** | Retrouvez un code par son libellé ou saisissez-le directement si vous le connaissez |
+| Fonctionnalité               | Ce que ça fait                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Analyse du texte libre**   | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (ICD-11) si configurée |
+| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible                                                              |
+| **Terme parent**             | Pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est rappelé pour le contexte                 |
+| **Recherche manuelle**       | Retrouvez un code par son libellé ou saisissez-le directement si vous le connaissez                                      |
 
 ### Validation et saisie
 
-| Fonctionnalité | Ce que ça fait |
-|---|---|
-| **Valider / Modifier / Rejeter** | Traitez chaque proposition en un clic ; modifiez librement le code si besoin |
-| **Contrôle du format** | L'application vérifie que le code saisi respecte le format CIM-10 et vous avertit en cas d'erreur |
-| **Réordonner les codes** | Changez l'ordre des diagnostics retenus avant l'export avec les boutons ↑ / ↓ |
+| Fonctionnalité                   | Ce que ça fait                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Valider / Modifier / Rejeter** | Traitez chaque proposition en un clic ; modifiez librement le code si besoin                      |
+| **Contrôle du format**           | L'application vérifie que le code saisi respecte le format CIM-10 et vous avertit en cas d'erreur |
+| **Réordonner les codes**         | Changez l'ordre des diagnostics retenus avant l'export avec les boutons ↑ / ↓                     |
 
 ### Confort d'utilisation
 
-| Fonctionnalité | Ce que ça fait |
-|---|---|
-| **Dictée vocale** | Parlez directement dans l'application (selon le navigateur et l'appareil) |
-| **Sauvegarde automatique** | Vos diagnostics validés sont mémorisés dans le navigateur — ils sont là si vous rechargez la page |
-| **Historique des comptes-rendus** | Les 5 derniers textes analysés sont mémorisés et rappelables en un clic |
-| **Nouvelle session** | Réinitialisez tout (texte + diagnostics) en un clic, avec confirmation |
-| **Raccourci clavier** | `Ctrl+Entrée` (ou `Cmd+Entrée` sur Mac) pour lancer l'analyse rapidement |
+| Fonctionnalité                    | Ce que ça fait                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Dictée vocale**                 | Parlez directement dans l'application (selon le navigateur et l'appareil)                         |
+| **Sauvegarde automatique**        | Vos diagnostics validés sont mémorisés dans le navigateur — ils sont là si vous rechargez la page |
+| **Historique des comptes-rendus** | Les 5 derniers textes analysés sont mémorisés et rappelables en un clic                           |
+| **Nouvelle session**              | Réinitialisez tout (texte + diagnostics) en un clic, avec confirmation                            |
+| **Raccourci clavier**             | `Ctrl+Entrée` (ou `Cmd+Entrée` sur Mac) pour lancer l'analyse rapidement                          |
 
 ### Export et partage
 
-| Fonctionnalité | Ce que ça fait |
-|---|---|
-| **Export TXT / CSV** | Téléchargez la liste de codes validés en texte brut ou tableur |
+| Fonctionnalité       | Ce que ça fait                                                                    |
+| -------------------- | --------------------------------------------------------------------------------- |
+| **Export TXT / CSV** | Téléchargez la liste de codes validés en texte brut ou tableur                    |
 | **Impression / PDF** | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface) |
-| **Partage** | Partagez par e-mail ou via l'API Web Share (selon le navigateur) |
+| **Partage**          | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                  |
 
 ---
 
@@ -76,9 +76,9 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 La protection des données est une priorité pour un outil traitant des informations médicales.
 
-| Mode | Données transmises |
-|---|---|
-| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement. |
+| Mode                    | Données transmises                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement.                                                                        |
 | **Avec option API OMS** | Des fragments du compte-rendu transitent vers votre proxy personnel, puis vers les serveurs de l'OMS (`id.who.int`). Vous contrôlez votre proxy. |
 
 - Aucun compte utilisateur requis.
@@ -116,14 +116,20 @@ Si l'outil vous est utile, vous pouvez soutenir son développement :
 
 ### Stack
 
-| Couche | Technologie |
-|---|---|
-| Build | [Vite 6](https://vitejs.dev/) |
-| Tests | [Vitest 3](https://vitest.dev/) |
-| Runtime | HTML / CSS / JS vanilla — sans framework |
-| PWA | Service Worker généré par `scripts/postbuild-sw.mjs` |
-| Proxy CORS | [Cloudflare Workers](workers/README.md) (optionnel) |
-| CI/CD | GitHub Actions → GitHub Pages |
+| Couche       | Technologie                                                                                                                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework UI | [React 19](https://react.dev/) (depuis la migration de mai 2026)                                                                                                                                            |
+| Routing      | [react-router-dom 7](https://reactrouter.com/) (HashRouter)                                                                                                                                                 |
+| Build        | [Vite 7](https://vitejs.dev/) (cible ES2025)                                                                                                                                                                |
+| Style        | [Tailwind CSS 4](https://tailwindcss.com/) + classes legacy de [`style.css`](src/style.css)                                                                                                                 |
+| State        | [Zustand 5](https://zustand-demo.pmnd.rs/) — `settingsStore`, `workspaceStore`                                                                                                                              |
+| Tests        | [Vitest 3](https://vitest.dev/) (jsdom) + [Testing Library React](https://testing-library.com/) + [Playwright](https://playwright.dev/) + [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) |
+| Qualité      | TypeScript ~6.0 strict + ESLint 9 flat + Prettier 3, mutualisés via [`@mister-guiiug/dev-wpa-config`](../dev-wpa-config/README.md)                                                                                   |
+| Monitoring   | [web-vitals 4](https://web.dev/vitals/)                                                                                                                                                                     |
+| Validation   | [Zod 3](https://zod.dev/)                                                                                                                                                                                   |
+| PWA          | [`vite-plugin-pwa 1.2`](https://vite-pwa-org.netlify.app/) (Workbox `generateSW`)                                                                                                                           |
+| Proxy CORS   | [Cloudflare Workers](workers/README.md) (optionnel)                                                                                                                                                         |
+| CI/CD        | GitHub Actions → GitHub Pages                                                                                                                                                                               |
 
 ### Démarrage local
 
@@ -141,15 +147,19 @@ npm run preview
 ### Tests
 
 ```bash
-npm test             # exécution unique
-npm run test:watch   # mode watch
+npm test             # Vitest unitaires (jsdom)
+npm run test:watch   # Vitest mode watch
+npm run test:e2e     # Playwright (full app + a11y)
+npm run type-check   # TypeScript strict (tsc --noEmit)
+npm run lint         # ESLint flat config
 ```
 
-Vitest + jsdom, couvre `analyzer.js`, `router.js`, `export-report.js`, `settings-share.js`.
+Setup partagé : [`src/test/setup.ts`](src/test/setup.ts) charge `@testing-library/jest-dom/vitest`. Les options Vitest viennent de [`@mister-guiiug/dev-wpa-config/vitest-base`](../dev-wpa-config/vitest-base.js) (jsdom + globals + passWithNoTests).
 
 ### Débogage VS Code / Cursor
 
 F5 → choisir une configuration :
+
 - **Déboguer : Chrome + Vite** — démarre le serveur et ouvre le navigateur avec le débogueur.
 - **Déboguer : Chrome (serveur déjà lancé)** — si `npm run dev` tourne déjà.
 
@@ -163,7 +173,7 @@ L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par C
 
 ### Déploiement sur GitHub Pages
 
-1. Nommer le dépôt `mister-cim10` (ou adapter `base` dans `vite.config.js`).
+1. Nommer le dépôt `mister-cim10` (ou adapter `base` dans [`vite.config.ts`](vite.config.ts)).
 2. **Settings → Pages** : source → **GitHub Actions**.
 3. Pousser sur `main` : le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) exécute `npm ci && npm run build` et publie `dist/`.
 
@@ -171,18 +181,43 @@ L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par C
 
 ```
 src/
-  analyzer.js        Suggestions locales (texte → code CIM-10)
-  who-icd-api.js     Intégration API OMS ICD-11 (OAuth2)
-  icd10-data.js      Échantillon de codes / synonymes FR
-  workspace.js       Interface principale — analyse, validation, export
-  export-report.js   Export TXT, CSV, e-mail, Web Share
-  speech.js          Web Speech API
-  router.js          Routeur SPA
-workers/             Proxy CORS Cloudflare Worker (optionnel)
-public/              Manifest PWA, icônes
-scripts/             Génération d'icônes, post-build SW
-docs/context.md      Contexte produit détaillé
+├── App.tsx                       Router (HashRouter) + 3 routes (home / parametres / aide)
+├── main.tsx                      Entry React + DialogProvider + bootstrap (theme, SW, web vitals)
+├── components/                   AppHeader, AppFooter, BrandMark, NavDrawer, ThemeToggle, DialogProvider
+├── pages/                        HomePage, SettingsPage, HelpPage
+├── features/workspace/           CrPanel, SuggestionsPanel, ValidatedPanel, ExportBar
+├── store/                        settingsStore (Zustand), workspaceStore (Zustand)
+├── hooks/                        useTheme
+├── lib/
+│   ├── analyzer.ts               suggestFromText — pure logic (TS strict)
+│   ├── constants.ts              LS_KEYS, MODE_SUMMARY_LABEL, FOOTER_NOTE
+│   ├── settings.ts               read/write LS pour mode, seuil de confiance, OMS
+│   ├── storage.ts                exportAppData / importAppData / dateSlug / downloadBlob
+│   └── theme.ts                  get/apply/cycle theme (pure)
+├── types/index.ts                AnalyzeMode, AnalysisResult, ValidatedDiagnostic, WhoSettings
+├── monitoring/web-vitals.ts
+├── register-sw.ts                Bannière de mise à jour PWA
+├── icd10-data.ts                 Échantillon de codes / synonymes FR
+├── style.css                     Styles legacy (classes réutilisées par les composants React)
+└── tailwind.css                  @import 'tailwindcss'
+workers/                          Proxy CORS Cloudflare Worker (optionnel)
+public/                           Manifest PWA, icônes
+scripts/                          Génération d'icônes
+docs/context.md                   Contexte produit détaillé
 ```
+
+### Migration vanilla TS → React (mai 2026)
+
+L'application a été entièrement réécrite en **React 19 + react-router-dom 7 + Tailwind 4 + Zustand 5**, en remplacement du runtime vanilla TS et du router maison. Les ~4 400 lignes de DOM-manipulation ([`workspace.ts`](https://github.com/mister-guiiug/mister-cim10/commits/main/src/workspace.ts), `pages.ts`, `*-html.ts`, `header-chrome.ts`, `nav-drawer.ts`, `dialog-ui.ts`, `enhancements-integration.ts`, `ui-helpers.js`) ont été remplacées par ~2 700 lignes de composants React TS strict. La logique pure (analyzer, données, theme, storage) a été conservée et reportée dans `src/lib/`.
+
+Fonctionnalités reportées dans les versions ultérieures (les hooks Zustand sont déjà en place) :
+
+- Reconnaissance vocale (Dictée) — `useSpeechRecognition` à brancher
+- Sessions sauvegardées / Favoris — `LS_KEYS.SESSIONS` et `LS_KEYS.FAVORITES` réservés dans [`lib/constants.ts`](src/lib/constants.ts)
+- Recherche manuelle de codes (autocomplete) — à ajouter dans `SuggestionsPanel`
+- Annuler/Rétablir (Ctrl+Z) — pile d'actions à empiler dans `workspaceStore`
+- Highlight du compte-rendu — composant à ajouter dans `CrPanel`
+- Appel réel API OMS (autocodage ICD-11) — `// TODO` dans `HomePage.handleAnalyze`
 
 </details>
 
@@ -190,6 +225,6 @@ docs/context.md      Contexte produit détaillé
 
 ## Licence
 
-[MIT](LICENSE) — Copyright © 2026 Guillaume GUERIN. 
+[MIT](LICENSE) — Copyright © 2026 Guillaume GUERIN.
 
 Utilisation sous votre entière responsabilité. Cet outil ne remplace pas les référentiels officiels ni le jugement clinique.

@@ -2,45 +2,44 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Déboguer : Chrome + Vite",
+      "name": "Chrome — launch (npm run dev)",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "dev: Vite",
+      "preLaunchTask": "dev",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
         "webpack:///src/*": "${webRoot}/src/*"
       }
     },
     {
-      "name": "Déboguer : Edge + Vite",
+      "name": "Edge — launch (npm run dev)",
       "type": "msedge",
       "request": "launch",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "dev: Vite",
+      "preLaunchTask": "dev",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
         "webpack:///src/*": "${webRoot}/src/*"
       }
     },
     {
-      "name": "Déboguer : Chrome (serveur déjà lancé)",
+      "name": "Chrome — attach (serveur déjà lancé)",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true
     },
     {
-      "name": "Déboguer : Edge (serveur déjà lancé)",
+      "name": "Edge — attach (serveur déjà lancé)",
       "type": "msedge",
       "request": "launch",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true
     }
-  ],
-  "compounds": []
+  ]
 }
