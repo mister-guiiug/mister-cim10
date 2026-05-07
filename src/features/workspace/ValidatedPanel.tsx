@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { ExportBar } from './ExportBar';
 import type { ValidatedDiagnostic } from '../../types/index';
@@ -7,6 +7,8 @@ export function ValidatedPanel() {
   const validated = useWorkspaceStore(s => s.validated);
   const removeValidated = useWorkspaceStore(s => s.removeValidated);
   const updateValidatedNote = useWorkspaceStore(s => s.updateValidatedNote);
+  const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
+  const validatedCodes = new Set(validated.map(v => v.code));
 
   return (
     <section className="panel panel--validated" aria-labelledby="val-label">
@@ -38,6 +40,10 @@ export function ValidatedPanel() {
           ))}
         </ul>
       )}
+      <ManualEntryForm
+        onAdd={addManualDiagnostic}
+        existingCodes={validatedCodes}
+      />
       <ExportBar disabled={validated.length === 0} />
     </section>
   );
@@ -89,5 +95,88 @@ function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
         </p>
       )}
     </li>
+  );
+}
+
+interface ManualEntryFormProps {
+  onAdd: (code: string, label: string) => void;
+  existingCodes: Set<string>;
+}
+
+function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
+  const [open, setOpen] = useState(false);
+  const [code, setCode] = useState('');
+  const [label, setLabel] = useState('');
+
+  const trimCode = code.trim().toUpperCase();
+  const trimLabel = label.trim();
+  const duplicate = trimCode !== '' && existingCodes.has(trimCode);
+  const canSubmit = trimCode !== '' && trimLabel !== '' && !duplicate;
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    onAdd(code, label);
+    setCode('');
+    setLabel('');
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="ghost manual-add-toggle"
+        onClick={() => setOpen(true)}
+      >
+        + Ajouter un code manuellement
+      </button>
+    );
+  }
+
+  return (
+    <form className="manual-entry-form" onSubmit={handleSubmit} noValidate>
+      <div className="manual-entry-row">
+        <input
+          type="text"
+          className="manual-entry-code"
+          placeholder="Code (ex. I10)"
+          aria-label="Code CIM-10"
+          value={code}
+          onChange={e => setCode(e.target.value)}
+          autoFocus
+          spellCheck={false}
+        />
+        <input
+          type="text"
+          className="manual-entry-label"
+          placeholder="Libellé libre"
+          aria-label="Libellé du diagnostic"
+          value={label}
+          onChange={e => setLabel(e.target.value)}
+        />
+      </div>
+      {duplicate && (
+        <p className="hint error" role="alert">
+          Ce code est déjà dans les diagnostics retenus.
+        </p>
+      )}
+      <div className="toolbar">
+        <button type="submit" className="primary" disabled={!canSubmit}>
+          Ajouter
+        </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => {
+            setOpen(false);
+            setCode('');
+            setLabel('');
+          }}
+        >
+          Annuler
+        </button>
+      </div>
+    </form>
   );
 }

@@ -1298,6 +1298,61 @@ section.panel {
   color: var(--muted);
 }
 
+/* ── Manual code entry form ── */
+.manual-add-toggle {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.manual-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px dashed var(--surface2);
+  border-radius: 10px;
+}
+
+.manual-entry-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.manual-entry-code {
+  width: 7rem;
+  flex-shrink: 0;
+  border: 1px solid var(--surface2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font-family: var(--font);
+  font-size: 0.88rem;
+  text-transform: uppercase;
+}
+
+.manual-entry-label {
+  flex: 1;
+  min-width: 12rem;
+  border: 1px solid var(--surface2);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+  font-family: var(--font);
+  font-size: 0.88rem;
+}
+
+.manual-entry-code:focus,
+.manual-entry-label:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .export-hint {
   margin: 0.25rem 0 0;
   max-width: none;
@@ -1574,6 +1629,33 @@ button.ghost:hover {
 
 .suggestion-filter-count {
   margin-left: auto;
+}
+
+/* ── Suggestion term highlight link ── */
+.suggestion-term-link {
+  display: inline;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 2px;
+}
+
+.suggestion-term-link:hover {
+  text-decoration: underline;
+}
+
+.suggestion-term-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .card {

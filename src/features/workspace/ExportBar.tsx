@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { dateSlug, downloadBlob } from '../../lib/storage';
 import type { ValidatedDiagnostic } from '../../types/index';
@@ -59,6 +60,20 @@ function buildJsonReport(
 export function ExportBar({ disabled }: ExportBarProps) {
   const crText = useWorkspaceStore(s => s.crText);
   const validated = useWorkspaceStore(s => s.validated);
+  const [copied, setCopied] = useState(false);
+
+  const copyList = async () => {
+    const text = validated
+      .map(v => `${v.code} — ${v.label}${v.note ? ` [${v.note}]` : ''}`)
+      .join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard not available */
+    }
+  };
 
   const exportTxt = () => {
     const blob = new Blob([buildTextReport(crText, validated)], {
@@ -109,6 +124,20 @@ export function ExportBar({ disabled }: ExportBarProps) {
 
   return (
     <div className="export-blocks">
+      <div className="export-block">
+        <span className="export-block-label">Presse-papiers</span>
+        <div className="toolbar export-row export-row--panel">
+          <button
+            type="button"
+            className={copied ? 'primary' : 'secondary'}
+            onClick={copyList}
+            disabled={disabled}
+            aria-live="polite"
+          >
+            {copied ? '✓ Copié' : 'Copier la liste'}
+          </button>
+        </div>
+      </div>
       <div className="export-block">
         <span className="export-block-label">Télécharger</span>
         <div className="toolbar export-row export-row--panel">

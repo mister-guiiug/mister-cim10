@@ -25,6 +25,9 @@ export function SuggestionsPanel() {
   const reject = useWorkspaceStore(s => s.rejectSuggestion);
   const validateAll = useWorkspaceStore(s => s.validateAll);
   const rejectAll = useWorkspaceStore(s => s.rejectAll);
+  const setHighlightedMatchedTerm = useWorkspaceStore(
+    s => s.setHighlightedMatchedTerm
+  );
   const minConfidence = useSettingsStore(s => s.minConfidence);
 
   const validatedCodes = useMemo(
@@ -117,6 +120,7 @@ export function SuggestionsPanel() {
                 suggestion={s}
                 onValidate={() => validate(s)}
                 onReject={() => reject(s.id)}
+                onHighlight={() => setHighlightedMatchedTerm(s.matchedTerm)}
               />
             ))}
           </ul>
@@ -130,12 +134,14 @@ interface SuggestionCardProps {
   suggestion: AnalysisResult;
   onValidate: () => void;
   onReject: () => void;
+  onHighlight: () => void;
 }
 
 function SuggestionCard({
   suggestion,
   onValidate,
   onReject,
+  onHighlight,
 }: SuggestionCardProps) {
   return (
     <li className="suggestion-card" role="listitem">
@@ -151,7 +157,15 @@ function SuggestionCard({
       <p className="suggestion-label">{suggestion.label}</p>
       {suggestion.matchedTerm && (
         <p className="suggestion-term">
-          Terme repéré : <em>{suggestion.matchedTerm}</em>
+          Terme repéré :{' '}
+          <button
+            type="button"
+            className="suggestion-term-link"
+            onClick={onHighlight}
+            title="Voir dans le compte-rendu"
+          >
+            {suggestion.matchedTerm}
+          </button>
         </p>
       )}
       <div className="toolbar">

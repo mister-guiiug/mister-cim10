@@ -23,6 +23,9 @@ interface WorkspaceState {
   resetSession: () => void;
   validateAll: (results: AnalysisResult[]) => void;
   rejectAll: (ids: string[]) => void;
+  addManualDiagnostic: (code: string, label: string) => void;
+  highlightedMatchedTerm: string | null;
+  setHighlightedMatchedTerm: (term: string | null) => void;
 }
 
 function loadValidated(): ValidatedDiagnostic[] {
@@ -135,5 +138,27 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const next = new Set(get().rejectedIds);
     for (const id of ids) next.add(id);
     set({ rejectedIds: next });
+  },
+  highlightedMatchedTerm: null,
+  setHighlightedMatchedTerm: term => set({ highlightedMatchedTerm: term }),
+  addManualDiagnostic: (code, label) => {
+    const trimCode = code.trim().toUpperCase();
+    const trimLabel = label.trim();
+    if (!trimCode || !trimLabel) return;
+    const validated = get().validated;
+    if (validated.some(v => v.code === trimCode)) return;
+    const id =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2, 12);
+    const next: ValidatedDiagnostic = {
+      id,
+      code: trimCode,
+      label: trimLabel,
+      validatedAt: Date.now(),
+    };
+    const items = [next, ...validated];
+    persistValidated(items);
+    set({ validated: items });
   },
 }));

@@ -1,4 +1,4 @@
-import { type FormEvent } from 'react';
+import { useRef, useEffect, type FormEvent } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useDialog } from '../../hooks/useDialog';
 
@@ -12,7 +12,22 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const analyzeError = useWorkspaceStore(s => s.analyzeError);
   const resetSession = useWorkspaceStore(s => s.resetSession);
+  const highlightedMatchedTerm = useWorkspaceStore(
+    s => s.highlightedMatchedTerm
+  );
   const dialog = useDialog();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!highlightedMatchedTerm || !textareaRef.current) return;
+    const ta = textareaRef.current;
+    const idx = ta.value
+      .toLowerCase()
+      .indexOf(highlightedMatchedTerm.toLowerCase());
+    if (idx === -1) return;
+    ta.focus();
+    ta.setSelectionRange(idx, idx + highlightedMatchedTerm.length);
+  }, [highlightedMatchedTerm]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -47,6 +62,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
       </div>
       <form onSubmit={handleSubmit}>
         <textarea
+          ref={textareaRef}
           className="cr"
           name="cr"
           placeholder="Ex. : Patient diabétique type 2, HTA, suivi pour BPCO…"
