@@ -1,10 +1,18 @@
 # Deploy délégué au reusable workflow famille (dev-wpa-config).
+# Les permissions doivent être déclarées au niveau caller : le reusable workflow
+# ne peut pas élever celles du caller (intersection only).
 name: Deploy
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: read
 
 jobs:
   deploy:
