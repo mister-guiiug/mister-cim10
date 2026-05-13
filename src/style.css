@@ -2844,3 +2844,92 @@ html[data-theme='dark'] .footer-pill--bmac:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--muted) 55%, transparent);
 }
+
+/* ── Compare panel (parent + siblings) ── */
+.suggestion-compare-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.suggestion-compare-empty {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
+  margin: 0;
+}
+
+.suggestion-compare-siblings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.suggestion-compare-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in srgb, var(--surface2) 35%, transparent);
+  font-size: 0.85rem;
+}
+
+.suggestion-compare-row--parent {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.suggestion-compare-tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--surface2);
+}
+
+.suggestion-compare-row--parent .suggestion-compare-tag {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--accent);
+}
+
+.suggestion-compare-code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-weight: 600;
+}
+
+.suggestion-compare-label {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-compare-row button {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+}
+
+@media (max-width: 480px) {
+  .suggestion-compare-row {
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+  }
+  .suggestion-compare-row button {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+  .suggestion-compare-label {
+    white-space: normal;
+  }
+}

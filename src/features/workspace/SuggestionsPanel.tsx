@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useSettingsStore } from '../../store/settingsStore';
-import type { AnalysisResult } from '../../types/index';
+import { getFamily } from '../../lib/icd-hierarchy';
+import type { AnalysisResult, ICD10Code } from '../../types/index';
 
 function confidenceLabel(c: number): string {
   if (c >= 0.8) return 'Élevée';
@@ -28,6 +29,7 @@ export function SuggestionsPanel() {
   const setHighlightedMatchedTerm = useWorkspaceStore(
     s => s.setHighlightedMatchedTerm
   );
+  const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const minConfidence = useSettingsStore(s => s.minConfidence);
 
   const validatedCodes = useMemo(
@@ -118,9 +120,13 @@ export function SuggestionsPanel() {
               <SuggestionCard
                 key={s.id}
                 suggestion={s}
+                validatedCodes={validatedCodes}
                 onValidate={() => validate(s)}
                 onReject={() => reject(s.id)}
                 onHighlight={() => setHighlightedMatchedTerm(s.matchedTerm)}
+                onValidateRelated={(code, label) =>
+                  addManualDiagnostic(code, label)
+                }
               />
             ))}
           </ul>
@@ -132,17 +138,29 @@ export function SuggestionsPanel() {
 
 interface SuggestionCardProps {
   suggestion: AnalysisResult;
+  validatedCodes: Set<string>;
   onValidate: () => void;
   onReject: () => void;
   onHighlight: () => void;
+  onValidateRelated: (code: string, label: string) => void;
 }
 
 function SuggestionCard({
   suggestion,
+  validatedCodes,
   onValidate,
   onReject,
   onHighlight,
+  onValidateRelated,
 }: SuggestionCardProps) {
+  const [comparing, setComparing] = useState(false);
+  const family = useMemo(
+    () => (comparing ? getFamily(suggestion.code) : null),
+    [comparing, suggestion.code]
+  );
+  const hasFamily =
+    family !== null && (family.parent !== null || family.siblings.length > 0);
+
   return (
     <li className="suggestion-card" role="listitem">
       <div className="suggestion-card-head">
@@ -175,7 +193,115 @@ function SuggestionCard({
         <button type="button" className="ghost" onClick={onReject}>
           Rejeter
         </button>
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => setComparing(v => !v)}
+          aria-expanded={comparing}
+          aria-controls={`compare-${suggestion.id}`}
+          title="Voir le code parent et les codes apparentés"
+        >
+          {comparing ? 'Fermer' : 'Comparer'}
+        </button>
       </div>
+      {comparing && family && (
+        <CompareFamily
+          id={`compare-${suggestion.id}`}
+          family={family}
+          validatedCodes={validatedCodes}
+          hasFamily={hasFamily}
+          onValidate={onValidateRelated}
+        />
+      )}
     </li>
+  );
+}
+
+interface CompareFamilyProps {
+  id: string;
+  family: { parent: ICD10Code | null; siblings: ICD10Code[] };
+  validatedCodes: Set<string>;
+  hasFamily: boolean;
+  onValidate: (code: string, label: string) => void;
+}
+
+function CompareFamily({
+  id,
+  family,
+  validatedCodes,
+  hasFamily,
+  onValidate,
+}: CompareFamilyProps) {
+  if (!hasFamily) {
+    return (
+      <div id={id} className="suggestion-compare-panel">
+        <p className="suggestion-compare-empty">
+          Aucun code apparenté dans le référentiel embarqué.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div id={id} className="suggestion-compare-panel">
+      {family.parent && (
+        <CompareRow
+          entry={family.parent}
+          variant="parent"
+          alreadyValidated={validatedCodes.has(family.parent.code)}
+          onValidate={onValidate}
+        />
+      )}
+      {family.siblings.length > 0 && (
+        <ul className="suggestion-compare-siblings" role="list">
+          {family.siblings.map(sib => (
+            <li key={sib.code}>
+              <CompareRow
+                entry={sib}
+                variant="sibling"
+                alreadyValidated={validatedCodes.has(sib.code)}
+                onValidate={onValidate}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+interface CompareRowProps {
+  entry: ICD10Code;
+  variant: 'parent' | 'sibling';
+  alreadyValidated: boolean;
+  onValidate: (code: string, label: string) => void;
+}
+
+function CompareRow({
+  entry,
+  variant,
+  alreadyValidated,
+  onValidate,
+}: CompareRowProps) {
+  return (
+    <div className={`suggestion-compare-row suggestion-compare-row--${variant}`}>
+      <span className="suggestion-compare-tag">
+        {variant === 'parent' ? 'Parent' : 'Apparenté'}
+      </span>
+      <strong className="suggestion-compare-code">{entry.code}</strong>
+      <span className="suggestion-compare-label">{entry.label}</span>
+      <button
+        type="button"
+        className="ghost"
+        onClick={() => onValidate(entry.code, entry.label)}
+        disabled={alreadyValidated}
+        title={
+          alreadyValidated
+            ? 'Déjà dans les diagnostics retenus'
+            : 'Valider ce code'
+        }
+      >
+        {alreadyValidated ? 'Validé' : 'Valider'}
+      </button>
+    </div>
   );
 }
