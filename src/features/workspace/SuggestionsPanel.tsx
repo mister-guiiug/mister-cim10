@@ -283,7 +283,9 @@ function CompareRow({
   onValidate,
 }: CompareRowProps) {
   return (
-    <div className={`suggestion-compare-row suggestion-compare-row--${variant}`}>
+    <div
+      className={`suggestion-compare-row suggestion-compare-row--${variant}`}
+    >
       <span className="suggestion-compare-tag">
         {variant === 'parent' ? 'Parent' : 'Apparenté'}
       </span>
