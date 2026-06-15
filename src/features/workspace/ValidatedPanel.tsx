@@ -63,6 +63,16 @@ function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
     <li className="validated-item" role="listitem">
       <div className="validated-row">
         <strong className="validated-code">{item.code}</strong>
+        <span
+          className={`source-badge source-badge--${item.source ?? 'local'}`}
+          title={
+            item.source === 'api'
+              ? 'Classification CIM-11 (OMS)'
+              : 'Dictionnaire CIM-10 embarqué'
+          }
+        >
+          {item.source === 'api' ? 'CIM-11' : 'CIM-10'}
+        </span>
         <span className="validated-label">{item.label}</span>
         <div className="toolbar">
           <button

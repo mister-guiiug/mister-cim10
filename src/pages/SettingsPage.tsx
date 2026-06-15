@@ -72,7 +72,8 @@ export function SettingsPage() {
     const params = new URLSearchParams();
     params.set('mode', mode);
     if (who.clientId) params.set('clientId', who.clientId);
-    if (who.clientSecret) params.set('clientSecret', who.clientSecret);
+    // Le mot secret n'est JAMAIS mis dans l'URL (sécurité) : le destinataire
+    // saisit le sien.
     if (who.proxyUrl) params.set('proxyUrl', who.proxyUrl);
     params.set('release', who.releaseId);
     params.set('lang', who.lang);
@@ -134,9 +135,9 @@ export function SettingsPage() {
                 value={mode}
                 onChange={e => setMode(e.target.value as AnalyzeMode)}
               >
-                <option value="local">Intégré uniquement (sans OMS)</option>
-                <option value="api">OMS uniquement</option>
-                <option value="both">Intégré et OMS</option>
+                <option value="local">Dictionnaire local (CIM-10)</option>
+                <option value="api">OMS en ligne (CIM-11)</option>
+                <option value="both">Les deux (CIM-10 + CIM-11)</option>
               </select>
             </div>
             <p className="settings-hint" id="analyze-mode-hint">
@@ -180,7 +181,9 @@ export function SettingsPage() {
               hidden={!showWhoSection}
             >
               <div className="api-compact-bar">
-                <span className="api-compact-heading">Connexion OMS</span>
+                <span className="api-compact-heading">
+                  Connexion OMS (CIM-11)
+                </span>
                 <nav className="api-links" aria-label="Ressources OMS">
                   <a
                     href="https://icd.who.int/icdapi"
@@ -284,10 +287,9 @@ export function SettingsPage() {
               <p className="settings-share-title">Partager le paramétrage</p>
               <p className="settings-share-hint hint">
                 Génère un <strong>lien</strong> reprenant le mode d’analyse et
-                les champs ci-dessus (y compris le{' '}
-                <strong>mot secret OMS</strong> s’il est renseigné). Ne
-                l’envoyez qu’à des personnes de confiance ; évitez les canaux
-                non chiffrés.
+                la connexion OMS (identifiant, passerelle) —{' '}
+                <strong>sans le mot secret</strong>, qui n’est jamais placé dans
+                l’URL. Le destinataire saisit le sien.
               </p>
               <div className="toolbar settings-share-toolbar">
                 <button

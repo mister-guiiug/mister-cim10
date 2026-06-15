@@ -166,6 +166,16 @@ function SuggestionCard({
       <div className="suggestion-card-head">
         <strong className="suggestion-code">{suggestion.code}</strong>
         <span
+          className={`source-badge source-badge--${suggestion.source ?? 'local'}`}
+          title={
+            suggestion.source === 'api'
+              ? 'Classification CIM-11 (OMS)'
+              : 'Dictionnaire CIM-10 embarqué'
+          }
+        >
+          {suggestion.source === 'api' ? 'CIM-11' : 'CIM-10'}
+        </span>
+        <span
           className={`suggestion-confidence ${confidenceClass(suggestion.confidence)}`}
         >
           {confidenceLabel(suggestion.confidence)} ·{' '}
