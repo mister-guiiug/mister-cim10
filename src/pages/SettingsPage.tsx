@@ -13,6 +13,7 @@ import {
 } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function SettingsPage() {
   const mode = useSettingsStore(s => s.mode);
@@ -367,9 +368,11 @@ export function SettingsPage() {
             </div>
 
             <div className="settings-block settings-display-block">
-              <p className="settings-block-title">
-                Préférences d&apos;affichage
-              </p>
+              <p className="settings-block-title">Apparence</p>
+              <div className="settings-theme-row">
+                <span className="settings-theme-label">Thème</span>
+                <ThemeToggle />
+              </div>
               <p className="settings-hint">
                 Éléments masqués manuellement que vous pouvez réafficher.
               </p>

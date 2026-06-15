@@ -1,7 +1,7 @@
 /**
  * Barre de navigation inférieure (mobile-first), sur le principe de miss-supaboss :
- * toujours visible, accessible au pouce, item actif mis en avant. Couvre les
- * routes principales ; le tiroir (en-tête) reste pour le thème et le statut.
+ * toujours visible, accessible au pouce, item actif mis en avant. C’est la seule
+ * navigation de l’application (le thème vit dans Paramètres › Apparence).
  */
 import { NavLink } from 'react-router-dom';
 import type { ReactNode } from 'react';
