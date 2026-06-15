@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
@@ -11,7 +11,7 @@ import {
   exportAppData,
   importAppData,
 } from '../lib/storage';
-import type { AnalyzeMode } from '../types/index';
+import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
 
 export function SettingsPage() {
@@ -42,6 +42,30 @@ export function SettingsPage() {
     const id = setTimeout(() => setResetFeedback(false), 2000);
     return () => clearTimeout(id);
   }, [resetFeedback]);
+
+  // Import d'un lien « Partager le paramétrage » : applique mode / identifiant /
+  // passerelle depuis l'URL (le mot secret n'y figure jamais), puis nettoie
+  // l'URL pour ne pas le réappliquer ni le laisser dans l'historique.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if ([...searchParams.keys()].length === 0) return;
+    const m = searchParams.get('mode');
+    if (m === 'local' || m === 'api' || m === 'both') setMode(m);
+    const patch: Partial<WhoSettings> = {};
+    const cid = searchParams.get('clientId');
+    const proxy = searchParams.get('proxyUrl');
+    const rel = searchParams.get('release');
+    const lang = searchParams.get('lang');
+    if (cid) patch.clientId = cid;
+    if (proxy) patch.proxyUrl = proxy;
+    if (rel) patch.releaseId = rel;
+    if (lang) patch.lang = lang;
+    if (Object.keys(patch).length > 0) setWho(patch);
+    setSearchParams({}, { replace: true });
+    setShareFeedback(
+      'Paramétrage importé depuis le lien — saisissez votre mot secret OMS.'
+    );
+  }, [searchParams, setSearchParams, setMode, setWho]);
 
   const showWhoSection = mode !== 'local';
 
