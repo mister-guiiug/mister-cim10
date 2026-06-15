@@ -1456,13 +1456,15 @@ button.primary {
   box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
-#btn-analyze {
+/* Bouton « Analyser » : pleine largeur sur mobile, auto dès 480 px.
+   Ciblé par structure (le bouton n'a pas d'id). */
+.panel--cr .toolbar button.primary {
   flex: 1 1 100%;
   justify-content: center;
 }
 
 @media (min-width: 480px) {
-  #btn-analyze {
+  .panel--cr .toolbar button.primary {
     flex: 0 0 auto;
   }
 }
@@ -2581,12 +2583,7 @@ html[data-theme='dark'] .footer-pill--bmac:hover {
   .manual-search-form,
   .export-blocks,
   footer,
-  .cr-history-details,
-  #btn-new-session,
-  #btn-print,
-  #btn-clear,
-  #btn-mic,
-  #btn-analyze {
+  .cr-history-details {
     display: none !important;
   }
   .workspace {
