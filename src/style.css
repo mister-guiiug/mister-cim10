@@ -865,6 +865,32 @@ a.brand-link:hover .brand-mark {
   background: var(--bg);
 }
 
+/* Badge de référentiel sur une suggestion / un diagnostic : CIM-10 (local) vs
+   CIM-11 (OMS). */
+.source-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.1em 0.45em;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.source-badge--local {
+  background: color-mix(in srgb, var(--muted) 16%, transparent);
+  color: var(--muted);
+  border-color: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+.source-badge--api {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 36%, transparent);
+}
+
 .settings-body {
   padding: 0 1rem 1rem;
   border-top: 1px solid var(--surface2);

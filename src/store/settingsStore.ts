@@ -8,6 +8,7 @@ import {
   writeMinConfidenceThreshold,
   writeWhoSettings,
 } from '../lib/settings';
+import { resetOmsToken } from '../lib/oms';
 
 interface SettingsState {
   mode: AnalyzeMode;
@@ -43,11 +44,13 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setWho: patch => {
     const next = { ...get().who, ...patch };
     writeWhoSettings(next);
+    resetOmsToken(); // identifiants/passerelle changés → jeton caché obsolète
     set({ who: next });
   },
   forgetSecret: () => {
     const next = { ...get().who, clientSecret: '' };
     writeWhoSettings(next);
+    resetOmsToken();
     set({ who: next });
   },
   dismissDisclaimer: () => {

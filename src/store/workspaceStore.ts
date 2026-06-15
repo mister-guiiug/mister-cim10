@@ -86,6 +86,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       id: s.id,
       code: s.code,
       label: s.label,
+      source: s.source,
       validatedAt: Date.now(),
     };
     const items = [next, ...validated];
@@ -128,6 +129,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         id: r.id,
         code: r.code,
         label: r.label,
+        source: r.source,
         validatedAt: Date.now(),
       }));
     const items = [...additions, ...validated];
@@ -155,6 +157,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       id,
       code: trimCode,
       label: trimLabel,
+      source: 'local',
       validatedAt: Date.now(),
     };
     const items = [next, ...validated];

@@ -26,6 +26,8 @@ export interface ValidatedDiagnostic {
   label: string;
   note?: string;
   validatedAt: number;
+  /** Référentiel d'origine : 'local' = CIM-10 embarqué, 'api' = OMS CIM-11. */
+  source?: 'local' | 'api';
 }
 
 export interface WhoSettings {

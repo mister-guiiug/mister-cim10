@@ -44,9 +44,10 @@ export function HelpPage() {
           <ol className="help-steps">
             <li>
               <strong>Configurer la source des suggestions</strong> dans la page{' '}
-              <Link to="/parametres">Paramètres</Link> : intégré uniquement
-              (sans connexion réseau vers l’OMS), OMS uniquement, ou les deux
-              combinés.
+              <Link to="/parametres">Paramètres</Link> : dictionnaire local
+              <strong> CIM-10</strong> (hors ligne),{' '}
+              <strong>OMS en ligne</strong> (classification{' '}
+              <strong>CIM-11</strong>), ou les deux combinés.
             </li>
             <li>
               <strong>Saisir le compte-rendu</strong> sur l’

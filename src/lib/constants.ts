@@ -20,7 +20,7 @@ export const LS_KEYS = {
 } as const;
 
 export const MODE_SUMMARY_LABEL: Record<AnalyzeMode, string> = {
-  local: 'Intégré',
-  api: 'OMS',
-  both: 'Intégré + OMS',
+  local: 'CIM-10',
+  api: 'OMS CIM-11',
+  both: 'CIM-10 + CIM-11',
 };
