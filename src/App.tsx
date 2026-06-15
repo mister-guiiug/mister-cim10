@@ -3,6 +3,7 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { HomePage } from './pages/HomePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
+import { BottomNav } from './components/BottomNav';
 import type { AppRoute } from './types/index';
 
 function pathToRoute(pathname: string): AppRoute {
@@ -31,11 +32,14 @@ export function App() {
   }, [location]);
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/parametres" element={<SettingsPage />} />
-      <Route path="/aide" element={<HelpPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/parametres" element={<SettingsPage />} />
+        <Route path="/aide" element={<HelpPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <BottomNav />
+    </>
   );
 }
