@@ -107,7 +107,7 @@ html {
 .suggestion-code,
 .validated-code,
 .suggestion-compare-code,
-.suggestion-confidence,
+.confidence-meter-pct,
 .panel-count,
 .settings-threshold-value {
   font-variant-numeric: tabular-nums;
@@ -2882,38 +2882,70 @@ html[data-theme='dark'] .footer-pill--bmac:hover {
 
 .suggestion-code {
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.95rem;
+  font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--text);
+  letter-spacing: 0.01em;
+  color: var(--accent);
 }
 
-.suggestion-confidence {
+/* Badge source poussé à droite de l'en-tête de carte. */
+.suggestion-card-head .source-badge {
   margin-left: auto;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 0.12em 0.55em;
-  border-radius: 999px;
-  border: 1px solid transparent;
+}
+
+/* Jauge de confiance : la couleur porte sur la barre (et non sur du texte posé
+   sur une teinte) ; le relevé reste à fort contraste (AA en clair comme sombre). */
+.confidence-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.confidence-meter-track {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--surface2) 55%, transparent);
+  overflow: hidden;
+}
+
+.confidence-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width var(--transition);
+}
+
+.confidence-meter.is-high .confidence-meter-fill {
+  background: var(--ok);
+}
+
+.confidence-meter.is-medium .confidence-meter-fill {
+  background: var(--warn);
+}
+
+.confidence-meter.is-low .confidence-meter-fill {
+  background: color-mix(in srgb, var(--muted) 80%, var(--text));
+}
+
+.confidence-meter-readout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 
-.suggestion-confidence.is-high {
-  background: color-mix(in srgb, var(--ok) 16%, transparent);
-  color: var(--ok);
-  border-color: color-mix(in srgb, var(--ok) 34%, transparent);
-}
-
-.suggestion-confidence.is-medium {
-  background: color-mix(in srgb, var(--warn) 18%, transparent);
-  color: var(--warn);
-  border-color: color-mix(in srgb, var(--warn) 36%, transparent);
-}
-
-.suggestion-confidence.is-low {
-  background: color-mix(in srgb, var(--muted) 16%, transparent);
+.confidence-meter-level {
+  font-weight: 600;
   color: var(--muted);
-  border-color: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+.confidence-meter-pct {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .suggestion-label {
