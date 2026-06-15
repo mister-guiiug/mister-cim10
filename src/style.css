@@ -1204,6 +1204,67 @@ section.panel {
   opacity: 0.7;
 }
 
+/* ── Flux d'accueil guidé : panneaux atténués tant qu'ils sont vides ── */
+.panel.is-pristine {
+  opacity: 0.62;
+  transition: opacity var(--transition);
+}
+
+.panel.is-pristine:hover,
+.panel.is-pristine:focus-within {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.is-pristine {
+    transition: none;
+  }
+}
+
+/* Pastille de comptage dans l'en-tête (progression du parcours). */
+.panel-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* État « analyse en cours » du panneau Suggestions. */
+.empty--analyzing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent);
+}
+
+.analyzing-spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: analyzing-spin 0.7s linear infinite;
+}
+
+@keyframes analyzing-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .analyzing-spinner {
+    animation: none;
+  }
+}
+
 .export-row--panel {
   margin-top: 0.35rem;
 }

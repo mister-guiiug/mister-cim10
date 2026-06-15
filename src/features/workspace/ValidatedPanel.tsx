@@ -9,9 +9,13 @@ export function ValidatedPanel() {
   const updateValidatedNote = useWorkspaceStore(s => s.updateValidatedNote);
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const validatedCodes = new Set(validated.map(v => v.code));
+  const hasValidated = validated.length > 0;
 
   return (
-    <section className="panel panel--validated" aria-labelledby="val-label">
+    <section
+      className={`panel panel--validated ${hasValidated ? 'is-active' : 'is-pristine'}`}
+      aria-labelledby="val-label"
+    >
       <div className="panel-head">
         <h2 id="val-label" className="panel-title">
           <svg
@@ -24,10 +28,17 @@ export function ValidatedPanel() {
             <path d="M13.854 3.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 9.793l6.646-6.647a.5.5 0 0 1 .708 0z" />
           </svg>
           <span className="panel-title-text">Diagnostics retenus</span>
+          {hasValidated && (
+            <span className="panel-count" aria-hidden="true">
+              {validated.length}
+            </span>
+          )}
         </h2>
       </div>
-      {validated.length === 0 ? (
-        <p className="empty">Aucun diagnostic validé pour l’instant.</p>
+      {!hasValidated ? (
+        <p className="empty">
+          Les codes que vous retenez s’afficheront ici, prêts à exporter.
+        </p>
       ) : (
         <ul className="validated-list" role="list">
           {validated.map(v => (
