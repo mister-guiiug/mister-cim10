@@ -30,6 +30,7 @@ export function SuggestionsPanel() {
     s => s.setHighlightedMatchedTerm
   );
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
+  const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const minConfidence = useSettingsStore(s => s.minConfidence);
 
   const validatedCodes = useMemo(
@@ -52,8 +53,14 @@ export function SuggestionsPanel() {
     });
   }, [suggestions, rejectedIds, validatedCodes, filterText, minConfidence]);
 
+  const hasSuggestions = suggestions.length > 0;
+  const pristine = !hasSuggestions && !isAnalyzing;
+
   return (
-    <section className="panel panel--suggestions" aria-labelledby="sug-label">
+    <section
+      className={`panel panel--suggestions ${pristine ? 'is-pristine' : 'is-active'}`}
+      aria-labelledby="sug-label"
+    >
       <div className="panel-head">
         <h2 id="sug-label" className="panel-title">
           <svg
@@ -66,54 +73,70 @@ export function SuggestionsPanel() {
             <path d="M8 1a5 5 0 0 0-2.5 9.33V12h5v-1.67A5 5 0 0 0 8 1zM6.5 13v1.5h3V13h-3z" />
           </svg>
           <span className="panel-title-text">Suggestions</span>
+          {hasSuggestions && (
+            <span className="panel-count" aria-hidden="true">
+              {visible.length}
+            </span>
+          )}
         </h2>
       </div>
-      <div className="suggestion-filter-row">
-        <input
-          type="search"
-          className="suggestion-filter-inp"
-          placeholder="Filtrer (code, libellé, terme repéré)"
-          aria-label="Filtrer les suggestions"
-          value={filterText}
-          onChange={e => setFilterText(e.target.value)}
-        />
-        <button
-          type="button"
-          className="ghost"
-          onClick={() => setFilterText('')}
-          disabled={!filterText}
-        >
-          Effacer filtre
-        </button>
-      </div>
-      <div className="toolbar suggestion-bulk-toolbar">
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => validateAll(visible)}
-          disabled={visible.length === 0}
-        >
-          Valider filtrées
-        </button>
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => rejectAll(visible.map(v => v.id))}
-          disabled={visible.length === 0}
-        >
-          Rejeter filtrées
-        </button>
-        <span className="hint suggestion-filter-count">
-          {visible.length} affichée{visible.length > 1 ? 's' : ''}
-        </span>
-      </div>
+      {hasSuggestions && (
+        <>
+          <div className="suggestion-filter-row">
+            <input
+              type="search"
+              className="suggestion-filter-inp"
+              placeholder="Filtrer (code, libellé, terme repéré)"
+              aria-label="Filtrer les suggestions"
+              value={filterText}
+              onChange={e => setFilterText(e.target.value)}
+            />
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => setFilterText('')}
+              disabled={!filterText}
+            >
+              Effacer filtre
+            </button>
+          </div>
+          <div className="toolbar suggestion-bulk-toolbar">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => validateAll(visible)}
+              disabled={visible.length === 0}
+            >
+              Valider filtrées
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => rejectAll(visible.map(v => v.id))}
+              disabled={visible.length === 0}
+            >
+              Rejeter filtrées
+            </button>
+            <span className="hint suggestion-filter-count">
+              {visible.length} affichée{visible.length > 1 ? 's' : ''}
+            </span>
+          </div>
+        </>
+      )}
       <div className="suggestions-root">
         {visible.length === 0 ? (
-          <p className="empty">
-            {suggestions.length === 0
-              ? 'Saisissez un compte-rendu et cliquez sur Analyser pour obtenir des suggestions.'
-              : 'Aucune suggestion ne correspond aux filtres actuels.'}
-          </p>
+          isAnalyzing ? (
+            <p className="empty empty--analyzing">
+              <span className="analyzing-spinner" aria-hidden="true" />
+              Analyse en cours…
+            </p>
+          ) : (
+            <p className="empty">
+              {suggestions.length === 0
+                ? 'Saisissez un compte-rendu, puis lancez l’analyse : les suggestions de codes s’afficheront ici.'
+                : 'Aucune suggestion ne correspond aux filtres actuels.'}
+            </p>
+          )
         ) : (
           <ul className="suggestion-list" role="list">
             {visible.map(s => (
