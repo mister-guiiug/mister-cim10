@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "icons": "node scripts/generate-icons.mjs",
-    "type-check": "tsc -b"
+    "type-check": "tsc -b",
+    "prepare": "husky"
   },
   "dependencies": {
     "react": "^19.2.4",
