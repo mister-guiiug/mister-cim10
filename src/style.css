@@ -928,6 +928,14 @@ a.brand-link:hover .brand-mark {
   line-height: 1.4;
 }
 
+/* Ligne de version en bas des Paramètres (sous le bouton « Recharger »). */
+.settings-app-version {
+  margin: 0.75rem 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .settings-block {
   margin-bottom: 1.1rem;
 }

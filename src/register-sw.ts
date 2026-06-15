@@ -2,6 +2,19 @@ import { registerSW } from 'virtual:pwa-register';
 
 const UPDATE_BANNER_ID = 'sw-update-banner';
 
+/** Référence vers l'updater du Service Worker, posée à l'enregistrement. */
+let updateSWFn: ((reload?: boolean) => Promise<void>) | undefined;
+
+/**
+ * Recharge l'application en récupérant la dernière version : active un SW en
+ * attente s'il y en a un, puis recharge. Repli sur un rechargement direct
+ * (dev, ou aucune mise à jour en attente).
+ */
+export function reloadApp(): void {
+  void updateSWFn?.(true);
+  setTimeout(() => window.location.reload(), 600);
+}
+
 function showUpdateBanner(updateServiceWorker: (reload?: boolean) => void) {
   if (document.getElementById(UPDATE_BANNER_ID)) return;
   const bar = document.createElement('div');
@@ -37,4 +50,5 @@ export function registerServiceWorker() {
       console.error('[PWA] Service worker registration error', error);
     },
   });
+  updateSWFn = updateSW;
 }

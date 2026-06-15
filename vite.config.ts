@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { readFileSync } from 'node:fs';
+
+const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
+  version: string;
+};
+// Date du build (YYYY-MM-DD) — repère « quelle version est déployée », utile
+// avec le bouton « Recharger l'application » des Paramètres.
+const buildDate = new Date().toISOString().slice(0, 10);
 
 const GTM_ID = 'GTM-W4SRNX5C';
 const GA_ID = 'G-64VBY2ZJBX';
@@ -55,6 +63,10 @@ function analyticsPlugin(): Plugin {
 // Production : site projet GitHub Pages — https://<user>.github.io/mister-cim10/
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/mister-cim10/' : '/',
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __BUILD_TIME__: JSON.stringify(buildDate),
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

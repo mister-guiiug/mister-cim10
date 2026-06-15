@@ -12,6 +12,7 @@ import {
   importAppData,
 } from '../lib/storage';
 import type { AnalyzeMode } from '../types/index';
+import { reloadApp } from '../register-sw';
 
 export function SettingsPage() {
   const mode = useSettingsStore(s => s.mode);
@@ -361,6 +362,22 @@ export function SettingsPage() {
                     : 'Réafficher l’avertissement'}
                 </button>
               </div>
+            </div>
+
+            <div className="settings-block settings-app-block">
+              <p className="settings-block-title">Application</p>
+              <p className="settings-hint">
+                L’application se met à jour automatiquement. Si elle vous semble
+                figée sur une ancienne version, rechargez-la.
+              </p>
+              <div className="toolbar">
+                <button type="button" className="secondary" onClick={reloadApp}>
+                  Recharger l’application
+                </button>
+              </div>
+              <p className="settings-app-version">
+                Mister CIM-10 v{__APP_VERSION__} · build {__BUILD_TIME__}
+              </p>
             </div>
           </div>
         </div>
