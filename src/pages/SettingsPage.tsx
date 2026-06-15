@@ -146,255 +146,298 @@ export function SettingsPage() {
 
         <div className="panel panel--settings-page">
           <div className="settings-body settings-body--compact settings-body--page">
-            <div className="settings-mode-line">
-              <label
-                className="settings-mode-label"
-                htmlFor="analyze-mode-select"
-              >
+            {/* ── Source des suggestions ── */}
+            <section className="settings-section" aria-labelledby="sec-source">
+              <h2 className="settings-section-title" id="sec-source">
                 Source des suggestions
-              </label>
-              <select
-                id="analyze-mode-select"
-                className="settings-select"
-                aria-describedby="analyze-mode-hint"
-                value={mode}
-                onChange={e => setMode(e.target.value as AnalyzeMode)}
-              >
-                <option value="local">Dictionnaire local (CIM-10)</option>
-                <option value="api">OMS en ligne (CIM-11)</option>
-                <option value="both">Les deux (CIM-10 + CIM-11)</option>
-              </select>
-            </div>
-            <p className="settings-hint" id="analyze-mode-hint">
-              Par défaut, tout se fait dans la page. Si vous choisissez une
-              option avec OMS, les champs de connexion s’affichent : compte OMS
-              et adresse de passerelle requis.
-            </p>
-
-            <div className="settings-block">
-              <p className="settings-block-title">Seuil de confiance minimal</p>
-              <p className="settings-hint">
-                Les suggestions avec une confiance inférieure à ce seuil restent
-                ignorées par défaut dans la liste.
-              </p>
-              <div className="settings-threshold-row">
-                <label className="who-field" htmlFor="min-confidence-threshold">
-                  <span className="who-field-label">Afficher à partir de</span>
-                  <input
-                    type="range"
-                    id="min-confidence-threshold"
-                    min={0.1}
-                    max={1}
-                    step={0.05}
-                    value={minConfidence}
-                    onChange={e =>
-                      setMinConfidence(Number.parseFloat(e.target.value))
-                    }
-                  />
-                </label>
-                <output
-                  className="settings-threshold-value"
-                  htmlFor="min-confidence-threshold"
+              </h2>
+              <div className="settings-mode-line">
+                <label
+                  className="settings-mode-label"
+                  htmlFor="analyze-mode-select"
                 >
-                  {Math.round(minConfidence * 100)}%
-                </output>
+                  Mode d’analyse
+                </label>
+                <select
+                  id="analyze-mode-select"
+                  className="settings-select"
+                  aria-describedby="analyze-mode-hint"
+                  value={mode}
+                  onChange={e => setMode(e.target.value as AnalyzeMode)}
+                >
+                  <option value="local">Dictionnaire local (CIM-10)</option>
+                  <option value="api">OMS en ligne (CIM-11)</option>
+                  <option value="both">Les deux (CIM-10 + CIM-11)</option>
+                </select>
               </div>
-            </div>
+              <p className="settings-hint" id="analyze-mode-hint">
+                Par défaut, tout se fait dans la page. Si vous choisissez une
+                option avec OMS, les champs de connexion s’affichent : compte
+                OMS et adresse de passerelle requis.
+              </p>
 
-            <div
-              className="settings-block api-section api-section--compact"
-              hidden={!showWhoSection}
-            >
-              <div className="api-compact-bar">
-                <span className="api-compact-heading">
-                  Connexion OMS (CIM-11)
-                </span>
-                <nav className="api-links" aria-label="Ressources OMS">
-                  <a
-                    href="https://icd.who.int/icdapi"
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <div className="settings-block">
+                <p className="settings-block-title">
+                  Seuil de confiance minimal
+                </p>
+                <p className="settings-hint">
+                  Les suggestions avec une confiance inférieure à ce seuil
+                  restent ignorées par défaut dans la liste.
+                </p>
+                <div className="settings-threshold-row">
+                  <label
+                    className="who-field"
+                    htmlFor="min-confidence-threshold"
                   >
-                    Portail ICD API
-                  </a>
-                  <span className="api-links-sep" aria-hidden="true">
-                    ·
-                  </span>
-                  <a
-                    href="https://icd.who.int/docs/icd-api/APIDoc-Version2/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Documentation API
-                  </a>
-                </nav>
-              </div>
-
-              <div className="api-fields-grid" role="group">
-                <label className="who-field">
-                  <span className="who-field-label">Identifiant</span>
-                  <input
-                    type="text"
-                    autoComplete="username"
-                    spellCheck={false}
-                    value={who.clientId}
-                    onChange={e => setWho({ clientId: e.target.value })}
-                  />
-                </label>
-                <label className="who-field">
-                  <span className="who-field-label">Mot secret</span>
-                  <input
-                    type="password"
-                    autoComplete="current-password"
-                    value={who.clientSecret}
-                    onChange={e => setWho({ clientSecret: e.target.value })}
-                  />
-                </label>
-                <label className="who-field api-field-span2">
-                  <span className="who-field-label">
-                    Adresse de la passerelle
-                  </span>
-                  <input
-                    type="url"
-                    inputMode="url"
-                    autoComplete="off"
-                    placeholder="https://…"
-                    spellCheck={false}
-                    value={who.proxyUrl}
-                    onChange={e => setWho({ proxyUrl: e.target.value })}
-                  />
-                </label>
-              </div>
-
-              <details className="settings-sub">
-                <summary className="settings-sub-summary">
-                  Version de la classification et langue
-                </summary>
-                <div className="api-row2 settings-sub-inner">
-                  <label className="who-field who-field-inline">
-                    <span className="who-field-label">Version</span>
-                    <select
-                      value={who.releaseId}
-                      onChange={e => setWho({ releaseId: e.target.value })}
-                    >
-                      <option value="2025-01">2025-01</option>
-                      <option value="2024-01">2024-01</option>
-                      <option value="2023-01">2023-01</option>
-                    </select>
+                    <span className="who-field-label">
+                      Afficher à partir de
+                    </span>
+                    <input
+                      type="range"
+                      id="min-confidence-threshold"
+                      min={0.1}
+                      max={1}
+                      step={0.05}
+                      value={minConfidence}
+                      onChange={e =>
+                        setMinConfidence(Number.parseFloat(e.target.value))
+                      }
+                    />
                   </label>
-                  <label className="who-field who-field-inline">
-                    <span className="who-field-label">Langue des libellés</span>
-                    <select
-                      value={who.lang}
-                      onChange={e => setWho({ lang: e.target.value })}
+                  <output
+                    className="settings-threshold-value"
+                    htmlFor="min-confidence-threshold"
+                  >
+                    {Math.round(minConfidence * 100)}%
+                  </output>
+                </div>
+              </div>
+
+              <div
+                className="settings-block api-section api-section--compact"
+                hidden={!showWhoSection}
+              >
+                <div className="api-compact-bar">
+                  <span className="api-compact-heading">
+                    Connexion OMS (CIM-11)
+                  </span>
+                  <nav className="api-links" aria-label="Ressources OMS">
+                    <a
+                      href="https://icd.who.int/icdapi"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      <option value="fr">Français</option>
-                      <option value="en">English</option>
-                    </select>
+                      Portail ICD API
+                    </a>
+                    <span className="api-links-sep" aria-hidden="true">
+                      ·
+                    </span>
+                    <a
+                      href="https://icd.who.int/docs/icd-api/APIDoc-Version2/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Documentation API
+                    </a>
+                  </nav>
+                </div>
+
+                <div className="api-fields-grid" role="group">
+                  <label className="who-field">
+                    <span className="who-field-label">Identifiant</span>
+                    <input
+                      type="text"
+                      autoComplete="username"
+                      spellCheck={false}
+                      value={who.clientId}
+                      onChange={e => setWho({ clientId: e.target.value })}
+                    />
+                  </label>
+                  <label className="who-field">
+                    <span className="who-field-label">Mot secret</span>
+                    <input
+                      type="password"
+                      autoComplete="current-password"
+                      value={who.clientSecret}
+                      onChange={e => setWho({ clientSecret: e.target.value })}
+                    />
+                  </label>
+                  <label className="who-field api-field-span2">
+                    <span className="who-field-label">
+                      Adresse de la passerelle
+                    </span>
+                    <input
+                      type="url"
+                      inputMode="url"
+                      autoComplete="off"
+                      placeholder="https://…"
+                      spellCheck={false}
+                      value={who.proxyUrl}
+                      onChange={e => setWho({ proxyUrl: e.target.value })}
+                    />
                   </label>
                 </div>
-              </details>
 
-              <p className="hint hint--compact who-risk">
-                Identifiants enregistrés dans ce navigateur (éviter sur poste
-                partagé). La passerelle doit autoriser ce site.
-              </p>
-              <button
-                type="button"
-                className="ghost who-clear-btn"
-                onClick={forgetSecret}
-              >
-                Oublier mot secret et session OMS
-              </button>
-            </div>
+                <details className="settings-sub">
+                  <summary className="settings-sub-summary">
+                    Version de la classification et langue
+                  </summary>
+                  <div className="api-row2 settings-sub-inner">
+                    <label className="who-field who-field-inline">
+                      <span className="who-field-label">Version</span>
+                      <select
+                        value={who.releaseId}
+                        onChange={e => setWho({ releaseId: e.target.value })}
+                      >
+                        <option value="2025-01">2025-01</option>
+                        <option value="2024-01">2024-01</option>
+                        <option value="2023-01">2023-01</option>
+                      </select>
+                    </label>
+                    <label className="who-field who-field-inline">
+                      <span className="who-field-label">
+                        Langue des libellés
+                      </span>
+                      <select
+                        value={who.lang}
+                        onChange={e => setWho({ lang: e.target.value })}
+                      >
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                      </select>
+                    </label>
+                  </div>
+                </details>
 
-            <div className="settings-share-block">
-              <p className="settings-share-title">Partager le paramétrage</p>
-              <p className="settings-share-hint hint">
-                Génère un <strong>lien</strong> reprenant le mode d’analyse et
-                la connexion OMS (identifiant, passerelle) —{' '}
-                <strong>sans le mot secret</strong>, qui n’est jamais placé dans
-                l’URL. Le destinataire saisit le sien.
-              </p>
-              <div className="toolbar settings-share-toolbar">
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={handleShareSettings}
-                >
-                  Partager ou copier le lien
-                </button>
-              </div>
-              {shareFeedback && (
-                <p className="settings-share-feedback" role="status">
-                  {shareFeedback}
+                <p className="hint hint--compact who-risk">
+                  Identifiants enregistrés dans ce navigateur (éviter sur poste
+                  partagé). La passerelle doit autoriser ce site.
                 </p>
-              )}
-            </div>
-
-            <div className="settings-block">
-              <p className="settings-block-title">Sauvegarde et Restauration</p>
-              <p className="settings-hint">
-                Téléchargez toutes vos données (favoris, historique, sessions,
-                paramètres) dans un fichier pour les sauvegarder ou les
-                transférer.
-              </p>
-              <div className="toolbar">
                 <button
                   type="button"
-                  className="secondary"
-                  onClick={handleExportAll}
+                  className="ghost who-clear-btn"
+                  onClick={forgetSecret}
                 >
-                  Sauvegarder tout (.json)
+                  Oublier mot secret et session OMS
                 </button>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Restaurer tout…
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json"
-                  hidden
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (file) void handleImportAll(file);
-                  }}
-                />
               </div>
-            </div>
+            </section>
 
-            <div className="settings-block settings-display-block">
-              <p className="settings-block-title">Apparence</p>
+            {/* ── Apparence ── */}
+            <section
+              className="settings-section"
+              aria-labelledby="sec-apparence"
+            >
+              <h2 className="settings-section-title" id="sec-apparence">
+                Apparence
+              </h2>
               <div className="settings-theme-row">
                 <span className="settings-theme-label">Thème</span>
                 <ThemeToggle />
               </div>
-              <p className="settings-hint">
-                Éléments masqués manuellement que vous pouvez réafficher.
-              </p>
-              <div className="toolbar">
-                <button
-                  type="button"
-                  className="ghost"
-                  disabled={resetFeedback}
-                  onClick={() => {
-                    resetDisclaimer();
-                    setResetFeedback(true);
-                  }}
-                >
-                  {resetFeedback
-                    ? 'Avertissement réaffiché ✓'
-                    : 'Réafficher l’avertissement'}
-                </button>
+              <div className="settings-block">
+                <p className="settings-block-title">Avertissement masqué</p>
+                <p className="settings-hint">
+                  Réaffichez sur l’accueil l’avertissement que vous auriez
+                  masqué.
+                </p>
+                <div className="toolbar">
+                  <button
+                    type="button"
+                    className="ghost"
+                    disabled={resetFeedback}
+                    onClick={() => {
+                      resetDisclaimer();
+                      setResetFeedback(true);
+                    }}
+                  >
+                    {resetFeedback
+                      ? 'Avertissement réaffiché ✓'
+                      : 'Réafficher l’avertissement'}
+                  </button>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div className="settings-block settings-app-block">
-              <p className="settings-block-title">Application</p>
+            {/* ── Données (repliable) ── */}
+            <details className="settings-section settings-section--collapsible">
+              <summary className="settings-section-summary">
+                <span className="settings-section-title">Données</span>
+                <span className="settings-section-summary-hint">
+                  Partage du paramétrage, sauvegarde et restauration
+                </span>
+              </summary>
+              <div className="settings-section-body">
+                <div className="settings-share-block">
+                  <p className="settings-share-title">
+                    Partager le paramétrage
+                  </p>
+                  <p className="settings-share-hint hint">
+                    Génère un <strong>lien</strong> reprenant le mode d’analyse
+                    et la connexion OMS (identifiant, passerelle) —{' '}
+                    <strong>sans le mot secret</strong>, qui n’est jamais placé
+                    dans l’URL. Le destinataire saisit le sien.
+                  </p>
+                  <div className="toolbar settings-share-toolbar">
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={handleShareSettings}
+                    >
+                      Partager ou copier le lien
+                    </button>
+                  </div>
+                  {shareFeedback && (
+                    <p className="settings-share-feedback" role="status">
+                      {shareFeedback}
+                    </p>
+                  )}
+                </div>
+
+                <div className="settings-block">
+                  <p className="settings-block-title">
+                    Sauvegarde et Restauration
+                  </p>
+                  <p className="settings-hint">
+                    Téléchargez toutes vos données (favoris, historique,
+                    sessions, paramètres) dans un fichier pour les sauvegarder
+                    ou les transférer.
+                  </p>
+                  <div className="toolbar">
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={handleExportAll}
+                    >
+                      Sauvegarder tout (.json)
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Restaurer tout…
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".json"
+                      hidden
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) void handleImportAll(file);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            {/* ── Application ── */}
+            <section className="settings-section" aria-labelledby="sec-app">
+              <h2 className="settings-section-title" id="sec-app">
+                Application
+              </h2>
               <p className="settings-hint">
                 L’application se met à jour automatiquement. Si elle vous semble
                 figée sur une ancienne version, rechargez-la.
@@ -407,7 +450,7 @@ export function SettingsPage() {
               <p className="settings-app-version">
                 Mister CIM-10 v{__APP_VERSION__} · build {__BUILD_TIME__}
               </p>
-            </div>
+            </section>
           </div>
         </div>
       </main>
