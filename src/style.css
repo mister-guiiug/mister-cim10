@@ -118,6 +118,69 @@ body {
   }
 }
 
+/* Réserve la place de la barre de navigation inférieure (fixed) sous le
+   contenu, quel que soit l'écran. */
+#react-root {
+  padding-bottom: calc(4.25rem + var(--safe-b));
+}
+
+/* ── Barre de navigation inférieure (mobile-first, principe miss-supaboss) ── */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  margin-inline: auto;
+  max-width: 920px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--surface2);
+  padding-bottom: var(--safe-b);
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.18);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 3.25rem;
+  padding: 0.45rem 0.25rem 0.4rem;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+
+.bottom-nav-item:hover {
+  color: var(--text);
+}
+
+.bottom-nav-item.is-active {
+  color: var(--accent);
+}
+
+.bottom-nav-icon {
+  display: flex;
+}
+
+.bottom-nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.bottom-nav-item.is-active .bottom-nav-icon svg {
+  filter: drop-shadow(
+    0 0 6px color-mix(in srgb, var(--accent) 45%, transparent)
+  );
+}
+
 /* Lien d'évitement : visible uniquement au focus clavier */
 .skip-to-content {
   position: absolute;
