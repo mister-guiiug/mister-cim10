@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BrandMark } from './BrandMark';
-import { NavDrawer } from './NavDrawer';
 import { useSettingsStore } from '../store/settingsStore';
 import type { AppRoute } from '../types/index';
 
@@ -23,7 +21,6 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
   const settingsReady = useSettingsStore(s => s.isReady());
   const disclaimerDismissed = useSettingsStore(s => s.disclaimerDismissed);
   const dismissDisclaimer = useSettingsStore(s => s.dismissDisclaimer);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const defaultTagline = settingsReady
     ? 'Saisir · analyser · valider · exporter'
@@ -58,20 +55,6 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
                 <p className="app-tagline">{taglineText}</p>
               </div>
             </Link>
-            <button
-              type="button"
-              className={`nav-menu-toggle${drawerOpen ? ' nav-menu-toggle--open' : ''}`}
-              aria-expanded={drawerOpen}
-              aria-controls="site-nav-drawer"
-              aria-label="Ouvrir le menu : navigation, statut et thème"
-              onClick={() => setDrawerOpen(v => !v)}
-            >
-              <span className="nav-menu-toggle-bars" aria-hidden="true">
-                <span className="nav-menu-toggle-bar" />
-                <span className="nav-menu-toggle-bar" />
-                <span className="nav-menu-toggle-bar" />
-              </span>
-            </button>
           </div>
           {isHome && (
             <>
@@ -100,7 +83,6 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
           )}
         </div>
       </div>
-      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </header>
   );
 }
@@ -109,8 +91,8 @@ function SetupGuide() {
   return (
     <div className="header-guide">
       <p className="setup-lead">
-        Pour la première configuration, ouvrez <strong>Paramètres</strong> via
-        le <strong>menu</strong> (icône en haut à droite).
+        Pour la première configuration, ouvrez <strong>Paramètres</strong>{' '}
+        depuis la barre de navigation en bas de l’écran.
       </p>
       <ol className="quick-steps" aria-label="Utilisation en trois étapes">
         <li className="quick-step">
