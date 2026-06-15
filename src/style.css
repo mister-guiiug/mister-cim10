@@ -797,6 +797,85 @@ a.brand-link:hover .brand-mark {
   color: var(--text);
 }
 
+/* ── Sections de la page Paramètres (regroupement + repli) ── */
+.settings-section {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--surface2);
+}
+
+.settings-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.settings-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.settings-section > .settings-block:last-child {
+  margin-bottom: 0;
+}
+
+/* Section repliable (<details>) : Données */
+.settings-section--collapsible {
+  padding-top: 0;
+}
+
+.settings-section-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.7rem;
+  padding-top: 1.1rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.settings-section-summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-section-summary .settings-section-title {
+  margin: 0;
+}
+
+.settings-section-summary-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.settings-section-summary::after {
+  content: '▾';
+  margin-left: auto;
+  align-self: center;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform var(--transition);
+}
+
+.settings-section--collapsible[open] .settings-section-summary::after {
+  transform: rotate(180deg);
+}
+
+.settings-section-summary:focus-visible {
+  outline: var(--ring-width) solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.settings-section-body {
+  padding-top: 0.9rem;
+}
+
 .api-section--compact {
   border-top: 1px solid var(--surface2);
   margin-top: 0.35rem;
