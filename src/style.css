@@ -2363,6 +2363,36 @@ html[data-theme='dark'] .footer-pill--bmac:hover {
   color: var(--muted);
 }
 
+/* Bloc repliable de l'Aide (étapes détaillées de la mise en place OMS). */
+.help-details {
+  margin: 0.75rem 0;
+  padding: 0 0.9rem;
+  border: 1px solid var(--surface2);
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in srgb, var(--surface2) 16%, transparent);
+}
+
+.help-details-summary {
+  cursor: pointer;
+  padding: 0.7rem 0;
+  font-weight: 600;
+  color: var(--accent);
+  list-style-position: inside;
+}
+
+.help-details-summary:hover {
+  color: var(--accent-dim);
+}
+
+.help-details[open] .help-details-summary {
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--surface2);
+}
+
+.help-details > .help-h3:first-of-type {
+  margin-top: 0.25rem;
+}
+
 .help-code {
   font-family: ui-monospace, monospace;
   font-size: 0.88em;

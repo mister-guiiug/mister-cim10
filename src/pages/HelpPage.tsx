@@ -85,64 +85,77 @@ export function HelpPage() {
             et un mot secret. Voici le déroulement habituel.
           </p>
 
-          <h3 className="help-h3">1. Créer un compte sur le portail ICD API</h3>
-          <ul className="help-list">
-            <li>
-              Ouvrez le portail :{' '}
-              <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
-                {PORTAL_URL}
-              </a>
-              .
-            </li>
-            <li>
-              Créez un compte (inscription) ou connectez-vous si vous en avez
-              déjà un.
-            </li>
-            <li>Acceptez les conditions d’usage du service API si demandé.</li>
-          </ul>
+          <details className="help-details">
+            <summary className="help-details-summary">
+              Voir les étapes détaillées (compte, application client,
+              identifiants)
+            </summary>
 
-          <h3 className="help-h3">2. Enregistrer une « application » client</h3>
-          <p>
-            L’OMS ne vous donne pas un simple mot de passe pour l’API : vous
-            devez déclarer une <strong>application</strong> (souvent appelée «
-            client ») qui représente votre usage automatisé (ici, cette page
-            web).
-          </p>
-          <ul className="help-list">
-            <li>
-              Dans l’espace développeur du portail, créez une{' '}
-              <strong>nouvelle application</strong> ou équivalent (libellé selon
-              l’interface actuelle du site).
-            </li>
-            <li>
-              Choisissez le type d’authentification adapté à un serveur ou
-              script : en général <strong>client credentials</strong>{' '}
-              (identifiant + secret, sans interaction utilisateur à chaque
-              requête).
-            </li>
-            <li>
-              À l’issue de la création, notez le <strong>Client ID</strong> et
-              générez ou copiez le <strong>Client secret</strong> (mot secret).
-              Le secret n’est souvent affiché qu’une fois : conservez-le dans un
-              endroit sûr.
-            </li>
-          </ul>
+            <h3 className="help-h3">
+              1. Créer un compte sur le portail ICD API
+            </h3>
+            <ul className="help-list">
+              <li>
+                Ouvrez le portail :{' '}
+                <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
+                  {PORTAL_URL}
+                </a>
+                .
+              </li>
+              <li>
+                Créez un compte (inscription) ou connectez-vous si vous en avez
+                déjà un.
+              </li>
+              <li>
+                Acceptez les conditions d’usage du service API si demandé.
+              </li>
+            </ul>
 
-          <h3 className="help-h3">
-            3. Renseigner l&apos;application Mister CIM-10
-          </h3>
-          <ul className="help-list">
-            <li>
-              Allez dans <Link to="/parametres">Paramètres</Link>, activez un
-              mode incluant l’OMS, puis collez l’<strong>identifiant</strong> et
-              le <strong>mot secret</strong> fournis par le portail.
-            </li>
-            <li>
-              Renseignez aussi l’<strong>adresse de la passerelle</strong> (voir
-              section suivante) : le navigateur ne peut pas appeler directement
-              l’API OMS sans cette étape technique.
-            </li>
-          </ul>
+            <h3 className="help-h3">
+              2. Enregistrer une « application » client
+            </h3>
+            <p>
+              L’OMS ne vous donne pas un simple mot de passe pour l’API : vous
+              devez déclarer une <strong>application</strong> (souvent appelée «
+              client ») qui représente votre usage automatisé (ici, cette page
+              web).
+            </p>
+            <ul className="help-list">
+              <li>
+                Dans l’espace développeur du portail, créez une{' '}
+                <strong>nouvelle application</strong> ou équivalent (libellé
+                selon l’interface actuelle du site).
+              </li>
+              <li>
+                Choisissez le type d’authentification adapté à un serveur ou
+                script : en général <strong>client credentials</strong>{' '}
+                (identifiant + secret, sans interaction utilisateur à chaque
+                requête).
+              </li>
+              <li>
+                À l’issue de la création, notez le <strong>Client ID</strong> et
+                générez ou copiez le <strong>Client secret</strong> (mot
+                secret). Le secret n’est souvent affiché qu’une fois :
+                conservez-le dans un endroit sûr.
+              </li>
+            </ul>
+
+            <h3 className="help-h3">
+              3. Renseigner l&apos;application Mister CIM-10
+            </h3>
+            <ul className="help-list">
+              <li>
+                Allez dans <Link to="/parametres">Paramètres</Link>, activez un
+                mode incluant l’OMS, puis collez l’<strong>identifiant</strong>{' '}
+                et le <strong>mot secret</strong> fournis par le portail.
+              </li>
+              <li>
+                Renseignez aussi l’<strong>adresse de la passerelle</strong>{' '}
+                (voir section suivante) : le navigateur ne peut pas appeler
+                directement l’API OMS sans cette étape technique.
+              </li>
+            </ul>
+          </details>
 
           <p className="help-note">
             Les écrans exacts du portail OMS peuvent évoluer ; en cas de doute,
