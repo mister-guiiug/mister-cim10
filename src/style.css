@@ -33,7 +33,7 @@ html[data-theme='light'] {
   --surface: #ffffff;
   --surface2: #e2e8f0;
   --text: #0f172a;
-  --muted: #64748b;
+  --muted: #556175;
   --accent: #0f766e;
   --accent-dim: #115e59;
   --ok: #059669;
@@ -85,8 +85,32 @@ html {
   --ring-width: 2px;
   --ring-offset: 2px;
   --transition: 0.16s ease;
+  /* Échelle typographique */
+  --text-2xs: 0.72rem;
+  --text-xs: 0.78rem;
+  --text-sm: 0.85rem;
+  --text-md: 0.92rem;
+  --text-base: 1rem;
+  --text-lg: 1.15rem;
+  --text-xl: 1.4rem;
+  --text-2xl: 1.75rem;
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.55;
+  --tracking-tight: -0.02em;
   --bmac: #f9a825;
   --bmac-hover: #fbc02d;
+}
+
+/* Numéraux tabulaires : codes, %, compteurs alignés (lisibilité « pro »). */
+.code,
+.suggestion-code,
+.validated-code,
+.suggestion-compare-code,
+.suggestion-confidence,
+.panel-count,
+.settings-threshold-value {
+  font-variant-numeric: tabular-nums;
 }
 
 body {
