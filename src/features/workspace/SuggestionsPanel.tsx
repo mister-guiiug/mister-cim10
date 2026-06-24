@@ -183,6 +183,9 @@ function SuggestionCard({
   );
   const hasFamily =
     family !== null && (family.parent !== null || family.siblings.length > 0);
+  const pct = Math.round(suggestion.confidence * 100);
+  const level = confidenceClass(suggestion.confidence);
+  const levelLabel = confidenceLabel(suggestion.confidence);
 
   return (
     <li className="suggestion-card" role="listitem">
@@ -198,14 +201,24 @@ function SuggestionCard({
         >
           {suggestion.source === 'api' ? 'CIM-11' : 'CIM-10'}
         </span>
-        <span
-          className={`suggestion-confidence ${confidenceClass(suggestion.confidence)}`}
-        >
-          {confidenceLabel(suggestion.confidence)} ·{' '}
-          {Math.round(suggestion.confidence * 100)}%
-        </span>
       </div>
       <p className="suggestion-label">{suggestion.label}</p>
+      <div className={`confidence-meter ${level}`}>
+        <span
+          className="confidence-meter-track"
+          role="img"
+          aria-label={`Confiance ${levelLabel.toLowerCase()}, ${pct} %`}
+        >
+          <span
+            className="confidence-meter-fill"
+            style={{ width: `${pct}%` }}
+          />
+        </span>
+        <span className="confidence-meter-readout">
+          <span className="confidence-meter-level">{levelLabel}</span>
+          <span className="confidence-meter-pct">{pct} %</span>
+        </span>
+      </div>
       {suggestion.matchedTerm && (
         <p className="suggestion-term">
           Terme repéré :{' '}
