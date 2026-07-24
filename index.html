@@ -2,6 +2,16 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Content-Security-Policy en défense en profondeur.
+      'unsafe-inline' : script anti-FOUC + snippets GTM/GA4 injectés au build,
+      styles Tailwind/vite-plugin-pwa. Tiers : Google Fonts + GTM/GA4.
+      connect-src *.who.int : API OMS optionnelle (recherche ICD).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://*.google-analytics.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.who.int; frame-src https://www.googletagmanager.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
@@ -31,12 +41,16 @@
       name="description"
       content="Analyse de comptes-rendus et suggestions de codes CIM-10 avec validation et export."
     />
+    <link rel="canonical" href="__SEO_HOME_URL__" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mister CIM-10" />
+    <meta property="og:url" content="__SEO_HOME_URL__" />
     <meta property="og:title" content="Mister CIM-10" />
     <meta
       property="og:description"
       content="Analyse de comptes-rendus et suggestions de codes CIM-10 avec validation et export."
     />
+    <meta property="og:image" content="__SEO_LOGO_URL__" />
     <meta property="og:locale" content="fr_FR" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Mister CIM-10" />
@@ -44,6 +58,7 @@
       name="twitter:description"
       content="Aide à la cotation CIM-10 : analyse locale, export, option OMS."
     />
+    <meta name="twitter:image" content="__SEO_LOGO_URL__" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
