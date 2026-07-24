@@ -72,10 +72,13 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
   });
 
   test('thème - toggle light/dark', async ({ page }) => {
+    // Le bouton de thème vit désormais sur la page Paramètres (le drawer
+    // de navigation a été remplacé par une BottomNav).
     await page.goto('/');
-
-    // Le bouton de thème vit dans le drawer de navigation : l'ouvrir d'abord.
-    await page.locator('button.nav-menu-toggle').click();
+    await page
+      .locator('a[href*="parametres"], a[href*="settings"]')
+      .first()
+      .click();
 
     const themeButton = page.locator('button.theme-switch');
     await expect(themeButton).toBeVisible();
