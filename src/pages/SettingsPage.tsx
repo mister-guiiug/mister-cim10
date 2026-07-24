@@ -14,6 +14,7 @@ import {
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react';
 
 export function SettingsPage() {
   const mode = useSettingsStore(s => s.mode);
@@ -450,6 +451,23 @@ export function SettingsPage() {
               <p className="settings-app-version">
                 Mister CIM-10 v{__APP_VERSION__} · build {__BUILD_TIME__}
               </p>
+            </section>
+
+            {/* ── Nos autres applications (catalogue famille) ── */}
+            <section className="settings-section" aria-labelledby="sec-famille">
+              <h2 className="settings-section-title" id="sec-famille">
+                Nos autres applications
+              </h2>
+              <p className="settings-hint">
+                D’autres applications gratuites de la même famille.
+              </p>
+              <div className="cim-family">
+                <FamilyApps
+                  currentAppId="mister-cim10"
+                  showSource={false}
+                  showSponsor={false}
+                />
+              </div>
             </section>
           </div>
         </div>
