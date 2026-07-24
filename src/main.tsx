@@ -1,6 +1,11 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
+import { ErrorBoundary } from '@mister-guiiug/dev-wpa-config/react';
+import {
+  installErrorReporter,
+  recordError,
+} from '@mister-guiiug/dev-wpa-config/react/observability';
 import { App } from './App';
 import { DialogProvider } from './components/DialogProvider';
 import { applyResolvedTheme } from './lib/theme';
@@ -9,6 +14,7 @@ import { initWebVitals } from './monitoring/web-vitals';
 import './tailwind.css';
 import './style.css';
 
+installErrorReporter();
 applyResolvedTheme();
 registerServiceWorker();
 initWebVitals();
@@ -17,11 +23,17 @@ const rootEl = document.getElementById('react-root');
 if (rootEl) {
   createRoot(rootEl).render(
     <StrictMode>
-      <HashRouter>
-        <DialogProvider>
-          <App />
-        </DialogProvider>
-      </HashRouter>
+      <ErrorBoundary
+        onError={error => {
+          recordError(error, { source: 'error-boundary' });
+        }}
+      >
+        <HashRouter>
+          <DialogProvider>
+            <App />
+          </DialogProvider>
+        </HashRouter>
+      </ErrorBoundary>
     </StrictMode>
   );
 }
