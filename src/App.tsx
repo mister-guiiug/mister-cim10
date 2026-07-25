@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';
 import { BottomNav } from './components/BottomNav';
+import { useI18n } from './i18n';
 import type { AppRoute } from './types/index';
 
 function pathToRoute(pathname: string): AppRoute {
@@ -13,23 +14,27 @@ function pathToRoute(pathname: string): AppRoute {
   return 'home';
 }
 
-const ROUTE_TITLES: Record<AppRoute, string> = {
-  home: 'Mister CIM-10',
-  parametres: 'Paramètres — Mister CIM-10',
-  aide: 'Aide — Mister CIM-10',
+const ROUTE_TITLE_KEY: Record<
+  AppRoute,
+  'doc.home' | 'doc.settings' | 'doc.help'
+> = {
+  home: 'doc.home',
+  parametres: 'doc.settings',
+  aide: 'doc.help',
 };
 
 export function App() {
   const location = useLocation();
+  const { t } = useI18n();
 
   useEffect(() => {
     const route = pathToRoute(location.pathname);
-    document.title = ROUTE_TITLES[route];
+    document.title = t(ROUTE_TITLE_KEY[route]);
     const main = document.getElementById('main-content');
     if (main) {
       requestAnimationFrame(() => main.focus({ preventScroll: false }));
     }
-  }, [location]);
+  }, [location, t]);
 
   return (
     <>

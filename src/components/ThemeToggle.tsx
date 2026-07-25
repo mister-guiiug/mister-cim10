@@ -1,4 +1,5 @@
 import { useTheme } from '../hooks/useTheme';
+import { useI18n } from '../i18n';
 
 const SUN_PATH = (
   <svg
@@ -32,17 +33,15 @@ const MOON_PATH = (
 
 export function ThemeToggle() {
   const { preference, resolved, cycle } = useTheme();
+  const { t } = useI18n();
 
   let label: string;
   if (preference === 'system') {
-    label =
-      resolved === 'light'
-        ? 'Thème automatique (affichage clair, suit l’appareil). Clic pour thème clair fixe.'
-        : 'Thème automatique (affichage sombre, suit l’appareil). Clic pour thème clair fixe.';
+    label = resolved === 'light' ? t('theme.autoLight') : t('theme.autoDark');
   } else if (preference === 'light') {
-    label = 'Thème clair fixe. Clic pour thème sombre fixe.';
+    label = t('theme.lightFixed');
   } else {
-    label = 'Thème sombre fixe. Clic pour thème automatique.';
+    label = t('theme.darkFixed');
   }
 
   const showSun = resolved === 'dark';

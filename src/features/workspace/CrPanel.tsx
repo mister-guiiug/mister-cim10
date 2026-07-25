@@ -1,6 +1,7 @@
 import { useRef, useEffect, type FormEvent } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useDialog } from '../../hooks/useDialog';
+import { useI18n } from '../../i18n';
 
 interface CrPanelProps {
   onAnalyze: () => void;
@@ -16,6 +17,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
     s => s.highlightedMatchedTerm
   );
   const dialog = useDialog();
+  const { t } = useI18n();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -35,11 +37,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
   };
 
   const handleNewSession = async () => {
-    if (
-      await dialog.confirm(
-        'Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.'
-      )
-    ) {
+    if (await dialog.confirm(t('report.resetConfirm'))) {
       resetSession();
     }
   };
@@ -57,7 +55,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
           >
             <path d="M4 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 2v1h6V4H5zm0 2.5v1h6v-1H5zm0 2.5v1h4v-1H5z" />
           </svg>
-          <span className="panel-title-text">Compte-rendu</span>
+          <span className="panel-title-text">{t('report.title')}</span>
         </h2>
       </div>
       <form onSubmit={handleSubmit}>
@@ -65,8 +63,8 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
           ref={textareaRef}
           className="cr"
           name="cr"
-          placeholder="Ex. : Patient diabétique type 2, HTA, suivi pour BPCO…"
-          aria-label="Texte du compte-rendu"
+          placeholder={t('report.placeholder')}
+          aria-label={t('report.ariaLabel')}
           value={crText}
           onChange={e => setCrText(e.target.value)}
         />
@@ -76,7 +74,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
             className="primary"
             disabled={isAnalyzing || !crText.trim()}
           >
-            {isAnalyzing ? 'Analyse…' : 'Analyser'}
+            {isAnalyzing ? t('report.analyzing') : t('common.analyze')}
           </button>
           <button
             type="button"
@@ -84,17 +82,14 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
             onClick={() => setCrText('')}
             disabled={!crText}
           >
-            Effacer le texte
+            {t('report.clear')}
           </button>
           <button type="button" className="ghost" onClick={handleNewSession}>
-            Nouvelle session
+            {t('report.newSession')}
           </button>
         </div>
       </form>
-      <p className="hint">
-        Vous pouvez dicter : micro du clavier sur mobile ou bouton Dictée si
-        proposé.
-      </p>
+      <p className="hint">{t('report.dictationHint')}</p>
       {analyzeError && (
         <p className="hint error" role="alert">
           {analyzeError}

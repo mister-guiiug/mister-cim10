@@ -11,11 +11,30 @@
  */
 import type { AnalysisResult, WhoSettings } from '../types/index';
 
-/** Erreur OMS porteuse d'un message lisible pour l'IHM. */
+/** Codes d'erreur OMS traduits à l'affichage (cf. `errors.oms.*` du catalogue i18n). */
+export type OmsErrorCode =
+  | 'proxyUnreachable'
+  | 'credentialsRejected'
+  | 'corsForbidden'
+  | 'authFailed'
+  | 'authInvalid'
+  | 'proxyUnreachableAnalyze'
+  | 'sessionExpired'
+  | 'analyzeFailed';
+
+/**
+ * Erreur OMS porteuse d'un `code` stable (traduit dans l'IHM) et d'un `status`
+ * HTTP optionnel interpolé dans le message. Le `message` reste le code brut,
+ * utile pour les logs.
+ */
 export class OmsError extends Error {
-  constructor(message: string) {
-    super(message);
+  readonly code: OmsErrorCode;
+  readonly status?: number;
+  constructor(code: OmsErrorCode, status?: number) {
+    super(code);
     this.name = 'OmsError';
+    this.code = code;
+    this.status = status;
   }
 }
 
@@ -50,23 +69,23 @@ async function getToken(who: WhoSettings): Promise<string> {
       }),
     });
   } catch {
-    throw new OmsError('Passerelle injoignable — vérifiez l’URL du proxy.');
+    throw new OmsError('proxyUnreachable');
   }
   if (!res.ok) {
     if (res.status === 400 || res.status === 401) {
-      throw new OmsError('Identifiants OMS refusés (Client ID / mot secret).');
+      throw new OmsError('credentialsRejected');
     }
     if (res.status === 403) {
-      throw new OmsError('Origine non autorisée par la passerelle (CORS).');
+      throw new OmsError('corsForbidden');
     }
-    throw new OmsError(`Authentification OMS impossible (HTTP ${res.status}).`);
+    throw new OmsError('authFailed', res.status);
   }
   const data = (await res.json()) as {
     access_token?: string;
     expires_in?: number;
   };
   if (!data.access_token) {
-    throw new OmsError('Réponse d’authentification OMS invalide.');
+    throw new OmsError('authInvalid');
   }
   tokenCache = {
     token: data.access_token,
@@ -97,14 +116,14 @@ async function autocode(
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {
-    throw new OmsError('Passerelle injoignable pendant l’analyse OMS.');
+    throw new OmsError('proxyUnreachableAnalyze');
   }
   if (res.status === 401) {
     resetOmsToken();
-    throw new OmsError('Session OMS expirée — relancez l’analyse.');
+    throw new OmsError('sessionExpired');
   }
   if (!res.ok) {
-    throw new OmsError(`Erreur OMS pendant l’analyse (HTTP ${res.status}).`);
+    throw new OmsError('analyzeFailed', res.status);
   }
   const data = (await res.json()) as AutocodeResponse | null;
   if (!data || !data.theCode) return null;

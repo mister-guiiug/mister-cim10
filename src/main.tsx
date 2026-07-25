@@ -8,6 +8,7 @@ import {
   recordError,
 } from '@mister-guiiug/dev-wpa-config/react/observability';
 import { App } from './App';
+import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';
 import { applyResolvedTheme } from './lib/theme';
 import { registerServiceWorker } from './register-sw.js';
@@ -33,11 +34,13 @@ if (rootEl) {
           recordError(error, { source: 'error-boundary' });
         }}
       >
-        <HashRouter>
-          <DialogProvider>
-            <App />
-          </DialogProvider>
-        </HashRouter>
+        <I18nProvider>
+          <HashRouter>
+            <DialogProvider>
+              <App />
+            </DialogProvider>
+          </HashRouter>
+        </I18nProvider>
       </ErrorBoundary>
     </StrictMode>
   );

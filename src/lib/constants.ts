@@ -1,5 +1,3 @@
-import type { AnalyzeMode } from '../types/index';
-
 export const FOOTER_NOTE =
   'Outil expérimental sans valeur officielle. Vérifiez chaque code avant utilisation.';
 
@@ -18,9 +16,3 @@ export const LS_KEYS = {
   SESSIONS: 'saved_sessions',
   FAVORITES: 'favorites',
 } as const;
-
-export const MODE_SUMMARY_LABEL: Record<AnalyzeMode, string> = {
-  local: 'CIM-10',
-  api: 'OMS CIM-11',
-  both: 'CIM-10 + CIM-11',
-};

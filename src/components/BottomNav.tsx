@@ -5,10 +5,11 @@
  */
 import { NavLink } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { useI18n } from '../i18n';
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: 'nav.home' | 'nav.settings' | 'nav.help';
   end: boolean;
   icon: ReactNode;
 }
@@ -59,15 +60,21 @@ const HelpIcon = (
 );
 
 const ITEMS: NavItem[] = [
-  { to: '/', label: 'Accueil', end: true, icon: HomeIcon },
-  { to: '/parametres', label: 'Paramètres', end: false, icon: SettingsIcon },
-  { to: '/aide', label: 'Aide', end: false, icon: HelpIcon },
+  { to: '/', labelKey: 'nav.home', end: true, icon: HomeIcon },
+  {
+    to: '/parametres',
+    labelKey: 'nav.settings',
+    end: false,
+    icon: SettingsIcon,
+  },
+  { to: '/aide', labelKey: 'nav.help', end: false, icon: HelpIcon },
 ];
 
 export function BottomNav() {
+  const { t } = useI18n();
   return (
-    <nav className="bottom-nav" aria-label="Navigation principale">
-      {ITEMS.map(({ to, label, end, icon }) => (
+    <nav className="bottom-nav" aria-label={t('nav.primary')}>
+      {ITEMS.map(({ to, labelKey, end, icon }) => (
         <NavLink
           key={to}
           to={to}
@@ -77,7 +84,7 @@ export function BottomNav() {
           }
         >
           <span className="bottom-nav-icon">{icon}</span>
-          <span className="bottom-nav-label">{label}</span>
+          <span className="bottom-nav-label">{t(labelKey)}</span>
         </NavLink>
       ))}
     </nav>

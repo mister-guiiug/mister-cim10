@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { DialogContext, type DialogContextValue } from './DialogContext';
+import { useI18n } from '../i18n';
 
 interface ActiveDialog {
   type: 'alert' | 'confirm';
@@ -19,6 +20,7 @@ interface ActiveDialog {
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<ActiveDialog | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const { t } = useI18n();
 
   const settle = useCallback((result: boolean) => {
     setActive(current => {
@@ -49,7 +51,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           setActive({
             type: 'alert',
             message,
-            okLabel: options?.okLabel ?? 'OK',
+            okLabel: options?.okLabel ?? t('common.ok'),
             cancelLabel: '',
             resolve: () => resolve(),
           });
@@ -59,13 +61,13 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           setActive({
             type: 'confirm',
             message,
-            okLabel: options?.okLabel ?? 'OK',
-            cancelLabel: options?.cancelLabel ?? 'Annuler',
+            okLabel: options?.okLabel ?? t('common.ok'),
+            cancelLabel: options?.cancelLabel ?? t('common.cancel'),
             resolve,
           });
         }),
     }),
-    []
+    [t]
   );
 
   return (
