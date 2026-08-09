@@ -2,18 +2,15 @@ import { useMemo, useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getFamily } from '../../lib/icd-hierarchy';
+import { useI18n } from '../../i18n';
 import type { AnalysisResult, ICD10Code } from '../../types/index';
 
-function confidenceLabel(c: number): string {
-  if (c >= 0.8) return 'Élevée';
-  if (c >= 0.5) return 'Moyenne';
-  return 'Faible';
-}
+type ConfidenceLevel = 'high' | 'medium' | 'low';
 
-function confidenceClass(c: number): string {
-  if (c >= 0.8) return 'is-high';
-  if (c >= 0.5) return 'is-medium';
-  return 'is-low';
+function confidenceLevel(c: number): ConfidenceLevel {
+  if (c >= 0.8) return 'high';
+  if (c >= 0.5) return 'medium';
+  return 'low';
 }
 
 export function SuggestionsPanel() {
@@ -32,6 +29,7 @@ export function SuggestionsPanel() {
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const minConfidence = useSettingsStore(s => s.minConfidence);
+  const { t } = useI18n();
 
   const validatedCodes = useMemo(
     () => new Set(validated.map(v => v.code)),
@@ -72,7 +70,7 @@ export function SuggestionsPanel() {
           >
             <path d="M8 1a5 5 0 0 0-2.5 9.33V12h5v-1.67A5 5 0 0 0 8 1zM6.5 13v1.5h3V13h-3z" />
           </svg>
-          <span className="panel-title-text">Suggestions</span>
+          <span className="panel-title-text">{t('results.title')}</span>
           {hasSuggestions && (
             <span className="panel-count" aria-hidden="true">
               {visible.length}
@@ -86,8 +84,8 @@ export function SuggestionsPanel() {
             <input
               type="search"
               className="suggestion-filter-inp"
-              placeholder="Filtrer (code, libellé, terme repéré)"
-              aria-label="Filtrer les suggestions"
+              placeholder={t('results.filterPlaceholder')}
+              aria-label={t('results.filterAria')}
               value={filterText}
               onChange={e => setFilterText(e.target.value)}
             />
@@ -97,7 +95,7 @@ export function SuggestionsPanel() {
               onClick={() => setFilterText('')}
               disabled={!filterText}
             >
-              Effacer filtre
+              {t('results.clearFilter')}
             </button>
           </div>
           <div className="toolbar suggestion-bulk-toolbar">
@@ -107,7 +105,7 @@ export function SuggestionsPanel() {
               onClick={() => validateAll(visible)}
               disabled={visible.length === 0}
             >
-              Valider filtrées
+              {t('results.validateFiltered')}
             </button>
             <button
               type="button"
@@ -115,10 +113,12 @@ export function SuggestionsPanel() {
               onClick={() => rejectAll(visible.map(v => v.id))}
               disabled={visible.length === 0}
             >
-              Rejeter filtrées
+              {t('results.rejectFiltered')}
             </button>
             <span className="hint suggestion-filter-count">
-              {visible.length} affichée{visible.length > 1 ? 's' : ''}
+              {visible.length > 1
+                ? t('results.shownMany', { count: visible.length })
+                : t('results.shownOne', { count: visible.length })}
             </span>
           </div>
         </>
@@ -128,13 +128,13 @@ export function SuggestionsPanel() {
           isAnalyzing ? (
             <p className="empty empty--analyzing">
               <span className="analyzing-spinner" aria-hidden="true" />
-              Analyse en cours…
+              {t('results.analyzing')}
             </p>
           ) : (
             <p className="empty">
               {suggestions.length === 0
-                ? 'Saisissez un compte-rendu, puis lancez l’analyse : les suggestions de codes s’afficheront ici.'
-                : 'Aucune suggestion ne correspond aux filtres actuels.'}
+                ? t('results.emptyPristine')
+                : t('results.emptyFiltered')}
             </p>
           )
         ) : (
@@ -176,6 +176,7 @@ function SuggestionCard({
   onHighlight,
   onValidateRelated,
 }: SuggestionCardProps) {
+  const { t } = useI18n();
   const [comparing, setComparing] = useState(false);
   const family = useMemo(
     () => (comparing ? getFamily(suggestion.code) : null),
@@ -184,8 +185,8 @@ function SuggestionCard({
   const hasFamily =
     family !== null && (family.parent !== null || family.siblings.length > 0);
   const pct = Math.round(suggestion.confidence * 100);
-  const level = confidenceClass(suggestion.confidence);
-  const levelLabel = confidenceLabel(suggestion.confidence);
+  const level = confidenceLevel(suggestion.confidence);
+  const levelLabel = t(`results.confidence.${level}`);
 
   return (
     <li className="suggestion-card" role="listitem">
@@ -195,19 +196,24 @@ function SuggestionCard({
           className={`source-badge source-badge--${suggestion.source ?? 'local'}`}
           title={
             suggestion.source === 'api'
-              ? 'Classification CIM-11 (OMS)'
-              : 'Dictionnaire CIM-10 embarqué'
+              ? t('results.sourceApiTitle')
+              : t('results.sourceLocalTitle')
           }
         >
-          {suggestion.source === 'api' ? 'CIM-11' : 'CIM-10'}
+          {suggestion.source === 'api'
+            ? t('results.badgeIcd11')
+            : t('results.badgeIcd10')}
         </span>
       </div>
       <p className="suggestion-label">{suggestion.label}</p>
-      <div className={`confidence-meter ${level}`}>
+      <div className={`confidence-meter is-${level}`}>
         <span
           className="confidence-meter-track"
           role="img"
-          aria-label={`Confiance ${levelLabel.toLowerCase()}, ${pct} %`}
+          aria-label={t('results.confidenceAria', {
+            level: levelLabel.toLowerCase(),
+            pct,
+          })}
         >
           <span
             className="confidence-meter-fill"
@@ -221,12 +227,12 @@ function SuggestionCard({
       </div>
       {suggestion.matchedTerm && (
         <p className="suggestion-term">
-          Terme repéré :{' '}
+          {t('results.matchedTerm')}{' '}
           <button
             type="button"
             className="suggestion-term-link"
             onClick={onHighlight}
-            title="Voir dans le compte-rendu"
+            title={t('results.matchedTermTitle')}
           >
             {suggestion.matchedTerm}
           </button>
@@ -234,10 +240,10 @@ function SuggestionCard({
       )}
       <div className="toolbar">
         <button type="button" className="primary" onClick={onValidate}>
-          Valider
+          {t('common.validate')}
         </button>
         <button type="button" className="ghost" onClick={onReject}>
-          Rejeter
+          {t('common.reject')}
         </button>
         <button
           type="button"
@@ -245,9 +251,9 @@ function SuggestionCard({
           onClick={() => setComparing(v => !v)}
           aria-expanded={comparing}
           aria-controls={`compare-${suggestion.id}`}
-          title="Voir le code parent et les codes apparentés"
+          title={t('results.compareTitle')}
         >
-          {comparing ? 'Fermer' : 'Comparer'}
+          {comparing ? t('common.close') : t('results.compare')}
         </button>
       </div>
       {comparing && family && (
@@ -278,12 +284,11 @@ function CompareFamily({
   hasFamily,
   onValidate,
 }: CompareFamilyProps) {
+  const { t } = useI18n();
   if (!hasFamily) {
     return (
       <div id={id} className="suggestion-compare-panel">
-        <p className="suggestion-compare-empty">
-          Aucun code apparenté dans le référentiel embarqué.
-        </p>
+        <p className="suggestion-compare-empty">{t('results.compareEmpty')}</p>
       </div>
     );
   }
@@ -328,12 +333,13 @@ function CompareRow({
   alreadyValidated,
   onValidate,
 }: CompareRowProps) {
+  const { t } = useI18n();
   return (
     <div
       className={`suggestion-compare-row suggestion-compare-row--${variant}`}
     >
       <span className="suggestion-compare-tag">
-        {variant === 'parent' ? 'Parent' : 'Apparenté'}
+        {variant === 'parent' ? t('results.parent') : t('results.related')}
       </span>
       <strong className="suggestion-compare-code">{entry.code}</strong>
       <span className="suggestion-compare-label">{entry.label}</span>
@@ -344,11 +350,11 @@ function CompareRow({
         disabled={alreadyValidated}
         title={
           alreadyValidated
-            ? 'Déjà dans les diagnostics retenus'
-            : 'Valider ce code'
+            ? t('results.alreadyValidatedTitle')
+            : t('results.validateCodeTitle')
         }
       >
-        {alreadyValidated ? 'Validé' : 'Valider'}
+        {alreadyValidated ? t('common.validated') : t('common.validate')}
       </button>
     </div>
   );

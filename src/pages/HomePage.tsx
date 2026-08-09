@@ -7,6 +7,7 @@ import { useWorkspaceStore } from '../store/workspaceStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { suggestFromText } from '../lib/analyzer';
 import { OmsError, suggestFromOms } from '../lib/oms';
+import { useI18n } from '../i18n';
 import type { AnalysisResult } from '../types/index';
 
 export function HomePage() {
@@ -17,16 +18,15 @@ export function HomePage() {
   const mode = useSettingsStore(s => s.mode);
   const who = useSettingsStore(s => s.who);
   const isReady = useSettingsStore(s => s.isReady());
+  const { t } = useI18n();
 
   const handleAnalyze = async () => {
     if (!isReady) {
-      setAnalyzeError(
-        'Configurez d’abord la source des suggestions dans les Paramètres.'
-      );
+      setAnalyzeError(t('errors.configure'));
       return;
     }
     if (!crText.trim()) {
-      setAnalyzeError('Saisissez un compte-rendu avant de lancer l’analyse.');
+      setAnalyzeError(t('errors.emptyReport'));
       return;
     }
     setAnalyzeError(null);
@@ -50,10 +50,11 @@ export function HomePage() {
     } catch (err) {
       setAnalyzeError(
         err instanceof OmsError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : String(err)
+          ? t(
+              `errors.oms.${err.code}`,
+              err.status === undefined ? undefined : { status: err.status }
+            )
+          : t('errors.oms.unknown')
       );
     } finally {
       setIsAnalyzing(false);

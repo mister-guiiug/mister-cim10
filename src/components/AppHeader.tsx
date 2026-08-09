@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { BrandMark } from './BrandMark';
 import { useSettingsStore } from '../store/settingsStore';
+import { useI18n } from '../i18n';
 import type { AppRoute } from '../types/index';
 
 interface AppHeaderProps {
@@ -21,10 +22,11 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
   const settingsReady = useSettingsStore(s => s.isReady());
   const disclaimerDismissed = useSettingsStore(s => s.disclaimerDismissed);
   const dismissDisclaimer = useSettingsStore(s => s.dismissDisclaimer);
+  const { t } = useI18n();
 
   const defaultTagline = settingsReady
-    ? 'Saisir · analyser · valider · exporter'
-    : 'Du texte clinique aux codes — à valider et exporter';
+    ? t('home.taglineReady')
+    : t('home.taglineSetup');
   const taglineText = isHome ? defaultTagline : (subTagline ?? defaultTagline);
 
   return (
@@ -43,7 +45,7 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
             <Link
               to="/"
               className="brand-block brand-link"
-              aria-label="Accueil — Mister CIM-10"
+              aria-label={t('nav.brandHome')}
             >
               <BrandMark />
               <div className="brand-text">
@@ -66,13 +68,13 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
                 >
                   <span>
                     {settingsReady
-                      ? 'Suggestions indicatives — vous restez responsable des codes retenus et des règles en vigueur.'
-                      : 'Outil d’aide : les suggestions sont indicatives. Vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.'}
+                      ? t('home.disclaimerReady')
+                      : t('home.disclaimerSetup')}
                   </span>
                   <button
                     type="button"
                     className="disclaimer-dismiss"
-                    aria-label="Masquer cet avertissement"
+                    aria-label={t('home.disclaimerHide')}
                     onClick={dismissDisclaimer}
                   >
                     ×
@@ -88,20 +90,17 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
 }
 
 function SetupGuide() {
+  const { t } = useI18n();
   return (
     <div className="header-guide">
-      <p className="setup-lead">
-        Pour la première configuration, ouvrez <strong>Paramètres</strong>{' '}
-        depuis la barre de navigation en bas de l’écran.
-      </p>
-      <ol className="quick-steps" aria-label="Utilisation en trois étapes">
+      <p className="setup-lead">{t('home.setupLead')}</p>
+      <ol className="quick-steps" aria-label={t('home.setupStepsLabel')}>
         <li className="quick-step">
           <span className="step-num" aria-hidden="true">
             1
           </span>
           <span className="step-body">
-            <strong>Paramètres</strong> — source des suggestions (intégré, OMS
-            ou les deux) et connexion OMS si besoin.
+            <strong>{t('nav.settings')}</strong> {t('home.setupStep1')}
           </span>
         </li>
         <li className="quick-step">
@@ -109,8 +108,7 @@ function SetupGuide() {
             2
           </span>
           <span className="step-body">
-            <strong>Compte-rendu</strong> — saisie ou dictée, puis{' '}
-            <strong>Analyser</strong>.
+            <strong>{t('report.title')}</strong> {t('home.setupStep2')}
           </span>
         </li>
         <li className="quick-step">
@@ -118,8 +116,7 @@ function SetupGuide() {
             3
           </span>
           <span className="step-body">
-            <strong>Validation</strong> — retenir ou écarter les propositions,
-            puis <strong>exporter</strong>.
+            <strong>{t('home.validationLabel')}</strong> {t('home.setupStep3')}
           </span>
         </li>
       </ol>
@@ -128,19 +125,21 @@ function SetupGuide() {
 }
 
 function DailyGuide() {
+  const { t } = useI18n();
   return (
     <div className="header-guide header-guide--daily">
-      <ul className="workflow-strip" aria-label="En pratique">
+      <ul className="workflow-strip" aria-label={t('home.dailyLabel')}>
         <li className="workflow-strip-item">
-          <span className="workflow-num">1</span> Texte
+          <span className="workflow-num">1</span> {t('home.dailyText')}
         </li>
         <li className="workflow-strip-sep" aria-hidden="true" />
         <li className="workflow-strip-item">
-          <span className="workflow-num">2</span> Analyser
+          <span className="workflow-num">2</span> {t('common.analyze')}
         </li>
         <li className="workflow-strip-sep" aria-hidden="true" />
         <li className="workflow-strip-item">
-          <span className="workflow-num">3</span> Valider & exporter
+          <span className="workflow-num">3</span>{' '}
+          {t('home.dailyValidateExport')}
         </li>
       </ul>
     </div>

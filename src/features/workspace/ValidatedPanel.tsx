@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { ExportBar } from './ExportBar';
+import { useI18n } from '../../i18n';
 import type { ValidatedDiagnostic } from '../../types/index';
 
 export function ValidatedPanel() {
@@ -8,6 +9,7 @@ export function ValidatedPanel() {
   const removeValidated = useWorkspaceStore(s => s.removeValidated);
   const updateValidatedNote = useWorkspaceStore(s => s.updateValidatedNote);
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
+  const { t } = useI18n();
   const validatedCodes = new Set(validated.map(v => v.code));
   const hasValidated = validated.length > 0;
 
@@ -27,7 +29,7 @@ export function ValidatedPanel() {
           >
             <path d="M13.854 3.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 9.793l6.646-6.647a.5.5 0 0 1 .708 0z" />
           </svg>
-          <span className="panel-title-text">Diagnostics retenus</span>
+          <span className="panel-title-text">{t('validated.title')}</span>
           {hasValidated && (
             <span className="panel-count" aria-hidden="true">
               {validated.length}
@@ -36,9 +38,7 @@ export function ValidatedPanel() {
         </h2>
       </div>
       {!hasValidated ? (
-        <p className="empty">
-          Les codes que vous retenez s’afficheront ici, prêts à exporter.
-        </p>
+        <p className="empty">{t('validated.empty')}</p>
       ) : (
         <ul className="validated-list" role="list">
           {validated.map(v => (
@@ -67,6 +67,7 @@ interface ValidatedItemProps {
 }
 
 function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [note, setNote] = useState(item.note ?? '');
 
@@ -78,11 +79,13 @@ function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
           className={`source-badge source-badge--${item.source ?? 'local'}`}
           title={
             item.source === 'api'
-              ? 'Classification CIM-11 (OMS)'
-              : 'Dictionnaire CIM-10 embarqué'
+              ? t('results.sourceApiTitle')
+              : t('results.sourceLocalTitle')
           }
         >
-          {item.source === 'api' ? 'CIM-11' : 'CIM-10'}
+          {item.source === 'api'
+            ? t('results.badgeIcd11')
+            : t('results.badgeIcd10')}
         </span>
         <span className="validated-label">{item.label}</span>
         <div className="toolbar">
@@ -92,10 +95,10 @@ function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
             onClick={() => setEditing(v => !v)}
             aria-pressed={editing}
           >
-            {editing ? 'Fermer' : 'Note'}
+            {editing ? t('common.close') : t('validated.note')}
           </button>
           <button type="button" className="ghost" onClick={onRemove}>
-            Retirer
+            {t('common.remove')}
           </button>
         </div>
       </div>
@@ -105,7 +108,7 @@ function ValidatedItem({ item, onRemove, onNote }: ValidatedItemProps) {
             value={note}
             onChange={e => setNote(e.target.value)}
             onBlur={() => onNote(note)}
-            placeholder="Note libre…"
+            placeholder={t('validated.notePlaceholder')}
             rows={2}
           />
         </div>
@@ -125,6 +128,7 @@ interface ManualEntryFormProps {
 }
 
 function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState('');
   const [label, setLabel] = useState('');
@@ -150,7 +154,7 @@ function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
         className="ghost manual-add-toggle"
         onClick={() => setOpen(true)}
       >
-        + Ajouter un code manuellement
+        {t('validated.addManual')}
       </button>
     );
   }
@@ -161,8 +165,8 @@ function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
         <input
           type="text"
           className="manual-entry-code"
-          placeholder="Code (ex. I10)"
-          aria-label="Code CIM-10"
+          placeholder={t('validated.codePlaceholder')}
+          aria-label={t('validated.codeAria')}
           value={code}
           onChange={e => setCode(e.target.value)}
           autoFocus
@@ -171,20 +175,20 @@ function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
         <input
           type="text"
           className="manual-entry-label"
-          placeholder="Libellé libre"
-          aria-label="Libellé du diagnostic"
+          placeholder={t('validated.labelPlaceholder')}
+          aria-label={t('validated.labelAria')}
           value={label}
           onChange={e => setLabel(e.target.value)}
         />
       </div>
       {duplicate && (
         <p className="hint error" role="alert">
-          Ce code est déjà dans les diagnostics retenus.
+          {t('validated.duplicate')}
         </p>
       )}
       <div className="toolbar">
         <button type="submit" className="primary" disabled={!canSubmit}>
-          Ajouter
+          {t('common.add')}
         </button>
         <button
           type="button"
@@ -195,7 +199,7 @@ function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
             setLabel('');
           }}
         >
-          Annuler
+          {t('common.cancel')}
         </button>
       </div>
     </form>

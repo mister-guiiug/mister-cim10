@@ -4,7 +4,6 @@ import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
-import { MODE_SUMMARY_LABEL } from '../lib/constants';
 import {
   dateSlug,
   downloadBlob,
@@ -14,6 +13,8 @@ import {
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useI18n } from '../i18n';
+import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react';
 
 export function SettingsPage() {
   const mode = useSettingsStore(s => s.mode);
@@ -26,6 +27,7 @@ export function SettingsPage() {
   const resetDisclaimer = useSettingsStore(s => s.resetDisclaimer);
 
   const dialog = useDialog();
+  const { t, locale, setLocale, locales } = useI18n();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
@@ -63,10 +65,8 @@ export function SettingsPage() {
     if (lang) patch.lang = lang;
     if (Object.keys(patch).length > 0) setWho(patch);
     setSearchParams({}, { replace: true });
-    setShareFeedback(
-      'Paramétrage importé depuis le lien — saisissez votre mot secret OMS.'
-    );
-  }, [searchParams, setSearchParams, setMode, setWho]);
+    setShareFeedback(t('settings.importedFromLink'));
+  }, [searchParams, setSearchParams, setMode, setWho, t]);
 
   const showWhoSection = mode !== 'local';
 
@@ -78,15 +78,11 @@ export function SettingsPage() {
 
   const handleImportAll = async (file: File) => {
     const text = await file.text();
-    if (
-      await dialog.confirm(
-        'Restaurer les données ? Les paramètres et données actuels seront écrasés. L’application va redémarrer.'
-      )
-    ) {
+    if (await dialog.confirm(t('settings.restoreConfirm'))) {
       if (importAppData(text)) {
         window.location.reload();
       } else {
-        await dialog.alert('Erreur lors de l’import. Fichier invalide.');
+        await dialog.alert(t('settings.importError'));
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -107,39 +103,39 @@ export function SettingsPage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Mister CIM-10 — paramétrage',
+          title: t('settings.shareDocTitle'),
           url: link,
         });
-        setShareFeedback('Lien partagé.');
+        setShareFeedback(t('settings.linkShared'));
       } else {
         await navigator.clipboard.writeText(link);
-        setShareFeedback('Lien copié dans le presse-papiers.');
+        setShareFeedback(t('settings.linkCopied'));
       }
     } catch {
-      setShareFeedback('Partage annulé.');
+      setShareFeedback(t('settings.shareCancelled'));
     }
   };
 
   return (
     <>
-      <AppHeader subTagline="Source des suggestions et connexion OMS" />
+      <AppHeader subTagline={t('settings.subTagline')} />
       <main id="main-content" className="page-main settings-page" tabIndex={-1}>
         <header className="page-hero">
-          <p className="page-kicker">Configuration</p>
-          <h1 className="page-title-h1">Paramètres</h1>
+          <p className="page-kicker">{t('settings.kicker')}</p>
+          <h1 className="page-title-h1">{t('settings.title')}</h1>
           <p className="page-lead">
-            Choisissez comment les codes sont proposés, puis renseignez la
-            connexion à l’OMS si vous l’activez. Pour obtenir un compte et des
-            identifiants API, suivez le guide sur la page{' '}
+            {t('settings.leadBefore')}
             <Link to="/aide" className="inline-link">
-              Aide
-            </Link>{' '}
-            (section compte OMS).
+              {t('nav.help')}
+            </Link>
+            {t('settings.leadAfter')}
           </p>
           <p className="settings-page-badge-line" aria-live="polite">
-            <span className="settings-page-badge-label">Mode enregistré</span>
+            <span className="settings-page-badge-label">
+              {t('settings.modeSavedLabel')}
+            </span>
             <span className="settings-summary-badge settings-summary-badge--inline">
-              {MODE_SUMMARY_LABEL[mode]}
+              {t(`settings.modeSummary.${mode}`)}
             </span>
           </p>
         </header>
@@ -149,14 +145,14 @@ export function SettingsPage() {
             {/* ── Source des suggestions ── */}
             <section className="settings-section" aria-labelledby="sec-source">
               <h2 className="settings-section-title" id="sec-source">
-                Source des suggestions
+                {t('settings.sourceTitle')}
               </h2>
               <div className="settings-mode-line">
                 <label
                   className="settings-mode-label"
                   htmlFor="analyze-mode-select"
                 >
-                  Mode d’analyse
+                  {t('settings.modeLabel')}
                 </label>
                 <select
                   id="analyze-mode-select"
@@ -165,32 +161,27 @@ export function SettingsPage() {
                   value={mode}
                   onChange={e => setMode(e.target.value as AnalyzeMode)}
                 >
-                  <option value="local">Dictionnaire local (CIM-10)</option>
-                  <option value="api">OMS en ligne (CIM-11)</option>
-                  <option value="both">Les deux (CIM-10 + CIM-11)</option>
+                  <option value="local">{t('settings.modeLocal')}</option>
+                  <option value="api">{t('settings.modeApi')}</option>
+                  <option value="both">{t('settings.modeBoth')}</option>
                 </select>
               </div>
               <p className="settings-hint" id="analyze-mode-hint">
-                Par défaut, tout se fait dans la page. Si vous choisissez une
-                option avec OMS, les champs de connexion s’affichent : compte
-                OMS et adresse de passerelle requis.
+                {t('settings.modeHint')}
               </p>
 
               <div className="settings-block">
                 <p className="settings-block-title">
-                  Seuil de confiance minimal
+                  {t('settings.thresholdTitle')}
                 </p>
-                <p className="settings-hint">
-                  Les suggestions avec une confiance inférieure à ce seuil
-                  restent ignorées par défaut dans la liste.
-                </p>
+                <p className="settings-hint">{t('settings.thresholdHint')}</p>
                 <div className="settings-threshold-row">
                   <label
                     className="who-field"
                     htmlFor="min-confidence-threshold"
                   >
                     <span className="who-field-label">
-                      Afficher à partir de
+                      {t('settings.thresholdFrom')}
                     </span>
                     <input
                       type="range"
@@ -219,15 +210,18 @@ export function SettingsPage() {
               >
                 <div className="api-compact-bar">
                   <span className="api-compact-heading">
-                    Connexion OMS (CIM-11)
+                    {t('settings.omsTitle')}
                   </span>
-                  <nav className="api-links" aria-label="Ressources OMS">
+                  <nav
+                    className="api-links"
+                    aria-label={t('settings.omsResources')}
+                  >
                     <a
                       href="https://icd.who.int/icdapi"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Portail ICD API
+                      {t('settings.omsPortal')}
                     </a>
                     <span className="api-links-sep" aria-hidden="true">
                       ·
@@ -237,14 +231,16 @@ export function SettingsPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Documentation API
+                      {t('settings.omsApiDoc')}
                     </a>
                   </nav>
                 </div>
 
                 <div className="api-fields-grid" role="group">
                   <label className="who-field">
-                    <span className="who-field-label">Identifiant</span>
+                    <span className="who-field-label">
+                      {t('settings.clientId')}
+                    </span>
                     <input
                       type="text"
                       autoComplete="username"
@@ -254,7 +250,9 @@ export function SettingsPage() {
                     />
                   </label>
                   <label className="who-field">
-                    <span className="who-field-label">Mot secret</span>
+                    <span className="who-field-label">
+                      {t('settings.clientSecret')}
+                    </span>
                     <input
                       type="password"
                       autoComplete="current-password"
@@ -264,7 +262,7 @@ export function SettingsPage() {
                   </label>
                   <label className="who-field api-field-span2">
                     <span className="who-field-label">
-                      Adresse de la passerelle
+                      {t('settings.proxyUrl')}
                     </span>
                     <input
                       type="url"
@@ -280,11 +278,13 @@ export function SettingsPage() {
 
                 <details className="settings-sub">
                   <summary className="settings-sub-summary">
-                    Version de la classification et langue
+                    {t('settings.versionLangSummary')}
                   </summary>
                   <div className="api-row2 settings-sub-inner">
                     <label className="who-field who-field-inline">
-                      <span className="who-field-label">Version</span>
+                      <span className="who-field-label">
+                        {t('settings.version')}
+                      </span>
                       <select
                         value={who.releaseId}
                         onChange={e => setWho({ releaseId: e.target.value })}
@@ -296,29 +296,28 @@ export function SettingsPage() {
                     </label>
                     <label className="who-field who-field-inline">
                       <span className="who-field-label">
-                        Langue des libellés
+                        {t('settings.labelLang')}
                       </span>
                       <select
                         value={who.lang}
                         onChange={e => setWho({ lang: e.target.value })}
                       >
-                        <option value="fr">Français</option>
-                        <option value="en">English</option>
+                        <option value="fr">{t('language.fr')}</option>
+                        <option value="en">{t('language.en')}</option>
                       </select>
                     </label>
                   </div>
                 </details>
 
                 <p className="hint hint--compact who-risk">
-                  Identifiants enregistrés dans ce navigateur (éviter sur poste
-                  partagé). La passerelle doit autoriser ce site.
+                  {t('settings.omsRisk')}
                 </p>
                 <button
                   type="button"
                   className="ghost who-clear-btn"
                   onClick={forgetSecret}
                 >
-                  Oublier mot secret et session OMS
+                  {t('settings.forgetSecret')}
                 </button>
               </div>
             </section>
@@ -329,17 +328,42 @@ export function SettingsPage() {
               aria-labelledby="sec-apparence"
             >
               <h2 className="settings-section-title" id="sec-apparence">
-                Apparence
+                {t('settings.appearanceTitle')}
               </h2>
               <div className="settings-theme-row">
-                <span className="settings-theme-label">Thème</span>
+                <span className="settings-theme-label">
+                  {t('settings.themeLabel')}
+                </span>
                 <ThemeToggle />
               </div>
+              <div className="settings-theme-row">
+                <span className="settings-theme-label" id="lang-switch-label">
+                  {t('settings.languageLabel')}
+                </span>
+                <div
+                  className="toolbar"
+                  role="group"
+                  aria-labelledby="lang-switch-label"
+                >
+                  {locales.map(loc => (
+                    <button
+                      key={loc}
+                      type="button"
+                      className={locale === loc ? 'primary' : 'ghost'}
+                      aria-pressed={locale === loc}
+                      onClick={() => setLocale(loc)}
+                    >
+                      {loc === 'fr' ? t('language.fr') : t('language.en')}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="settings-block">
-                <p className="settings-block-title">Avertissement masqué</p>
+                <p className="settings-block-title">
+                  {t('settings.disclaimerHiddenTitle')}
+                </p>
                 <p className="settings-hint">
-                  Réaffichez sur l’accueil l’avertissement que vous auriez
-                  masqué.
+                  {t('settings.disclaimerHiddenHint')}
                 </p>
                 <div className="toolbar">
                   <button
@@ -352,8 +376,8 @@ export function SettingsPage() {
                     }}
                   >
                     {resetFeedback
-                      ? 'Avertissement réaffiché ✓'
-                      : 'Réafficher l’avertissement'}
+                      ? t('settings.disclaimerShown')
+                      : t('settings.disclaimerReshow')}
                   </button>
                 </div>
               </div>
@@ -362,21 +386,20 @@ export function SettingsPage() {
             {/* ── Données (repliable) ── */}
             <details className="settings-section settings-section--collapsible">
               <summary className="settings-section-summary">
-                <span className="settings-section-title">Données</span>
+                <span className="settings-section-title">
+                  {t('settings.dataTitle')}
+                </span>
                 <span className="settings-section-summary-hint">
-                  Partage du paramétrage, sauvegarde et restauration
+                  {t('settings.dataSummaryHint')}
                 </span>
               </summary>
               <div className="settings-section-body">
                 <div className="settings-share-block">
                   <p className="settings-share-title">
-                    Partager le paramétrage
+                    {t('settings.shareTitle')}
                   </p>
                   <p className="settings-share-hint hint">
-                    Génère un <strong>lien</strong> reprenant le mode d’analyse
-                    et la connexion OMS (identifiant, passerelle) —{' '}
-                    <strong>sans le mot secret</strong>, qui n’est jamais placé
-                    dans l’URL. Le destinataire saisit le sien.
+                    {t('settings.shareHint')}
                   </p>
                   <div className="toolbar settings-share-toolbar">
                     <button
@@ -384,7 +407,7 @@ export function SettingsPage() {
                       className="secondary"
                       onClick={handleShareSettings}
                     >
-                      Partager ou copier le lien
+                      {t('settings.shareButton')}
                     </button>
                   </div>
                   {shareFeedback && (
@@ -396,27 +419,23 @@ export function SettingsPage() {
 
                 <div className="settings-block">
                   <p className="settings-block-title">
-                    Sauvegarde et Restauration
+                    {t('settings.backupTitle')}
                   </p>
-                  <p className="settings-hint">
-                    Téléchargez toutes vos données (favoris, historique,
-                    sessions, paramètres) dans un fichier pour les sauvegarder
-                    ou les transférer.
-                  </p>
+                  <p className="settings-hint">{t('settings.backupHint')}</p>
                   <div className="toolbar">
                     <button
                       type="button"
                       className="secondary"
                       onClick={handleExportAll}
                     >
-                      Sauvegarder tout (.json)
+                      {t('settings.backupExport')}
                     </button>
                     <button
                       type="button"
                       className="secondary"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      Restaurer tout…
+                      {t('settings.backupImport')}
                     </button>
                     <input
                       ref={fileInputRef}
@@ -436,20 +455,35 @@ export function SettingsPage() {
             {/* ── Application ── */}
             <section className="settings-section" aria-labelledby="sec-app">
               <h2 className="settings-section-title" id="sec-app">
-                Application
+                {t('settings.appTitle')}
               </h2>
-              <p className="settings-hint">
-                L’application se met à jour automatiquement. Si elle vous semble
-                figée sur une ancienne version, rechargez-la.
-              </p>
+              <p className="settings-hint">{t('settings.appHint')}</p>
               <div className="toolbar">
                 <button type="button" className="secondary" onClick={reloadApp}>
-                  Recharger l’application
+                  {t('settings.appReload')}
                 </button>
               </div>
               <p className="settings-app-version">
-                Mister CIM-10 v{__APP_VERSION__} · build {__BUILD_TIME__}
+                {t('settings.appVersion', {
+                  version: __APP_VERSION__,
+                  build: __BUILD_TIME__,
+                })}
               </p>
+            </section>
+
+            {/* ── Nos autres applications (catalogue famille) ── */}
+            <section className="settings-section" aria-labelledby="sec-famille">
+              <h2 className="settings-section-title" id="sec-famille">
+                {t('settings.familyTitle')}
+              </h2>
+              <p className="settings-hint">{t('settings.familyHint')}</p>
+              <div className="cim-family">
+                <FamilyApps
+                  currentAppId="mister-cim10"
+                  showSource={false}
+                  showSponsor={false}
+                />
+              </div>
             </section>
           </div>
         </div>

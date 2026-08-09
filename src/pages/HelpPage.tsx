@@ -1,215 +1,142 @@
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
+import { useI18n } from '../i18n';
 
 const PORTAL_URL = 'https://icd.who.int/icdapi';
 const DOC_API_URL = 'https://icd.who.int/docs/icd-api/APIDoc-Version2/';
 
 export function HelpPage() {
+  const { t } = useI18n();
   return (
     <>
-      <AppHeader subTagline="Guide d’utilisation et compte API OMS" />
+      <AppHeader subTagline={t('help.subTagline')} />
       <main id="main-content" className="page-main help-page" tabIndex={-1}>
         <header className="page-hero">
-          <h1 className="page-title">Aide à l’utilisation</h1>
+          <h1 className="page-title">{t('help.title')}</h1>
           <p className="page-lead">
-            Comment utiliser l’application au quotidien, et comment obtenir un{' '}
-            <strong>compte développeur OMS</strong> pour activer les suggestions
-            issues du service de classification de l’OMS (ICD-11).
+            {t('help.leadBefore')}
+            <strong>{t('help.leadStrong')}</strong>
+            {t('help.leadAfter')}
           </p>
         </header>
 
-        <nav className="help-toc" aria-label="Sommaire">
-          <span className="help-toc-label">Sommaire</span>
+        <nav className="help-toc" aria-label={t('help.tocLabel')}>
+          <span className="help-toc-label">{t('help.tocLabel')}</span>
           <ul className="help-toc-list">
             <li>
-              <a href="#aide-utilisation">Utiliser l’application</a>
+              <a href="#aide-utilisation">{t('help.tocUse')}</a>
             </li>
             <li>
-              <a href="#aide-compte-oms">
-                Créer un compte et une application API OMS
-              </a>
+              <a href="#aide-compte-oms">{t('help.tocAccount')}</a>
             </li>
             <li>
-              <a href="#aide-passerelle">Passerelle et confidentialité</a>
+              <a href="#aide-passerelle">{t('help.tocGateway')}</a>
             </li>
             <li>
-              <a href="#aide-liens">Liens utiles</a>
+              <a href="#aide-liens">{t('help.tocLinks')}</a>
             </li>
           </ul>
         </nav>
 
         <article className="help-article" id="aide-utilisation">
-          <h2 className="help-h2">Utiliser l’application</h2>
+          <h2 className="help-h2">{t('help.tocUse')}</h2>
           <ol className="help-steps">
             <li>
-              <strong>Configurer la source des suggestions</strong> dans la page{' '}
-              <Link to="/parametres">Paramètres</Link> : dictionnaire local
-              <strong> CIM-10</strong> (hors ligne),{' '}
-              <strong>OMS en ligne</strong> (classification{' '}
-              <strong>CIM-11</strong>), ou les deux combinés.
+              <strong>{t('help.use1Strong')}</strong> {t('help.use1Mid')}
+              <Link to="/parametres">{t('nav.settings')}</Link>
+              {t('help.use1After')}
             </li>
             <li>
-              <strong>Saisir le compte-rendu</strong> sur l’
-              <Link to="/">accueil</Link>, éventuellement à la voix (dictée du
-              navigateur ou du clavier sur mobile).
+              <strong>{t('help.use2Strong')}</strong> {t('help.use2Mid')}
+              <Link to="/">{t('help.use2Link')}</Link>
+              {t('help.use2After')}
             </li>
-            <li>
-              Cliquer sur <strong>Analyser</strong> pour obtenir des
-              propositions de codes. Chaque carte peut être{' '}
-              <strong>validée</strong>, <strong>modifiée</strong> ou{' '}
-              <strong>rejetée</strong>.
-            </li>
-            <li>
-              Les diagnostics retenus sont listés en bas de page ; vous pouvez
-              les <strong>exporter</strong> en fichier texte simple (.txt) ou
-              tableur (.csv), et les envoyer par e-mail ou via le partage du
-              système.
-            </li>
+            <li>{t('help.use3')}</li>
+            <li>{t('help.use4')}</li>
           </ol>
-          <p className="help-note">
-            Les suggestions sont <strong>indicatives</strong> : vous restez
-            responsable du choix final des codes et du respect des règles de
-            cotation en vigueur dans votre contexte.
-          </p>
+          <p className="help-note">{t('help.useNote')}</p>
         </article>
 
         <article className="help-article" id="aide-compte-oms">
-          <h2 className="help-h2">
-            Créer un compte pour utiliser l’API de l’OMS
-          </h2>
-          <p>
-            Pour que l’application interroge le service officiel de
-            classification ICD-11 (MMS), l’OMS exige une{' '}
-            <strong>authentification OAuth2</strong> avec un identifiant client
-            et un mot secret. Voici le déroulement habituel.
-          </p>
+          <h2 className="help-h2">{t('help.accountTitle')}</h2>
+          <p>{t('help.accountIntro')}</p>
 
           <details className="help-details">
             <summary className="help-details-summary">
-              Voir les étapes détaillées (compte, application client,
-              identifiants)
+              {t('help.accountDetailsSummary')}
             </summary>
 
-            <h3 className="help-h3">
-              1. Créer un compte sur le portail ICD API
-            </h3>
+            <h3 className="help-h3">{t('help.accountStep1Title')}</h3>
             <ul className="help-list">
               <li>
-                Ouvrez le portail :{' '}
+                {t('help.openPortal')}
                 <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
                   {PORTAL_URL}
                 </a>
                 .
               </li>
-              <li>
-                Créez un compte (inscription) ou connectez-vous si vous en avez
-                déjà un.
-              </li>
-              <li>
-                Acceptez les conditions d’usage du service API si demandé.
-              </li>
+              <li>{t('help.accountStep1b')}</li>
+              <li>{t('help.accountStep1c')}</li>
             </ul>
 
-            <h3 className="help-h3">
-              2. Enregistrer une « application » client
-            </h3>
-            <p>
-              L’OMS ne vous donne pas un simple mot de passe pour l’API : vous
-              devez déclarer une <strong>application</strong> (souvent appelée «
-              client ») qui représente votre usage automatisé (ici, cette page
-              web).
-            </p>
+            <h3 className="help-h3">{t('help.accountStep2Title')}</h3>
+            <p>{t('help.accountStep2Intro')}</p>
             <ul className="help-list">
-              <li>
-                Dans l’espace développeur du portail, créez une{' '}
-                <strong>nouvelle application</strong> ou équivalent (libellé
-                selon l’interface actuelle du site).
-              </li>
-              <li>
-                Choisissez le type d’authentification adapté à un serveur ou
-                script : en général <strong>client credentials</strong>{' '}
-                (identifiant + secret, sans interaction utilisateur à chaque
-                requête).
-              </li>
-              <li>
-                À l’issue de la création, notez le <strong>Client ID</strong> et
-                générez ou copiez le <strong>Client secret</strong> (mot
-                secret). Le secret n’est souvent affiché qu’une fois :
-                conservez-le dans un endroit sûr.
-              </li>
+              <li>{t('help.accountStep2a')}</li>
+              <li>{t('help.accountStep2b')}</li>
+              <li>{t('help.accountStep2c')}</li>
             </ul>
 
-            <h3 className="help-h3">
-              3. Renseigner l&apos;application Mister CIM-10
-            </h3>
+            <h3 className="help-h3">{t('help.accountStep3Title')}</h3>
             <ul className="help-list">
               <li>
-                Allez dans <Link to="/parametres">Paramètres</Link>, activez un
-                mode incluant l’OMS, puis collez l’<strong>identifiant</strong>{' '}
-                et le <strong>mot secret</strong> fournis par le portail.
+                {t('help.goTo')}
+                <Link to="/parametres">{t('nav.settings')}</Link>
+                {t('help.accountStep3aAfter')}
               </li>
-              <li>
-                Renseignez aussi l’<strong>adresse de la passerelle</strong>{' '}
-                (voir section suivante) : le navigateur ne peut pas appeler
-                directement l’API OMS sans cette étape technique.
-              </li>
+              <li>{t('help.accountStep3b')}</li>
             </ul>
           </details>
 
           <p className="help-note">
-            Les écrans exacts du portail OMS peuvent évoluer ; en cas de doute,
-            consultez la{' '}
+            {t('help.accountNoteBefore')}
             <a href={DOC_API_URL} target="_blank" rel="noopener noreferrer">
-              documentation officielle de l’API ICD
-            </a>{' '}
-            et les FAQ du portail.
+              {t('help.accountNoteLink')}
+            </a>
+            {t('help.accountNoteAfter')}
           </p>
         </article>
 
         <article className="help-article" id="aide-passerelle">
-          <h2 className="help-h2">Pourquoi une passerelle ?</h2>
+          <h2 className="help-h2">{t('help.gatewayTitle')}</h2>
+          <p>{t('help.gatewayP1')}</p>
           <p>
-            Depuis une page web hébergée sur Internet, les navigateurs
-            appliquent des règles de sécurité (CORS) qui empêchent en pratique
-            d’appeler directement certains services distants, dont l’API de
-            l’OMS. Une <strong>passerelle</strong> est un petit service
-            intermédiaire (par ex. un Cloudflare Worker) que vous déployez
-            vous-même : il reçoit les requêtes de cette application et les
-            transmet à l’OMS de façon autorisée.
+            {t('help.gatewayP2a')}
+            <code className="help-code">workers/</code>
+            {t('help.gatewayP2b')}
+            <code className="help-code">README</code>
+            {t('help.gatewayP2c')}
           </p>
-          <p>
-            Le dépôt du projet contient un exemple de passerelle et un guide
-            dans le dossier <code className="help-code">workers/</code> (fichier
-            proxy et <code className="help-code">README</code>). Vous devez y
-            configurer l’
-            <strong>origine exacte</strong> de ce site (URL de la page) pour que
-            le navigateur puisse l’utiliser.
-          </p>
-          <p className="help-note">
-            Tant que vous n’utilisez que le mode <strong>intégré</strong>,
-            aucune donnée clinique n’est envoyée vers l’OMS ; l’activation de
-            l’OMS envoie des extraits de texte au service de classification
-            selon votre analyse.
-          </p>
+          <p className="help-note">{t('help.gatewayNote')}</p>
         </article>
 
         <article className="help-article" id="aide-liens">
-          <h2 className="help-h2">Liens utiles</h2>
+          <h2 className="help-h2">{t('help.tocLinks')}</h2>
           <ul className="help-list help-list--links">
             <li>
               <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
-                Portail ICD API (inscription / applications)
+                {t('help.linkPortal')}
               </a>
             </li>
             <li>
               <a href={DOC_API_URL} target="_blank" rel="noopener noreferrer">
-                Documentation API ICD (version 2)
+                {t('help.linkApiDoc')}
               </a>
             </li>
             <li>
-              <Link to="/">Retour à l’accueil</Link> ·{' '}
-              <Link to="/parametres">Paramètres</Link>
+              <Link to="/">{t('help.backHome')}</Link> ·{' '}
+              <Link to="/parametres">{t('nav.settings')}</Link>
             </li>
           </ul>
         </article>

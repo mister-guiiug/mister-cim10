@@ -2,6 +2,7 @@ import { defineConfig, type Plugin, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { pwaSeoPlugin } from '@mister-guiiug/dev-wpa-config/vite-pwa-base';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
 
@@ -61,136 +62,166 @@ function analyticsPlugin(): Plugin {
 }
 
 // Production : site projet GitHub Pages — https://<user>.github.io/mister-cim10/
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/mister-cim10/' : '/',
-  define: {
-    __APP_VERSION__: JSON.stringify(version),
-    __BUILD_TIME__: JSON.stringify(buildDate),
-  },
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: true,
-    chunkSizeWarningLimit: 800,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return;
+// `VITE_BASE_PATH` (Lighthouse CI avec « / », déploiement famille) prioritaire.
+export default defineConfig(({ command }) => {
+  const basePath =
+    process.env.VITE_BASE_PATH ??
+    (command === 'build' ? '/mister-cim10/' : '/');
+  return {
+    base: basePath,
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+      __BUILD_TIME__: JSON.stringify(buildDate),
+    },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+      sourcemap: true,
+      chunkSizeWarningLimit: 800,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return;
 
-          const norm = id.replace(/\\/g, '/');
+            const norm = id.replace(/\\/g, '/');
 
-          // React et écosystème
-          if (
-            norm.includes('/react-dom/') ||
-            norm.includes('/node_modules/react/') ||
-            norm.includes('/scheduler/')
-          ) {
-            return 'react-vendor';
-          }
+            // React et écosystème
+            if (
+              norm.includes('/react-dom/') ||
+              norm.includes('/node_modules/react/') ||
+              norm.includes('/scheduler/')
+            ) {
+              return 'react-vendor';
+            }
 
-          // Router séparé
-          if (norm.includes('/react-router/')) {
-            return 'router';
-          }
+            // Router séparé
+            if (norm.includes('/react-router/')) {
+              return 'router';
+            }
 
-          // State manager
-          if (norm.includes('/zustand/')) {
-            return 'zustand';
-          }
+            // State manager
+            if (norm.includes('/zustand/')) {
+              return 'zustand';
+            }
 
-          // Tailwind runtime
-          if (
-            norm.includes('/tailwindcss/') ||
-            norm.includes('/@tailwindcss/')
-          ) {
-            return 'tailwind';
-          }
+            // Tailwind runtime
+            if (
+              norm.includes('/tailwindcss/') ||
+              norm.includes('/@tailwindcss/')
+            ) {
+              return 'tailwind';
+            }
 
-          // PWA
-          if (
-            norm.includes('/vite-plugin-pwa/') ||
-            norm.includes('/workbox-')
-          ) {
-            return 'pwa';
-          }
+            // PWA
+            if (
+              norm.includes('/vite-plugin-pwa/') ||
+              norm.includes('/workbox-')
+            ) {
+              return 'pwa';
+            }
 
-          // PNGJS pour les images
-          if (norm.includes('/pngjs/')) {
-            return 'image-processing';
-          }
+            // PNGJS pour les images
+            if (norm.includes('/pngjs/')) {
+              return 'image-processing';
+            }
 
-          return 'vendor';
+            return 'vendor';
+          },
         },
       },
     },
-  },
-  plugins: [
-    ...(command === 'build' ? [analyticsPlugin()] : []),
-    react(),
-    tailwindcss(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['icon-192.png', 'icon-512.png'],
-      manifest: {
-        name: 'Mister CIM10',
-        short_name: 'CIM10',
-        description: 'Explorateur interactif de la classification CIM10',
-        theme_color: '#4f46e5',
-        background_color: '#ffffff',
-        display: 'standalone',
-        icons: [
-          {
-            src: 'icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
+    plugins: [
+      ...(command === 'build' ? [analyticsPlugin()] : []),
+      react(),
+      tailwindcss(),
+      // SEO partagé famille : canonical/OG via placeholders index.html +
+      // sitemap.xml/robots.txt générés au build. L'analytics reste géré par
+      // analyticsPlugin() local (GTM + GA4 + GSC).
+      pwaSeoPlugin({
+        siteName: 'Mister CIM-10',
+        basePath,
+        logoPath: '/icon-192.png',
+      }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['icon-192.png', 'icon-512.png'],
+        manifest: {
+          name: 'Mister CIM10',
+          short_name: 'CIM10',
+          description: 'Explorateur interactif de la classification CIM10',
+          theme_color: '#4f46e5',
+          background_color: '#ffffff',
+          display: 'standalone',
+          icons: [
+            {
+              src: 'icon-192.png',
+              sizes: '192x192',
+              type: 'image/png',
+            },
+            {
+              src: 'icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+            },
+          ],
+          screenshots: [
+            {
+              src: 'screenshots/mobile.png',
+              sizes: '824x1830',
+              type: 'image/png',
+              form_factor: 'narrow',
+              label: 'Écran d’accueil sur mobile',
+            },
+            {
+              src: 'screenshots/wide.png',
+              sizes: '2560x1600',
+              type: 'image/png',
+              form_factor: 'wide',
+              label: 'Écran d’accueil sur ordinateur',
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
               },
             },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 60,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                },
               },
             },
-          },
-        ],
-      },
-    }),
-    ...(analyze
-      ? [
-          visualizer({
-            filename: 'dist/stats.html',
-            gzipSize: true,
-            brotliSize: true,
-            open: !process.env.CI,
-          }) as PluginOption,
-        ]
-      : []),
-  ],
-}));
+          ],
+        },
+      }),
+      ...(analyze
+        ? [
+            visualizer({
+              filename: 'dist/stats.html',
+              gzipSize: true,
+              brotliSize: true,
+              open: !process.env.CI,
+            }) as PluginOption,
+          ]
+        : []),
+    ],
+  };
+});
