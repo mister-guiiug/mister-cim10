@@ -4,12 +4,8 @@ import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
-import {
-  dateSlug,
-  downloadBlob,
-  exportAppData,
-  importAppData,
-} from '../lib/storage';
+import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
+import { exportAppData, importAppData } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
 import { ThemeToggle } from '../components/ThemeToggle';

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { dateSlug, downloadBlob } from '../../lib/storage';
+import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
+import { toCsv } from '@mister-guiiug/dev-wpa-config/csv';
 import { useI18n } from '../../i18n';
 import type { ValidatedDiagnostic } from '../../types/index';
 
@@ -37,20 +38,30 @@ function buildTextReport(
   return lines.join('\n');
 }
 
+/**
+ * CSV via le socle, dialecte `unix` (virgule + LF, sans BOM) : celui que
+ * produisait l'échappement maison. Les libellés de colonnes restent i18n
+ * (clé `export.csvHeader`, quatre segments séparés par des virgules).
+ */
 function buildCsvReport(
   validated: ValidatedDiagnostic[],
   header: string
 ): string {
-  const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  const rows = validated.map(v =>
-    [
-      escape(v.code),
-      escape(v.label),
-      escape(v.note ?? ''),
-      escape(new Date(v.validatedAt).toISOString()),
-    ].join(',')
-  );
-  return [header, ...rows].join('\n');
+  const [codeH, labelH, noteH, dateH] = header.split(',');
+  return toCsv(validated, {
+    dialect: 'unix',
+    columns: [
+      { key: 'code', header: codeH },
+      { key: 'label', header: labelH },
+      { key: 'note', header: noteH },
+      {
+        key: 'validatedAt',
+        header: dateH,
+        // `Date` : sérialisée en ISO 8601 par le socle, comme avant.
+        map: (_value, row) => new Date(row.validatedAt),
+      },
+    ],
+  });
 }
 
 function buildJsonReport(
