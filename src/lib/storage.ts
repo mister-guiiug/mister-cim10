@@ -22,6 +22,10 @@ const ALL_KEYS = [
   // Clés legacy historiques
   'cr_history',
   'validated_session',
+  // Thème d'avant la clé famille `dwc_theme` : exportée tant que des
+  // sauvegardes antérieures circulent (l'import la restaure, la migration
+  // `legacyKeys` du socle la relit au démarrage suivant).
+  'app_theme',
 ];
 
 export function exportAppData(): string {

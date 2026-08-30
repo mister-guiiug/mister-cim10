@@ -158,7 +158,9 @@ body {
   padding-bottom: calc(4.25rem + var(--safe-b));
 }
 
-/* ── Barre de navigation inférieure (mobile-first, principe miss-supaboss) ── */
+/* ── Barre de navigation inférieure (mobile-first, principe miss-supaboss).
+   Composant du socle ([data-dwc='bottom-nav…'], classe .bottom-nav posée via
+   className) ; l'habillage ci-dessous écrase la base de components.css. ── */
 .bottom-nav {
   position: fixed;
   left: 0;
@@ -176,7 +178,7 @@ body {
   box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.18);
 }
 
-.bottom-nav-item {
+.bottom-nav [data-dwc='bottom-nav-item'] {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -185,6 +187,8 @@ body {
   gap: 3px;
   min-height: 3.25rem;
   padding: 0.45rem 0.25rem 0.4rem;
+  /* Le trait actif de components.css est remplacé par le bandeau ::before. */
+  border-block-start: 0;
   text-decoration: none;
   color: var(--muted);
   font-size: 0.68rem;
@@ -193,16 +197,16 @@ body {
   transition: color var(--transition);
 }
 
-.bottom-nav-item:hover {
+.bottom-nav [data-dwc='bottom-nav-item']:hover {
   color: var(--text);
 }
 
-.bottom-nav-item.is-active {
+.bottom-nav [data-dwc='bottom-nav-item'][data-current] {
   color: var(--accent);
 }
 
 /* Indicateur d'onglet actif (petit bandeau haut), repère « pro » familier. */
-.bottom-nav-item.is-active::before {
+.bottom-nav [data-dwc='bottom-nav-item'][data-current]::before {
   content: '';
   position: absolute;
   top: 0;
@@ -213,7 +217,7 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .bottom-nav-item.is-active::before {
+  .bottom-nav [data-dwc='bottom-nav-item'][data-current]::before {
     animation: nav-indicator 0.22s ease;
   }
 }
@@ -225,16 +229,19 @@ body {
   }
 }
 
-.bottom-nav-icon {
+.bottom-nav [data-dwc='bottom-nav-icon'] {
   display: flex;
 }
 
-.bottom-nav-icon svg {
+.bottom-nav [data-dwc='bottom-nav-icon'] svg {
   width: 22px;
   height: 22px;
 }
 
-.bottom-nav-item.is-active .bottom-nav-icon svg {
+.bottom-nav
+  [data-dwc='bottom-nav-item'][data-current]
+  [data-dwc='bottom-nav-icon']
+  svg {
   filter: drop-shadow(
     0 0 6px color-mix(in srgb, var(--accent) 45%, transparent)
   );
@@ -452,94 +459,8 @@ a.brand-link:hover .brand-mark {
 }
 
 /* Commutateur thème (pilule + icônes soleil/lune) */
-.theme-switch {
-  position: relative;
-  flex-shrink: 0;
-  width: 3.25rem;
-  height: 3.25rem;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  background: transparent;
-  color: var(--text);
-  isolation: isolate;
-  transition: transform 0.15s ease;
-}
-
-.theme-switch:active {
-  transform: scale(0.94);
-}
-
-.theme-switch:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-.theme-switch-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in srgb, var(--accent) 45%, transparent),
-    transparent 65%
-  );
-  opacity: 0.55;
-  z-index: 0;
-  transition: opacity 0.25s ease;
-}
-
-.theme-switch:hover .theme-switch-glow {
-  opacity: 0.85;
-}
-
-.theme-switch-face {
-  position: absolute;
-  inset: 2px;
-  border-radius: inherit;
-  display: grid;
-  place-items: center;
-  background: var(--surface2);
-  border: 1px solid color-mix(in srgb, var(--surface2) 70%, var(--accent) 30%);
-  box-shadow:
-    0 2px 8px var(--shadow-inset-key),
-    inset 0 1px 0 var(--shadow-inset-shine);
-  z-index: 1;
-  overflow: hidden;
-}
-
-.theme-switch-layer {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  transform: scale(0.72) rotate(-12deg);
-  transition:
-    opacity 0.28s ease,
-    transform 0.32s cubic-bezier(0.34, 1.2, 0.64, 1);
-  pointer-events: none;
-}
-
-.theme-switch-layer.is-visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
-
-.theme-switch-icon {
-  width: 1.35rem;
-  height: 1.35rem;
-  color: var(--accent-dim);
-}
-
-.theme-switch--dark .theme-switch-icon {
-  color: var(--warn);
-}
-
-.theme-switch--light .theme-switch-icon {
-  color: var(--accent);
-}
+/* La bascule de thème vient du socle ([data-dwc='theme-toggle'], habillée par
+   components.css) : l'ancien bloc .theme-switch* a été retiré avec elle. */
 
 /* Étapes rapides 1 → 2 → 3 */
 .quick-steps {
@@ -2750,7 +2671,20 @@ html[data-theme='dark'] .footer-pill--bmac:hover {
   font-style: italic;
 }
 
-/* ---------- App Dialog (custom alert / confirm) ---------- */
+/* ---------- App Dialog (alerte locale + ConfirmDialog du socle) ---------- */
+
+/* Le reset global `button { border: none }` (non layered) écrase le contour
+   que components.css donne à l'annulation du ConfirmDialog : on lui rend le
+   rendu `.secondary` de l'ancienne boîte maison. */
+[data-dwc='confirm-cancel'] {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 9%, var(--surface2));
+}
+
+[data-dwc='confirm-cancel']:hover {
+  background: color-mix(in srgb, var(--surface2) 70%, var(--text));
+}
 
 .app-dialog {
   border: none;

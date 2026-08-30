@@ -8,7 +8,7 @@ import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
 import { exportAppData, importAppData } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { reloadApp } from '../register-sw';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { ThemeToggle } from '@mister-guiiug/dev-wpa-config/react/theme-toggle';
 import { useI18n } from '../i18n';
 import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react';
 

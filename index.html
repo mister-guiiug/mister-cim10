@@ -16,27 +16,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" id="meta-theme-color" content="#0c1222" />
-    <script>
-      (function () {
-        try {
-          var k = 'app_theme';
-          var v = localStorage.getItem(k);
-          var eff;
-          if (v === 'light' || v === 'dark') eff = v;
-          else
-            eff = window.matchMedia('(prefers-color-scheme: light)').matches
-              ? 'light'
-              : 'dark';
-          document.documentElement.setAttribute('data-theme', eff);
-          var m = document.getElementById('meta-theme-color');
-          if (m)
-            m.setAttribute('content', eff === 'light' ? '#eef2f7' : '#0c1222');
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      })();
-    </script>
+    <!-- Thème : script anti-FOUC et <meta name="theme-color"> (deux balises
+         par schéma, attribut media) injectés au build par pwaSeoPlugin
+         (themeBoot/themeColor) ; le choix explicite contraire au système est
+         resynchronisé par ThemeProvider. -->
     <meta
       name="description"
       content="Analyse de comptes-rendus et suggestions de codes CIM-10 avec validation et export."

@@ -80,13 +80,14 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
       .first()
       .click();
 
-    const themeButton = page.locator('button.theme-switch');
+    const themeButton = page.locator('button[data-dwc="theme-toggle"]');
     await expect(themeButton).toBeVisible();
 
-    // cycleThemePreference enchaîne system → clair → sombre : un clic change
-    // toujours la préférence, donc le libellé du bouton (3 libellés distincts).
-    // On vérifie le libellé (déterministe) plutôt que data-theme, qui peut
-    // rester identique sur la transition system→clair quand l'OS est déjà clair.
+    // Le ThemeToggle du socle cycle clair → sombre → système : un clic change
+    // toujours la préférence, donc le nom accessible recalculé du bouton
+    // (3 libellés distincts). On vérifie le libellé (déterministe) plutôt que
+    // data-theme, qui peut rester identique sur la transition système→clair
+    // quand l'OS est déjà clair.
     const initialLabel = await themeButton.getAttribute('aria-label');
     await themeButton.click();
     const newLabel = await themeButton.getAttribute('aria-label');
