@@ -1,7 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
-import { ErrorBoundary } from '@mister-guiiug/dev-wpa-config/react';
+import {
+  ErrorBoundary,
+  ThemeProvider,
+} from '@mister-guiiug/dev-wpa-config/react';
 import {
   installErrorReporter,
   initSentry,
@@ -10,7 +13,7 @@ import {
 import { App } from './App';
 import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';
-import { applyResolvedTheme } from './lib/theme';
+import { SocleLabelsBridge } from './components/SocleLabelsBridge';
 import { registerServiceWorker } from './register-sw.js';
 import { initWebVitals } from './monitoring/web-vitals';
 import './tailwind.css';
@@ -21,7 +24,6 @@ void initSentry({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
 });
-applyResolvedTheme();
 registerServiceWorker();
 initWebVitals();
 
@@ -34,13 +36,26 @@ if (rootEl) {
           recordError(error, { source: 'error-boundary' });
         }}
       >
-        <I18nProvider>
-          <HashRouter>
-            <DialogProvider>
-              <App />
-            </DialogProvider>
-          </HashRouter>
-        </I18nProvider>
+        {/* Avant React, le thème est posé par le script anti-FOUC injecté au
+            build (pwaSeoPlugin themeBoot) ; ThemeProvider prend ensuite le
+            relais : état partagé, écoute du thème système, persistance et
+            <meta name="theme-color"> alignée sur le schéma affiché. Pas
+            d'appId : aucune palette --dwc-* n'est peinte, le contrat est
+            câblé sur les jetons de style.css dans tailwind.css. */}
+        <ThemeProvider
+          legacyKeys={['app_theme']}
+          themeColor={{ light: '#eef2f7', dark: '#0c1222' }}
+        >
+          <I18nProvider>
+            <SocleLabelsBridge>
+              <HashRouter>
+                <DialogProvider>
+                  <App />
+                </DialogProvider>
+              </HashRouter>
+            </SocleLabelsBridge>
+          </I18nProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </StrictMode>
   );

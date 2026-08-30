@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { ConfirmDialog } from '@mister-guiiug/dev-wpa-config/react/confirm-dialog';
 import { DialogContext, type DialogContextValue } from './DialogContext';
 import { useI18n } from '../i18n';
 
@@ -17,6 +18,13 @@ interface ActiveDialog {
   resolve: (result: boolean) => void;
 }
 
+/**
+ * L'API interne (useDialog → alert/confirm en promesses) ne change pas ; seul
+ * le RENDU de `confirm` passe au `ConfirmDialog` du socle (rôle alertdialog,
+ * focus initial sur Annuler, Échap, verrou de scroll). `alert` garde la
+ * <dialog> native locale : le socle rend toujours ses deux boutons et n'a pas
+ * de mode à bouton unique.
+ */
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<ActiveDialog | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
@@ -29,10 +37,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Ouvre la <dialog> native quand un dialogue est actif (focus trap + ESC).
+  // Ouvre la <dialog> native quand une alerte est active (focus trap + ESC).
   useEffect(() => {
     const el = dialogRef.current;
-    if (!el || !active) return;
+    if (!el || !active || active.type !== 'alert') return;
     if (!el.open) el.showModal();
     const okBtn = el.querySelector<HTMLButtonElement>('[data-result="ok"]');
     okBtn?.focus();
@@ -73,21 +81,11 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   return (
     <DialogContext.Provider value={value}>
       {children}
-      {active && (
+      {active?.type === 'alert' && (
         <dialog ref={dialogRef} className="app-dialog">
           <div className="app-dialog-body">
             <p className="app-dialog-message">{active.message}</p>
             <div className="app-dialog-actions">
-              {active.type === 'confirm' && (
-                <button
-                  type="button"
-                  className="secondary"
-                  data-result="cancel"
-                  onClick={() => settle(false)}
-                >
-                  {active.cancelLabel}
-                </button>
-              )}
               <button
                 type="button"
                 className="primary"
@@ -100,6 +98,15 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           </div>
         </dialog>
       )}
+      <ConfirmDialog
+        open={active?.type === 'confirm'}
+        title={t('common.confirmTitle')}
+        message={active?.type === 'confirm' ? active.message : undefined}
+        confirmLabel={active?.okLabel}
+        cancelLabel={active?.cancelLabel}
+        onConfirm={() => settle(true)}
+        onCancel={() => settle(false)}
+      />
     </DialogContext.Provider>
   );
 }

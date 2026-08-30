@@ -141,6 +141,17 @@ export default defineConfig(({ command }) => {
         siteName: 'Mister CIM-10',
         basePath,
         logoPath: '/icon-192.png',
+        // Script anti-FOUC engendré par le socle (theme-boot), injecté en tête
+        // de <head>. Il interroge `(prefers-color-scheme: dark)` avec repli
+        // clair — l'ancienne IIFE maison interrogeait `light` avec repli
+        // sombre (même défaut corrigé sur miss-badminton). `legacyKeys` migre
+        // la préférence déjà stockée sous `app_theme` vers la clé famille
+        // `dwc_theme`, partagée avec ThemeProvider/useTheme.
+        themeBoot: { legacyKeys: ['app_theme'] },
+        // Deux <meta name="theme-color"> par schéma (attribut media) : la
+        // barre du navigateur suit le système dès le premier rendu ; le choix
+        // explicite contraire au système est couvert par ThemeProvider.
+        themeColor: { light: '#eef2f7', dark: '#0c1222' },
       }),
       VitePWA({
         registerType: 'autoUpdate',

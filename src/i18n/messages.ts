@@ -16,6 +16,7 @@ export const messages = {
       appName: 'Mister CIM-10',
       ok: 'OK',
       cancel: 'Annuler',
+      confirmTitle: 'Confirmation',
       add: 'Ajouter',
       close: 'Fermer',
       validate: 'Valider',
@@ -305,14 +306,6 @@ export const messages = {
       updateAvailable: '🎨 Nouveau logo ! Une mise à jour est disponible.',
       updateAction: 'Mettre à jour',
     },
-    theme: {
-      autoLight:
-        'Thème automatique (affichage clair, suit l’appareil). Clic pour thème clair fixe.',
-      autoDark:
-        'Thème automatique (affichage sombre, suit l’appareil). Clic pour thème clair fixe.',
-      lightFixed: 'Thème clair fixe. Clic pour thème sombre fixe.',
-      darkFixed: 'Thème sombre fixe. Clic pour thème automatique.',
-    },
     footer: {
       privacy:
         'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Rien n’est envoyé à nos serveurs tant que vous n’activez pas la connexion OMS ; seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
@@ -325,6 +318,7 @@ export const messages = {
       appName: 'Mister CIM-10',
       ok: 'OK',
       cancel: 'Cancel',
+      confirmTitle: 'Confirmation',
       add: 'Add',
       close: 'Close',
       validate: 'Validate',
@@ -610,14 +604,6 @@ export const messages = {
     pwa: {
       updateAvailable: '🎨 New logo! An update is available.',
       updateAction: 'Update',
-    },
-    theme: {
-      autoLight:
-        'Automatic theme (light display, follows the device). Click for a fixed light theme.',
-      autoDark:
-        'Automatic theme (dark display, follows the device). Click for a fixed light theme.',
-      lightFixed: 'Fixed light theme. Click for a fixed dark theme.',
-      darkFixed: 'Fixed dark theme. Click for automatic theme.',
     },
     footer: {
       privacy:

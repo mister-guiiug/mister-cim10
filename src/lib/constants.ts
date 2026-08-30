@@ -9,7 +9,9 @@ export const LS_KEYS = {
   WHO_LANG: 'who_icd_lang',
   WHO_PROXY: 'who_icd_proxy_url',
   MIN_CONFIDENCE: 'min_confidence_threshold',
-  THEME: 'app_theme',
+  /** Clé famille du socle (theme-boot/ThemeProvider) ; ex-`app_theme`, migrée
+   *  via `legacyKeys`. */
+  THEME: 'dwc_theme',
   DISCLAIMER_DISMISSED: 'disclaimer_dismissed',
   VALIDATED: 'validated_diagnostics',
   CR_TEXT: 'cr_text',
