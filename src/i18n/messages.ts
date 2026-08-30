@@ -14,9 +14,9 @@ export const messages = {
   fr: {
     common: {
       appName: 'Mister CIM-10',
-      ok: 'OK',
       cancel: 'Annuler',
       confirmTitle: 'Confirmation',
+      alertTitle: 'Information',
       add: 'Ajouter',
       close: 'Fermer',
       validate: 'Valider',
@@ -316,9 +316,9 @@ export const messages = {
   en: {
     common: {
       appName: 'Mister CIM-10',
-      ok: 'OK',
       cancel: 'Cancel',
       confirmTitle: 'Confirmation',
+      alertTitle: 'Information',
       add: 'Add',
       close: 'Close',
       validate: 'Validate',

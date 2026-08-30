@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { ConfirmDialog } from '@mister-guiiug/dev-wpa-config/react/confirm-dialog';
 import { DialogContext, type DialogContextValue } from './DialogContext';
 import { useI18n } from '../i18n';
@@ -13,21 +6,30 @@ import { useI18n } from '../i18n';
 interface ActiveDialog {
   type: 'alert' | 'confirm';
   message: string;
-  okLabel: string;
-  cancelLabel: string;
+  /** `undefined` : le libellé par défaut du socle, qui suit déjà la langue. */
+  okLabel?: string;
+  cancelLabel?: string;
   resolve: (result: boolean) => void;
 }
 
 /**
  * L'API interne (useDialog → alert/confirm en promesses) ne change pas ; seul
- * le RENDU de `confirm` passe au `ConfirmDialog` du socle (rôle alertdialog,
- * focus initial sur Annuler, Échap, verrou de scroll). `alert` garde la
- * <dialog> native locale : le socle rend toujours ses deux boutons et n'a pas
- * de mode à bouton unique.
+ * le RENDU passe au `ConfirmDialog` du socle — les DEUX modes désormais.
+ *
+ * `alert` était resté sur une <dialog> native locale parce que le composant
+ * rendait inconditionnellement deux boutons. Le mode MONO-ACTION du socle
+ * (3.23.0) lève ce blocage : `cancelLabel={null}` — et non `undefined`, qui
+ * garderait le repli « Annuler » — retire le bouton d'annulation, garde le
+ * rôle `alertdialog`, pose le focus initial sur l'action unique et fait
+ * valoir Échap comme le clic sur le voile pour un « OK » (via `onConfirm`).
+ *
+ * Les libellés par défaut ne sont plus tirés du dictionnaire de l'app : le
+ * socle les fournit (« OK », « Annuler ») et le `SocleLabelsBridge` les
+ * accorde à la langue courante. L'app ne nomme donc plus que les titres, que
+ * le socle exige pour donner un nom accessible à la boîte.
  */
 export function DialogProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<ActiveDialog | null>(null);
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const { t } = useI18n();
 
   const settle = useCallback((result: boolean) => {
@@ -37,21 +39,6 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Ouvre la <dialog> native quand une alerte est active (focus trap + ESC).
-  useEffect(() => {
-    const el = dialogRef.current;
-    if (!el || !active || active.type !== 'alert') return;
-    if (!el.open) el.showModal();
-    const okBtn = el.querySelector<HTMLButtonElement>('[data-result="ok"]');
-    okBtn?.focus();
-    const onCancel = (e: Event) => {
-      e.preventDefault();
-      settle(false);
-    };
-    el.addEventListener('cancel', onCancel);
-    return () => el.removeEventListener('cancel', onCancel);
-  }, [active, settle]);
-
   const value = useMemo<DialogContextValue>(
     () => ({
       alert: (message, options) =>
@@ -59,8 +46,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           setActive({
             type: 'alert',
             message,
-            okLabel: options?.okLabel ?? t('common.ok'),
-            cancelLabel: '',
+            okLabel: options?.okLabel,
             resolve: () => resolve(),
           });
         }),
@@ -69,41 +55,27 @@ export function DialogProvider({ children }: { children: ReactNode }) {
           setActive({
             type: 'confirm',
             message,
-            okLabel: options?.okLabel ?? t('common.ok'),
-            cancelLabel: options?.cancelLabel ?? t('common.cancel'),
+            okLabel: options?.okLabel,
+            cancelLabel: options?.cancelLabel,
             resolve,
           });
         }),
     }),
-    [t]
+    []
   );
+
+  const isAlert = active?.type === 'alert';
 
   return (
     <DialogContext.Provider value={value}>
       {children}
-      {active?.type === 'alert' && (
-        <dialog ref={dialogRef} className="app-dialog">
-          <div className="app-dialog-body">
-            <p className="app-dialog-message">{active.message}</p>
-            <div className="app-dialog-actions">
-              <button
-                type="button"
-                className="primary"
-                data-result="ok"
-                onClick={() => settle(true)}
-              >
-                {active.okLabel}
-              </button>
-            </div>
-          </div>
-        </dialog>
-      )}
       <ConfirmDialog
-        open={active?.type === 'confirm'}
-        title={t('common.confirmTitle')}
-        message={active?.type === 'confirm' ? active.message : undefined}
+        open={active !== null}
+        title={isAlert ? t('common.alertTitle') : t('common.confirmTitle')}
+        message={active?.message}
         confirmLabel={active?.okLabel}
-        cancelLabel={active?.cancelLabel}
+        // `null` bascule en mono-action ; `undefined` laisserait « Annuler ».
+        cancelLabel={isAlert ? null : active?.cancelLabel}
         onConfirm={() => settle(true)}
         onCancel={() => settle(false)}
       />
