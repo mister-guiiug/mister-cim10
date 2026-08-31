@@ -154,7 +154,24 @@ export default defineConfig(({ command }) => {
         themeColor: { light: '#eef2f7', dark: '#0c1222' },
       }),
       VitePWA({
-        registerType: 'autoUpdate',
+        // `'prompt'`, et non `'autoUpdate'`. Avec `autoUpdate`, le module
+        // engendré `virtual:pwa-register` n'appelle JAMAIS `onNeedRefresh` (il
+        // n'écoute que `activated`, et recharge la page de lui-même), et
+        // `updateServiceWorker(true)` y est un no-op déclaré :
+        //
+        //   const updateServiceWorker = async () => {
+        //     await registerPromise;
+        //     if (!auto) sendSkipWaitingMessage?.();
+        //   };
+        //
+        // Le bandeau de mise à jour que l'app portait — traduit fr/en, avec son
+        // bouton — était donc structurellement incapable d'apparaître, et le
+        // bouton « Recharger l'application » ne faisait que recharger la même
+        // version depuis le cache. `'prompt'` retire aussi `skipWaiting` et
+        // `clientsClaim` du service worker engendré, ce qui laisse un worker EN
+        // ATTENTE : c'est lui que le bandeau active. Les 13 autres apps de la
+        // famille qui affichent un bandeau sont toutes en `'prompt'`.
+        registerType: 'prompt',
         includeAssets: ['icon-192.png', 'icon-512.png'],
         manifest: {
           name: 'Mister CIM10',

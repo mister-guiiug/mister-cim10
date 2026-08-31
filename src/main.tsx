@@ -14,7 +14,7 @@ import { App } from './App';
 import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';
 import { SocleLabelsBridge } from './components/SocleLabelsBridge';
-import { registerServiceWorker } from './register-sw.js';
+import { PwaUpdates } from './components/PwaUpdates';
 import { initWebVitals } from './monitoring/web-vitals';
 import './tailwind.css';
 import './style.css';
@@ -24,7 +24,6 @@ void initSentry({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
 });
-registerServiceWorker();
 initWebVitals();
 
 const rootEl = document.getElementById('react-root');
@@ -48,11 +47,17 @@ if (rootEl) {
         >
           <I18nProvider>
             <SocleLabelsBridge>
-              <HashRouter>
-                <DialogProvider>
-                  <App />
-                </DialogProvider>
-              </HashRouter>
+              {/* L'enregistrement du service worker vit désormais DANS l'arbre
+                  React : le bandeau de mise à jour est un composant, donc rendu
+                  sous I18nProvider (langue du contexte) et sous
+                  SocleLabelsBridge (libellés secondaires du socle). */}
+              <PwaUpdates>
+                <HashRouter>
+                  <DialogProvider>
+                    <App />
+                  </DialogProvider>
+                </HashRouter>
+              </PwaUpdates>
             </SocleLabelsBridge>
           </I18nProvider>
         </ThemeProvider>

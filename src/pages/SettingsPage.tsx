@@ -7,7 +7,7 @@ import { useSettingsStore } from '../store/settingsStore';
 import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
 import { exportAppData, importAppData } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
-import { reloadApp } from '../register-sw';
+import { UpdateButton } from '@mister-guiiug/dev-wpa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-wpa-config/react/theme-toggle';
 import { useI18n } from '../i18n';
 import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react';
@@ -455,9 +455,19 @@ export function SettingsPage() {
               </h2>
               <p className="settings-hint">{t('settings.appHint')}</p>
               <div className="toolbar">
-                <button type="button" className="secondary" onClick={reloadApp}>
-                  {t('settings.appReload')}
-                </button>
+                {/* Le bouton du socle, sous le fournisseur `AppUpdates` monté
+                    dans `main.tsx` : il partage l'état du bandeau (« Mise à
+                    jour… » pendant l'opération) et n'a donc rien à recevoir.
+                    L'ancien `reloadApp()` postait `SKIP_WAITING` puis
+                    rechargeait au bout de 600 ms — un pari sur une activation
+                    asynchrone, et un no-op complet en `registerType:
+                    'autoUpdate'`. `forceUpdate()` purge le Cache Storage et
+                    navigue vers une URL anti-cache ; `localStorage` (compte
+                    rendu, diagnostics validés, réglages) n'est jamais touché. */}
+                <UpdateButton
+                  className="secondary"
+                  label={t('settings.appReload')}
+                />
               </div>
               <p className="settings-app-version">
                 {t('settings.appVersion', {
