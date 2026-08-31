@@ -300,6 +300,8 @@ export const messages = {
         sessionExpired: 'Session OMS expirée — relancez l’analyse.',
         analyzeFailed: 'Erreur OMS pendant l’analyse (HTTP {status}).',
         unknown: 'Erreur inattendue pendant l’analyse.',
+        offlineSkipped:
+          'Hors connexion : seul le dictionnaire CIM-10 local a répondu, la recherche OMS a été ignorée.',
       },
     },
     pwa: {
@@ -601,6 +603,8 @@ export const messages = {
         sessionExpired: 'WHO session expired — run the analysis again.',
         analyzeFailed: 'WHO error during analysis (HTTP {status}).',
         unknown: 'Unexpected error during analysis.',
+        offlineSkipped:
+          'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
       },
     },
     pwa: {

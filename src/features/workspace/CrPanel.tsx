@@ -1,13 +1,22 @@
 import { useRef, useEffect, type FormEvent } from 'react';
+import type { ActionGuardResult } from '@mister-guiiug/dev-wpa-config/react/use-action-guard';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useDialog } from '../../hooks/useDialog';
 import { useI18n } from '../../i18n';
 
 interface CrPanelProps {
   onAnalyze: () => void;
+  /** Décision du socle sur « Analyser » (motif `offline` en mode OMS seul). */
+  analyzeGuard?: ActionGuardResult;
+  /** Mode mixte hors connexion : l'OMS est sautée, le local a répondu. */
+  omsOfflineNotice?: string | null;
 }
 
-export function CrPanel({ onAnalyze }: CrPanelProps) {
+export function CrPanel({
+  onAnalyze,
+  analyzeGuard,
+  omsOfflineNotice,
+}: CrPanelProps) {
   const crText = useWorkspaceStore(s => s.crText);
   const setCrText = useWorkspaceStore(s => s.setCrText);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
@@ -73,6 +82,9 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
             type="submit"
             className="primary"
             disabled={isAnalyzing || !crText.trim()}
+            // `aria-disabled` et non `disabled` : le bouton reste focusable,
+            // donc son motif reste DÉCOUVRABLE au clavier et au lecteur d'écran.
+            {...analyzeGuard?.disabledProps}
           >
             {isAnalyzing ? t('report.analyzing') : t('common.analyze')}
           </button>
@@ -90,6 +102,16 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
         </div>
       </form>
       <p className="hint">{t('report.dictationHint')}</p>
+      {analyzeGuard?.reason && (
+        <p className="hint offline" role="status">
+          {analyzeGuard.reason}
+        </p>
+      )}
+      {omsOfflineNotice && (
+        <p className="hint offline" role="status">
+          {omsOfflineNotice}
+        </p>
+      )}
       {analyzeError && (
         <p className="hint error" role="alert">
           {analyzeError}
