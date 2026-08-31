@@ -199,7 +199,7 @@ export const messages = {
       backupImport: 'Restaurer tout…',
       appTitle: 'Application',
       appHint:
-        'L’application se met à jour automatiquement. Si elle vous semble figée sur une ancienne version, rechargez-la.',
+        'Une nouvelle version vous est annoncée par un bandeau. Si l’application vous semble figée sur une ancienne version, rechargez-la : le cache est vidé, vos données restent sur cet appareil.',
       appReload: 'Recharger l’application',
       appVersion: 'Mister CIM-10 v{version} · build {build}',
       familyTitle: 'Nos autres applications',
@@ -503,7 +503,7 @@ export const messages = {
       backupImport: 'Restore everything…',
       appTitle: 'Application',
       appHint:
-        'The app updates automatically. If it seems stuck on an old version, reload it.',
+        'A banner announces each new version. If the app seems stuck on an old version, reload it: the cache is cleared, your data stays on this device.',
       appReload: 'Reload the app',
       appVersion: 'Mister CIM-10 v{version} · build {build}',
       familyTitle: 'Our other apps',
