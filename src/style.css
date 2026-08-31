@@ -1418,10 +1418,18 @@ button.primary:hover {
   filter: brightness(1.06);
 }
 
-button.primary:disabled {
+/* `aria-disabled` traité comme `:disabled` À L'ŒIL, mais le bouton reste
+   focusable : c'est tout l'intérêt du garde du socle — l'utilisateur peut
+   l'atteindre au clavier et entendre POURQUOI il est bloqué. */
+button.primary:disabled,
+button.primary[aria-disabled='true'] {
   opacity: 0.55;
   filter: none;
   cursor: not-allowed;
+}
+
+button.primary[aria-disabled='true']:hover {
+  filter: none;
 }
 
 button.secondary {
@@ -1503,6 +1511,16 @@ button.ghost:hover {
 .hint.error {
   color: var(--danger);
   border-left: 3px solid var(--danger);
+  padding-left: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+/* Indisponibilité réseau : un constat, pas une erreur — d'où le ton neutre
+   plutôt que le rouge de `.hint.error`. Rien n'est cassé, l'OMS est hors
+   d'atteinte. */
+.hint.offline {
+  color: var(--text);
+  border-left: 3px solid var(--muted);
   padding-left: 0.65rem;
   margin-top: 0.65rem;
 }

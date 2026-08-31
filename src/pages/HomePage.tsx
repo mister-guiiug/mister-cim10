@@ -1,3 +1,5 @@
+import { useActionGuard } from '@mister-guiiug/dev-wpa-config/react/use-action-guard';
+import { useOnline } from '@mister-guiiug/dev-wpa-config/react/use-online';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';
@@ -20,6 +22,22 @@ export function HomePage() {
   const isReady = useSettingsStore(s => s.isReady());
   const { t } = useI18n();
 
+  /**
+   * L'OMS est le SEUL appel réseau de l'app ; le dictionnaire CIM-10, lui, est
+   * embarqué et répond hors connexion. D'où deux traitements distincts :
+   *
+   *   - mode « api » : l'OMS est l'unique source. Hors connexion le bouton n'a
+   *     rien à produire, on le garde (motif `offline` du socle, message affiché).
+   *   - mode « both » : le local suffit à répondre. Le bouton RESTE actif, et
+   *     seule la moitié OMS s'annonce indisponible. Avant, l'échec de l'OMS
+   *     levait avant `setSuggestions` : les résultats locaux déjà calculés
+   *     partaient à la poubelle et l'utilisateur repartait les mains vides.
+   *   - mode « local » (défaut) : rien ne change, aucun mot.
+   */
+  const isOnline = useOnline();
+  const analyzeGuard = useActionGuard({ online: mode === 'api' });
+  const omsSkipped = mode === 'both' && !isOnline;
+
   const handleAnalyze = async () => {
     if (!isReady) {
       setAnalyzeError(t('errors.configure'));
@@ -37,8 +55,9 @@ export function HomePage() {
       if (mode === 'local' || mode === 'both') {
         results.push(...suggestFromText(crText));
       }
-      // OMS CIM-11 via la passerelle (réseau).
-      if (mode === 'api' || mode === 'both') {
+      // OMS CIM-11 via la passerelle (réseau) — sautée hors connexion, où elle
+      // ne peut qu'échouer : la partie locale, elle, a déjà répondu.
+      if ((mode === 'api' || mode === 'both') && isOnline) {
         results.push(...(await suggestFromOms(crText, who)));
       }
       // Dédup par code (CIM-10 et CIM-11 ne se chevauchent pas), tri par confiance.
@@ -65,7 +84,14 @@ export function HomePage() {
     <>
       <AppHeader />
       <main id="main-content" className="workspace" tabIndex={-1}>
-        <CrPanel onAnalyze={handleAnalyze} />
+        <CrPanel
+          // `wrap` neutralise le clic quand le garde bloque : `aria-disabled`
+          // laisse le bouton focusable (donc son motif atteignable), il ne
+          // l'empêche pas de se déclencher.
+          onAnalyze={analyzeGuard.wrap(handleAnalyze)}
+          analyzeGuard={analyzeGuard}
+          omsOfflineNotice={omsSkipped ? t('errors.oms.offlineSkipped') : null}
+        />
         <SuggestionsPanel />
         <ValidatedPanel />
       </main>
