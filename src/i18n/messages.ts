@@ -194,7 +194,7 @@ export const messages = {
       shareButton: 'Partager ou copier le lien',
       backupTitle: 'Sauvegarde et Restauration',
       backupHint:
-        'Téléchargez toutes vos données (favoris, historique, sessions, paramètres) dans un fichier pour les sauvegarder ou les transférer.',
+        'Téléchargez vos données (compte-rendu en cours, diagnostics retenus, paramètres) dans un fichier pour les sauvegarder ou les transférer. Le mot secret OMS n’y figure pas : saisissez-le à nouveau sur l’appareil restauré.',
       backupExport: 'Sauvegarder tout (.json)',
       backupImport: 'Restaurer tout…',
       appTitle: 'Application',
@@ -498,7 +498,7 @@ export const messages = {
       shareButton: 'Share or copy the link',
       backupTitle: 'Backup and restore',
       backupHint:
-        'Download all your data (favorites, history, sessions, settings) to a file to back it up or transfer it.',
+        'Download your data (current report, kept diagnoses, settings) to a file to back it up or transfer it. The WHO client secret is not included: enter it again on the restored device.',
       backupExport: 'Back up everything (.json)',
       backupImport: 'Restore everything…',
       appTitle: 'Application',
