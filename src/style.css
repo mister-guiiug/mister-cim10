@@ -2706,6 +2706,13 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
   min-width: 86px;
 }
 
+/* La restauration d'une sauvegarde rend une LISTE de motifs de refus
+   (`validateBackup`), affichée une par ligne : sans ça, les retours à la ligne
+   sont repliés et les motifs se collent bout à bout en une phrase illisible. */
+[data-dwc='confirm-body'] {
+  white-space: pre-line;
+}
+
 /* ── Card confidence left border ── */
 .card[data-conf='high'] {
   border-left: 3px solid color-mix(in srgb, var(--ok) 60%, transparent);

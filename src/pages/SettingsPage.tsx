@@ -4,8 +4,7 @@ import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
-import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
-import { exportAppData, importAppData } from '../lib/storage';
+import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-wpa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-wpa-config/react/theme-toggle';
@@ -67,18 +66,23 @@ export function SettingsPage() {
   const showWhoSection = mode !== 'local';
 
   const handleExportAll = () => {
-    const json = exportAppData();
-    const blob = new Blob([json], { type: 'application/json' });
-    downloadBlob(blob, `mister-cim10-backup-${dateSlug()}.json`);
+    downloadAppBackup();
   };
 
   const handleImportAll = async (file: File) => {
     const text = await file.text();
     if (await dialog.confirm(t('settings.restoreConfirm'))) {
-      if (importAppData(text)) {
+      const result = restoreAppBackup(text);
+      if (result.ok) {
         window.location.reload();
       } else {
-        await dialog.alert(t('settings.importError'));
+        // Les motifs de refus sont AFFICHÉS, pas journalisés : l'utilisateur
+        // doit savoir si son fichier est illisible ou vient d'une autre app.
+        await dialog.alert(
+          `${t('settings.importError')}\n\n${result.problems
+            .map(p => `• ${p}`)
+            .join('\n')}`
+        );
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
