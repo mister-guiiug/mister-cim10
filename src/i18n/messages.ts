@@ -310,7 +310,9 @@ export const messages = {
       privacy:
         'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Rien n’est envoyé à nos serveurs tant que vous n’activez pas la connexion OMS ; seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
       source: 'Code source sur GitHub',
-      coffee: '☕ Buy me a coffee',
+      // L'émoji ☕ est retiré : le composant du socle rend déjà une icône tasse
+      // devant le libellé, on affichait deux cafés côte à côte.
+      coffee: 'Buy me a coffee',
     },
   },
   en: {
@@ -609,7 +611,7 @@ export const messages = {
       privacy:
         'No clinical data is stored on our servers: the report and analysis stay in your browser. Nothing is sent to our servers until you enable the WHO connection; only your settings may be saved locally on this device.',
       source: 'Source code on GitHub',
-      coffee: '☕ Buy me a coffee',
+      coffee: 'Buy me a coffee',
     },
   },
 } as const;
