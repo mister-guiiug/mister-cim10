@@ -1,4 +1,4 @@
-import { useEffect, type ComponentType, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Routes, Route, useLocation, Navigate, Link } from 'react-router-dom';
 import { BottomNav } from '@mister-guiiug/dev-wpa-config/react/bottom-nav';
 import { HomePage } from './pages/HomePage';
@@ -122,15 +122,14 @@ export function App() {
           icon,
           end,
         }))}
-        // `linkComponent` est typé `ComponentType<Record<string, unknown>>`,
-        // qui refuse un composant à prop obligatoire — donc `Link` et son
-        // `to`, alors que c'est l'usage documenté du socle. La conversion est
-        // sûre : `hrefProp` fournit précisément `to`. `Link` plutôt que
-        // `NavLink` : l'état actif (aria-current, data-current) est déjà
-        // calculé par le socle, inutile de le calculer deux fois.
-        linkComponent={
-          Link as unknown as ComponentType<Record<string, unknown>>
-        }
+        // Le socle 3.32.0 a élargi `linkComponent` à `ComponentType<any>` :
+        // le type refusait jusque-là tout composant à prop OBLIGATOIRE, donc
+        // précisément `Link` et son `to` — l'usage que sa propre documentation
+        // donne en exemple. Cinq apps portaient la même conversion.
+        //
+        // `Link` plutôt que `NavLink` : l'état actif (aria-current,
+        // data-current) est déjà calculé par le socle, inutile deux fois.
+        linkComponent={Link}
         hrefProp="to"
       />
     </>
