@@ -1,5 +1,5 @@
 import { LS_KEYS } from './constants';
-import type { AnalyzeMode, AnalyzeSettings, WhoSettings } from '../types/index';
+import type { AnalyzeMode, WhoSettings } from '../types/index';
 
 export function readAnalyzeMode(): AnalyzeMode {
   const v = localStorage.getItem(LS_KEYS.ANALYZE_MODE);
@@ -48,19 +48,4 @@ export function readMinConfidenceThreshold(): number {
 export function writeMinConfidenceThreshold(value: number): void {
   const safe = Number.isFinite(value) ? Math.max(0.1, Math.min(1, value)) : 0.4;
   localStorage.setItem(LS_KEYS.MIN_CONFIDENCE, safe.toFixed(2));
-}
-
-export function readAnalyzeSettings(): AnalyzeSettings {
-  return {
-    mode: readAnalyzeMode(),
-    minConfidence: readMinConfidenceThreshold(),
-    ...readWhoSettings(),
-  };
-}
-
-export function isSettingsReadyForDailyUse(): boolean {
-  const mode = readAnalyzeMode();
-  if (mode === 'local') return true;
-  const { clientId, clientSecret, proxyUrl } = readWhoSettings();
-  return Boolean(clientId && clientSecret && proxyUrl);
 }

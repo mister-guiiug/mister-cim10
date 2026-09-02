@@ -2,6 +2,9 @@ import type { ReactNode } from 'react';
 import { registerSW } from 'virtual:pwa-register';
 import { AppUpdates } from '@mister-guiiug/dev-wpa-config/react/app-updates';
 import { useI18n } from '../i18n';
+import { createLogger } from '@mister-guiiug/dev-wpa-config/logger';
+
+const log = createLogger('pwa');
 
 /**
  * Mise à jour de l'application : enregistrement du service worker, bandeau
@@ -61,7 +64,7 @@ export function PwaUpdates({ children }: { children: ReactNode }) {
         console.log('[PWA] Service worker registered', swUrl, registration);
       }}
       onRegisterError={error => {
-        console.error('[PWA] Service worker registration error', error);
+        log.error('Service worker registration error', { error });
       }}
     >
       {children}

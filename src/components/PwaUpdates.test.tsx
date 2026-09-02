@@ -110,9 +110,11 @@ describe('PwaUpdates', () => {
     act(() => {
       swStub.registerError(boom);
     });
+    // Par le journal du socle (`createLogger('pwa')`) : préfixe du logger,
+    // erreur portée dans les données.
     expect(error).toHaveBeenCalledWith(
-      '[PWA] Service worker registration error',
-      boom
+      '[pwa] Service worker registration error',
+      { error: boom }
     );
 
     log.mockRestore();
