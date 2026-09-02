@@ -174,6 +174,8 @@ export default defineConfig(({ command }) => {
         registerType: 'prompt',
         includeAssets: ['icon-192.png', 'icon-512.png'],
         manifest: {
+          id: basePath,
+          lang: 'fr',
           name: 'Mister CIM10',
           short_name: 'CIM10',
           description: 'Explorateur interactif de la classification CIM10',
@@ -190,6 +192,12 @@ export default defineConfig(({ command }) => {
               src: 'icon-512.png',
               sizes: '512x512',
               type: 'image/png',
+            },
+            {
+              src: 'icon-maskable-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable',
             },
           ],
           screenshots: [
