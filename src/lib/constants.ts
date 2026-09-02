@@ -5,9 +5,6 @@
 import './storage-migration';
 import { APP_PREFIX } from './storage-migration';
 
-export const FOOTER_NOTE =
-  'Outil expérimental sans valeur officielle. Vérifiez chaque code avant utilisation.';
-
 /**
  * Clés `localStorage` de l'app.
  *
