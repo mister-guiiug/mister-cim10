@@ -34,13 +34,37 @@ const WHO: WhoSettings = {
   lang: 'fr',
 };
 
+/**
+ * Bascule la connectivité — et la fait PARVENIR au composant avant de rendre
+ * la main.
+ *
+ * `dispatchEvent` seul ne suffit pas. `useOnline` du socle réagit dans un
+ * écouteur d'événement, donc hors de React : la mise à jour d'état part au
+ * planificateur, qui ne la rend qu'à la macrotâche suivante. Entre les deux, le
+ * composant garde un `isOnline` PÉRIMÉ — et un test qui clique dans cet
+ * intervalle analyse comme s'il était en ligne : l'OMS est interrogée, le
+ * `fetch` doublé échoue, `setSuggestions` n'est jamais atteint, et les
+ * suggestions restent à zéro POUR TOUJOURS.
+ *
+ * C'est ce qui a fait échouer « mode mixte » le 04/09/2026 sur la PR #43 : les
+ * 1081 ms du test étaient 1000 ms d'attente morte (le défaut de `waitFor`) plus
+ * ~80 ms de travail réel, pas une analyse lente — le dictionnaire CIM-10 répond
+ * en 2 ms. Le socle n'y était pour rien : son `useOnline` est identique en
+ * 3.33.0 et 3.34.0. La PR n'a fait que perdre le tirage au sort.
+ *
+ * `act` vide la file de React avant de rendre : à la ligne suivante, la bascule
+ * EST rendue. Plus de course — et plus d'avertissement « An update to HomePage
+ * inside a test was not wrapped in act(...) ».
+ */
 function setOnline(value: boolean) {
   Object.defineProperty(navigator, 'onLine', {
     value,
     configurable: true,
     writable: true,
   });
-  window.dispatchEvent(new Event(value ? 'online' : 'offline'));
+  act(() => {
+    window.dispatchEvent(new Event(value ? 'online' : 'offline'));
+  });
 }
 
 function renderHome() {
@@ -83,9 +107,7 @@ describe('HomePage hors connexion', () => {
     renderHome();
 
     setOnline(false);
-    await waitFor(() =>
-      expect(analyzeButton()).toHaveAttribute('aria-disabled', 'true')
-    );
+    expect(analyzeButton()).toHaveAttribute('aria-disabled', 'true');
     // Le motif est AFFICHÉ : un bouton grisé muet n'apprend rien.
     expect(screen.getByText('Indisponible hors ligne')).toBeInTheDocument();
 
@@ -103,13 +125,23 @@ describe('HomePage hors connexion', () => {
     renderHome();
 
     setOnline(false);
-    await waitFor(() =>
-      expect(analyzeButton()).not.toHaveAttribute('aria-disabled')
-    );
+    expect(analyzeButton()).not.toHaveAttribute('aria-disabled');
+    // AVANT DE CLIQUER, exiger le témoin que la bascule est rendue. Ici se
+    // cachait la course : un `waitFor` sur l'absence d'`aria-disabled` passait
+    // au premier essai — en mode mixte le bouton ne la porte JAMAIS — et
+    // n'attendait donc rien du tout. L'échec, lui, tombait mille millisecondes
+    // plus loin sur des suggestions vides, à l'autre bout du test.
+    expect(
+      screen.getByText(/la recherche OMS a été ignorée/)
+    ).toBeInTheDocument();
 
     await act(async () => {
       fireEvent.click(analyzeButton());
     });
+    // `waitFor` parce que `handleAnalyze` est une fonction ASYNCHRONE, pas
+    // parce que le dictionnaire serait lent : il rend ses codes en ~2 ms. Le
+    // défaut de 1 s est donc large — l'allonger ne rendrait pas ce test plus
+    // sûr, il rendrait seulement ses échecs plus lents à venir.
     await waitFor(() =>
       expect(
         useWorkspaceStore.getState().suggestions.length
