@@ -3,6 +3,13 @@ dist/
 .DS_Store
 *.log
 
+# Fichiers d'environnement. Ce dépôt était le SEUL du parc à ne pas les couvrir
+# (relevé du 04/09/2026) : un `.env` posé ici partait au prochain `git add`,
+# dans un dépôt public. `.env.example`, lui, est la documentation — il reste.
+.env
+.env.*
+!.env.example
+
 # Playwright
 test-results/
 playwright-report/
