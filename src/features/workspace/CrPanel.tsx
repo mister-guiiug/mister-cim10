@@ -1,5 +1,5 @@
 import { useRef, useEffect, type FormEvent } from 'react';
-import type { ActionGuardResult } from '@mister-guiiug/dev-wpa-config/react/use-action-guard';
+import type { ActionGuardResult } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useDialog } from '../../hooks/useDialog';
 import { useI18n } from '../../i18n';

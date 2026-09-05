@@ -1,8 +1,8 @@
-import { AppFooter as SocleAppFooter } from '@mister-guiiug/dev-wpa-config/react/app-footer';
+import { AppFooter as SocleAppFooter } from '@mister-guiiug/dev-pwa-config/react/app-footer';
 import {
   SPONSOR_URL,
   repoUrl,
-} from '@mister-guiiug/dev-wpa-config/apps-catalog';
+} from '@mister-guiiug/dev-pwa-config/apps-catalog';
 import { useI18n } from '../i18n';
 
 /**

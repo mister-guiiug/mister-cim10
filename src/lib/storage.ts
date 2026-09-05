@@ -1,6 +1,6 @@
 /**
  * Sauvegarde et restauration des données de l'app, sur le module partagé
- * `@mister-guiiug/dev-wpa-config/backup`.
+ * `@mister-guiiug/dev-pwa-config/backup`.
  *
  * CE QUE LA VERSION PRÉCÉDENTE FAISAIT, ET POURQUOI IL FALLAIT L'ARRÊTER.
  * L'export énumérait une LISTE BLANCHE de seize noms de clés tenue à la main ;
@@ -42,9 +42,9 @@ import {
   restoreBackup,
   BACKUP_FORMAT,
   BACKUP_VERSION,
-} from '@mister-guiiug/dev-wpa-config/backup';
-import { createStore } from '@mister-guiiug/dev-wpa-config/storage';
-import { dateSlug, downloadJson } from '@mister-guiiug/dev-wpa-config/download';
+} from '@mister-guiiug/dev-pwa-config/backup';
+import { createStore } from '@mister-guiiug/dev-pwa-config/storage';
+import { dateSlug, downloadJson } from '@mister-guiiug/dev-pwa-config/download';
 import { APP_PREFIX, LEGACY_KEY_MAP } from './storage-migration';
 
 /** Identité de l'app dans le fichier de sauvegarde. */

@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UpdateButton } from '@mister-guiiug/dev-wpa-config/react/update-button';
-import { swStub } from '@mister-guiiug/dev-wpa-config/testing/pwa-register';
+import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
+import { swStub } from '@mister-guiiug/dev-pwa-config/testing/pwa-register';
 import { I18nProvider, LOCALE_STORAGE_KEY } from '../i18n';
 import { SocleLabelsBridge } from './SocleLabelsBridge';
 import { PwaUpdates } from './PwaUpdates';

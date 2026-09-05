@@ -11,7 +11,7 @@
  * CE QUE LE PRÉFIXE DÉBLOQUE, au-delà de la collision : `createStore('cim10_')`
  * sait ÉNUMÉRER les données de l'app, ce qu'une liste blanche écrite à la main
  * ne sait pas faire de façon fiable (voir `./storage.ts`). C'est la condition
- * d'entrée du module `@mister-guiiug/dev-wpa-config/backup`.
+ * d'entrée du module `@mister-guiiug/dev-pwa-config/backup`.
  *
  * CE QUI NE PASSE PAS SOUS LE PRÉFIXE. `dwc_theme` appartient à la FAMILLE, pas
  * à l'app : c'est le `DEFAULT_STORAGE_KEY` du socle, lu par le script anti-FOUC
@@ -34,7 +34,7 @@ import {
   readRaw,
   writeRaw,
   removeKey,
-} from '@mister-guiiug/dev-wpa-config/storage';
+} from '@mister-guiiug/dev-pwa-config/storage';
 
 /** Préfixe d'identité de l'app dans le `localStorage` partagé de la famille. */
 export const APP_PREFIX = 'cim10_';

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { registerSW } from 'virtual:pwa-register';
-import { AppUpdates } from '@mister-guiiug/dev-wpa-config/react/app-updates';
+import { AppUpdates } from '@mister-guiiug/dev-pwa-config/react/app-updates';
 import { useI18n } from '../i18n';
-import { createLogger } from '@mister-guiiug/dev-wpa-config/logger';
+import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
 
 const log = createLogger('pwa');
 
