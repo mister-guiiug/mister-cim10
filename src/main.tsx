@@ -4,13 +4,13 @@ import { HashRouter } from 'react-router-dom';
 import {
   ErrorBoundary,
   ThemeProvider,
-} from '@mister-guiiug/dev-wpa-config/react';
+} from '@mister-guiiug/dev-pwa-config/react';
 import {
   installErrorReporter,
   initSentry,
   recordError,
-} from '@mister-guiiug/dev-wpa-config/react/observability';
-import { initWebVitals } from '@mister-guiiug/dev-wpa-config/web-vitals';
+} from '@mister-guiiug/dev-pwa-config/react/observability';
+import { initWebVitals } from '@mister-guiiug/dev-pwa-config/web-vitals';
 import { App } from './App';
 import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';

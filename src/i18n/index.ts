@@ -1,4 +1,4 @@
-import { createI18n } from '@mister-guiiug/dev-wpa-config/react/i18n';
+import { createI18n } from '@mister-guiiug/dev-pwa-config/react/i18n';
 import { messages } from './messages';
 
 /** Clé localStorage de persistance du choix de langue (partagée avec le SW). */

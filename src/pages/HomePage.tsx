@@ -1,5 +1,5 @@
-import { useActionGuard } from '@mister-guiiug/dev-wpa-config/react/use-action-guard';
-import { useOnline } from '@mister-guiiug/dev-wpa-config/react/use-online';
+import { useActionGuard } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
+import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';

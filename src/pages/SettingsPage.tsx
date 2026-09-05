@@ -6,10 +6,10 @@ import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
-import { UpdateButton } from '@mister-guiiug/dev-wpa-config/react/update-button';
-import { ThemeToggle } from '@mister-guiiug/dev-wpa-config/react/theme-toggle';
+import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
+import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import { useI18n } from '../i18n';
-import { FamilyApps } from '@mister-guiiug/dev-wpa-config/react';
+import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react';
 
 export function SettingsPage() {
   const mode = useSettingsStore(s => s.mode);

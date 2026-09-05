@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { Routes, Route, useLocation, Navigate, Link } from 'react-router-dom';
-import { BottomNav } from '@mister-guiiug/dev-wpa-config/react/bottom-nav';
+import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
 import { HomePage } from './pages/HomePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { HelpPage } from './pages/HelpPage';

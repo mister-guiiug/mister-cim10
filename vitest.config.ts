@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
-import { baseTestOptions } from '@mister-guiiug/dev-wpa-config/vitest-base';
+import { baseTestOptions } from '@mister-guiiug/dev-pwa-config/vitest-base';
 
 export default defineConfig({
   test: baseTestOptions,
@@ -16,7 +16,7 @@ export default defineConfig({
       // jamais qu'un bandeau peut s'afficher.
       'virtual:pwa-register': fileURLToPath(
         import.meta
-          .resolve('@mister-guiiug/dev-wpa-config/testing/pwa-register')
+          .resolve('@mister-guiiug/dev-pwa-config/testing/pwa-register')
       ),
     },
   },

@@ -124,7 +124,7 @@ Si l'outil vous est utile, vous pouvez soutenir son développement :
 | Style        | [Tailwind CSS 4](https://tailwindcss.com/) + classes legacy de [`style.css`](src/style.css)                                                                                                                 |
 | State        | [Zustand 5](https://zustand-demo.pmnd.rs/) — `settingsStore`, `workspaceStore`                                                                                                                              |
 | Tests        | [Vitest 4](https://vitest.dev/) (jsdom) + [Testing Library React](https://testing-library.com/) + [Playwright](https://playwright.dev/) + [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) |
-| Qualité      | TypeScript ~6.0 strict + ESLint 9 flat + Prettier 3, mutualisés via [`@mister-guiiug/dev-wpa-config`](../dev-wpa-config/README.md)                                                                          |
+| Qualité      | TypeScript ~6.0 strict + ESLint 9 flat + Prettier 3, mutualisés via [`@mister-guiiug/dev-pwa-config`](../dev-pwa-config/README.md)                                                                          |
 | Monitoring   | [web-vitals 4](https://web.dev/vitals/)                                                                                                                                                                     |
 | PWA          | [`vite-plugin-pwa 1.3`](https://vite-pwa-org.netlify.app/) (Workbox `generateSW`)                                                                                                                           |
 | Proxy CORS   | [Cloudflare Workers](workers/README.md) (optionnel)                                                                                                                                                         |
@@ -153,7 +153,7 @@ npm run type-check   # TypeScript strict (tsc --noEmit)
 npm run lint         # ESLint flat config
 ```
 
-Setup partagé : [`src/test/setup.ts`](src/test/setup.ts) charge `@testing-library/jest-dom/vitest`. Les options Vitest viennent de [`@mister-guiiug/dev-wpa-config/vitest-base`](../dev-wpa-config/vitest-base.js) (jsdom + globals + passWithNoTests).
+Setup partagé : [`src/test/setup.ts`](src/test/setup.ts) charge `@testing-library/jest-dom/vitest`. Les options Vitest viennent de [`@mister-guiiug/dev-pwa-config/vitest-base`](../dev-pwa-config/vitest-base.js) (jsdom + globals + passWithNoTests).
 
 ### Débogage VS Code / Cursor
 

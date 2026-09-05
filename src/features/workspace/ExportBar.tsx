@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { dateSlug, downloadBlob } from '@mister-guiiug/dev-wpa-config/download';
-import { toCsv } from '@mister-guiiug/dev-wpa-config/csv';
+import { dateSlug, downloadBlob } from '@mister-guiiug/dev-pwa-config/download';
+import { toCsv } from '@mister-guiiug/dev-pwa-config/csv';
 import { useI18n } from '../../i18n';
 import type { ValidatedDiagnostic } from '../../types/index';
 
