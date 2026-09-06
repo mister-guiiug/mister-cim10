@@ -15,37 +15,123 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
     ).toBeVisible();
   });
 
-  test('recherche CIM-10 fonctionnelle', async ({ page }) => {
+  /**
+   * LE PARCOURS QUI MANQUAIT : coter un terme ABSENT du compte-rendu.
+   *
+   * Rien n'est saisi dans le compte-rendu, rien n'est analysé — c'est tout
+   * l'intérêt. On tape « diabète » dans la recherche de code, on ajoute E11.9
+   * aux diagnostics retenus, et on l'exporte. Sans passer par « Analyser »,
+   * ce parcours était impossible : le seul champ de l'écran filtrait des
+   * suggestions qui n'existaient pas.
+   *
+   * Les assertions ne dépendent d'aucune classe CSS : rôles et libellés
+   * accessibles seulement. Un test qui interroge `.result, .entry, [data-code]`
+   * — trois sélecteurs dont aucun n'existe dans cette application — passe quoi
+   * qu'il arrive, et c'est ce que faisait la version précédente de ce test.
+   */
+  test('recherche d’un code par libellé, puis export @critical', async ({
+    page,
+  }) => {
     await page.goto('/');
 
-    // Trouver le champ de recherche
-    const searchInput = page
-      .locator(
-        'input[type="search"], input[placeholder*="rechercher"], input[placeholder*="search"]'
-      )
-      .first();
+    const searchInput = page.getByRole('searchbox', {
+      name: /chercher un code|search an icd-10 code/i,
+    });
+    await expect(searchInput).toBeVisible();
+    await searchInput.fill('diabète');
 
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('diabete');
-      await page.waitForTimeout(500);
+    const results = page.getByRole('list', {
+      name: /résultats de la recherche|code search results/i,
+    });
+    await expect(results).toBeVisible();
+    const ligneE11 = results.getByRole('listitem').filter({ hasText: 'E11.9' });
+    await expect(ligneE11).toHaveCount(1);
 
-      // Vérifier que des résultats apparaissent
-      await expect(page.locator('.result, .entry, [data-code]')).toHaveCount(
-        await page.locator('.result, .entry, [data-code]').count(),
-        { timeout: 5000 }
-      );
-    }
+    await ligneE11.getByRole('button').click();
+
+    // Le code est passé dans les diagnostics retenus…
+    const retenus = page.locator('.panel--validated');
+    await expect(retenus.getByText('E11.9').first()).toBeVisible();
+    // …et le bouton de la ligne de recherche dit qu'il y est déjà.
+    await expect(ligneE11.getByRole('button')).toBeDisabled();
+
+    // …et l'export part avec lui.
+    const downloadPromise = page.waitForEvent('download');
+    await retenus
+      .getByRole('button', { name: /texte \(\.txt\)|text \(\.txt\)/i })
+      .click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/^cim10-.*\.txt$/);
+  });
+
+  /**
+   * « Retrouver le dossier d'hier » : enregistrer sous un nom, tout effacer,
+   * rouvrir. Le compte-rendu doit revenir mot pour mot.
+   */
+  test('dossier enregistré, effacé, rouvert @critical', async ({ page }) => {
+    await page.goto('/');
+
+    const cr = page.getByRole('textbox', {
+      name: /texte du compte-rendu|report text/i,
+    });
+    await cr.fill('Patient hypertendu suivi depuis 2019.');
+
+    // Le bloc des dossiers est un <details> replié par défaut.
+    await page.locator('.sessions-block > summary').click();
+
+    await page
+      .getByRole('textbox', { name: /nom du dossier|name of the case/i })
+      .fill('séjour du 12/05');
+    await page.getByRole('button', { name: /^(enregistrer|save)$/i }).click();
+
+    await cr.fill('');
+    await expect(cr).toHaveValue('');
+
+    await page.getByRole('button', { name: /rouvrir|reopen/i }).click();
+    // La confirmation vient du ConfirmDialog du socle, pas de `window.confirm`.
+    await page.locator('[data-dwc="confirm-confirm"]').click();
+
+    await expect(cr).toHaveValue('Patient hypertendu suivi depuis 2019.');
+  });
+
+  /**
+   * Le canal de retour. Le lien du pied de page (socle `AppFooter issues`) doit
+   * pointer sur le gabarit d'anomalie du compte ET arriver prérempli : sans la
+   * version et l'environnement, la première réponse à tout signalement est
+   * « quelle version ? ». Le lien est recalculé AU CLIC, on lit donc l'attribut
+   * après avoir cliqué.
+   */
+  test('pied de page — « Signaler un problème » prérempli @critical', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const lien = page.locator('a[data-dwc="footer-issues"]').first();
+    await expect(lien).toBeVisible();
+
+    const href = await lien.getAttribute('href');
+    expect(href).toContain(
+      'https://github.com/mister-guiiug/mister-cim10/issues/new'
+    );
+    const params = new URL(href as string).searchParams;
+    expect(params.get('template')).toBe('bug.yml');
+    // La version qui tourne, et l'écran + le navigateur d'où part le rapport.
+    expect(params.get('version')).toBeTruthy();
+    expect(params.get('environnement')).toContain('écran');
   });
 
   test('navigation responsive', async ({ page }) => {
-    // Test mobile
+    // `body` est visible par construction : l'assertion précédente
+    // (`body, main, #app`) passait sur n'importe quelle page, y compris une
+    // page blanche. On interroge le plan de travail et la barre basse.
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await expect(page.locator('body, main, #app').first()).toBeVisible();
+    await expect(page.locator('main#main-content')).toBeVisible();
+    await expect(page.locator('[data-dwc="bottom-nav"]')).toBeVisible();
 
-    // Test desktop
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await expect(page.locator('body, main, #app').first()).toBeVisible();
+    await expect(page.locator('main#main-content')).toBeVisible();
+    await expect(page.locator('[data-dwc="bottom-nav"]')).toBeVisible();
   });
 
   test('accessibilité - navigation clavier', async ({ page }) => {
@@ -97,125 +183,64 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
   test('paramètres - accès et navigation', async ({ page }) => {
     await page.goto('/');
 
-    // Naviguer vers les paramètres
-    const settingsButton = page
-      .locator(
-        'a[href*="parametres"], a[href*="settings"], button:has-text("Paramètres")'
+    // Sans `if`, volontairement : le lien EXISTE (barre basse du socle). Une
+    // condition ici ne protégeait de rien — elle transformait sa disparition
+    // en test vert.
+    await page
+      .locator('a[href*="parametres"], a[href*="settings"]')
+      .first()
+      .click();
+    await expect(page).toHaveURL(/parametres|settings/i);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
+  });
+
+  /**
+   * Une recherche sans réponse doit LE DIRE. Un champ qui se vide en silence
+   * laisse croire à une panne ; ici, le référentiel embarqué est un
+   * échantillon, et c'est exactement ce que le message rappelle.
+   */
+  test('recherche - une requête sans réponse le dit @critical', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await page
+      .getByRole('searchbox', {
+        name: /chercher un code|search an icd-10 code/i,
+      })
+      .fill('xyz123abc456');
+
+    await expect(
+      page.getByText(
+        /aucun code du référentiel embarqué|no code in the built-in reference/i
       )
-      .first();
-
-    if (await settingsButton.isVisible()) {
-      await settingsButton.click();
-      await expect(page).toHaveURL(/parametres|settings/i);
-
-      // Vérifier que la page de paramètres se charge
-      await expect(page.locator('h1, h2, .settings').first()).toBeVisible();
-    }
+    ).toBeVisible();
   });
 
-  test('recherche - gestion résultats vides', async ({ page }) => {
+  /**
+   * Hors connexion, la recherche répond quand même : le dictionnaire CIM-10 est
+   * EMBARQUÉ dans le bundle, il n'y a aucun appel réseau à faire. C'est la
+   * promesse du README (« fonctionne hors connexion »), et l'assertion
+   * précédente — `toHaveCount(await …count())` — était vraie par construction.
+   */
+  test('hors connexion - la recherche de code répond @critical', async ({
+    page,
+  }) => {
     await page.goto('/');
-
-    const searchInput = page
-      .locator('input[type="search"], input[placeholder*="rechercher"]')
-      .first();
-
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('xyz123abc456');
-      await page.waitForTimeout(1000);
-
-      // Vérifier qu'un message "aucun résultat" s'affiche (le message peut ne pas s'afficher immédiatement)
-      void page.locator(
-        'text=aucun résultat, text=no results, text=aucune entrée'
-      );
-    }
-  });
-
-  test('code CIM-10 - affichage détails', async ({ page }) => {
-    await page.goto('/');
-
-    const searchInput = page
-      .locator('input[type="search"], input[placeholder*="rechercher"]')
-      .first();
-
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('E10'); // Diabète insulinodépendant
-      await page.waitForTimeout(500);
-
-      // Cliquer sur un résultat
-      const firstResult = page.locator('.result, .entry, [data-code]').first();
-      if (await firstResult.isVisible()) {
-        await firstResult.click();
-
-        // Vérifier que les détails s'affichent
-        await expect(
-          page.locator('.details, .modal, [data-details]').first()
-        ).toBeVisible();
-      }
-    }
-  });
-
-  test("export - fonctionnalité d'export", async ({ page }) => {
-    await page.goto('/');
-
-    // Trouver le bouton d'export
-    const exportButton = page
-      .locator(
-        'button:has-text("Export"), button:has-text("Télécharger"), [data-action="export"]'
-      )
-      .first();
-
-    if (await exportButton.isVisible()) {
-      const downloadPromise = page.waitForEvent('download');
-      await exportButton.click();
-
-      // Vérifier qu'un téléchargement se lance
-      const download = await downloadPromise;
-      expect(download.suggestedFilename()).toMatch(/\.(json|csv|pdf)$/);
-    }
-  });
-
-  test('historique - sauvegarde recherche', async ({ page }) => {
-    await page.goto('/');
-
-    const searchInput = page
-      .locator('input[type="search"], input[placeholder*="rechercher"]')
-      .first();
-
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('test');
-      await page.waitForTimeout(500);
-
-      // Vérifier que la recherche est sauvegardée
-      const historyButton = page
-        .locator('button:has-text("Historique"), [data-action="history"]')
-        .first();
-      if (await historyButton.isVisible()) {
-        await historyButton.click();
-        await expect(page.locator('text=test').first()).toBeVisible();
-      }
-    }
-  });
-
-  test('offline - fonctionne hors ligne', async ({ page }) => {
-    await page.goto('/');
-
-    // Simuler offline
     await page.context().setOffline(true);
 
-    // La recherche devrait fonctionner avec les données en cache
-    const searchInput = page
-      .locator('input[type="search"], input[placeholder*="rechercher"]')
-      .first();
+    await page
+      .getByRole('searchbox', {
+        name: /chercher un code|search an icd-10 code/i,
+      })
+      .fill('diabète');
 
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('E10');
-      await page.waitForTimeout(500);
-
-      // Devrait avoir des résultats en cache
-      await expect(page.locator('.result, .entry, [data-code]')).toHaveCount(
-        await page.locator('.result, .entry, [data-code]').count()
-      );
-    }
+    const results = page.getByRole('list', {
+      name: /résultats de la recherche|code search results/i,
+    });
+    await expect(results.getByRole('listitem').first()).toBeVisible();
+    await expect(
+      results.getByRole('listitem').filter({ hasText: 'E11.9' })
+    ).toHaveCount(1);
   });
 });
