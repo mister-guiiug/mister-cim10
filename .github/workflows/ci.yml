@@ -1,5 +1,12 @@
 # CI déléguée au reusable workflow famille (dev-pwa-config).
-# E2E activé : critical sur chaque PR/push.
+# E2E activé : le parcours critique ET la suite axe-core, sur chaque PR/push.
+#
+# `e2e-grep` doit couvrir TOUTES les specs du dépôt : Playwright rend
+# « No tests found » avec un code 0 pour une spec que le filtre ignore. Le
+# filtre a valu `@critical` seul, et `e2e/a11y.spec.ts` (`@a11y accessibilité`,
+# axe-core WCAG A/AA) n'a donc jamais été jouée en CI — un job vert qui ne
+# vérifiait pas l'accessibilité. Ajouter `|@a11y` à ce filtre en même temps
+# qu'une spec taguée autrement.
 name: CI
 
 on:
@@ -19,5 +26,5 @@ jobs:
     with:
       run-doctor: true # la checklist du parc, lue sur le dépôt et sur dist/ (AMELIORATIONS.md, T2)
       run-e2e: true
-      e2e-grep: '@critical'
+      e2e-grep: '@critical|@a11y'
       e2e-project: chromium
