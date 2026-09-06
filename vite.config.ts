@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { pwaSeoPlugin } from '@mister-guiiug/dev-pwa-config/vite-pwa-base';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
+import { versionPlugin } from '@mister-guiiug/dev-pwa-config/vite-version';
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
   version: string;
@@ -131,6 +132,9 @@ export default defineConfig(({ command }) => {
       },
     },
     plugins: [
+      // AVANT cspPlugin : il pose un script inline dans le <head>, que la
+      // CSP doit hacher après coup ; et il écrit version.json au build.
+      versionPlugin({ manifest: true, define: false }),
       ...(command === 'build' ? [analyticsPlugin()] : []),
       react(),
       tailwindcss(),

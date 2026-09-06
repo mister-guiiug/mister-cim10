@@ -37,6 +37,8 @@ export function AppFooter() {
     <div className="app-footer">
       <p className="footer-privacy">{t('footer.privacy')}</p>
       <SocleAppFooter
+        version
+        issues
         className="footer-actions"
         repoUrl={repoUrl('mister-cim10')}
         sponsorUrl={SPONSOR_URL}
