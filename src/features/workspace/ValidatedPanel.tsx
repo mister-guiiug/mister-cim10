@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
+import { CodeSearch } from './CodeSearch';
 import { ExportBar } from './ExportBar';
 import { useI18n } from '../../i18n';
 import type { ValidatedDiagnostic } from '../../types/index';
@@ -51,6 +52,12 @@ export function ValidatedPanel() {
           ))}
         </ul>
       )}
+      {/* Deux façons d'ajouter un code que le compte-rendu ne contient pas :
+          par son LIBELLÉ (la recherche, qui interroge tout le référentiel) ou
+          par son CODE quand on le connaît déjà (la saisie manuelle, repliée
+          derrière son bouton). La recherche vient en premier : c'est celle qui
+          n'exige rien de l'utilisateur. */}
+      <CodeSearch onAdd={addManualDiagnostic} existingCodes={validatedCodes} />
       <ManualEntryForm
         onAdd={addManualDiagnostic}
         existingCodes={validatedCodes}

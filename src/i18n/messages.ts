@@ -75,6 +75,41 @@ export const messages = {
       resetConfirm:
         'Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.',
     },
+    sessions: {
+      title: 'Dossiers enregistrés',
+      countOne: '{count} dossier',
+      countMany: '{count} dossiers',
+      namePlaceholder: 'Nom du dossier (ex. séjour du 12/05)',
+      nameAria: 'Nom du dossier à enregistrer',
+      save: 'Enregistrer',
+      saved: 'Dossier enregistré ✓',
+      replaced: 'Dossier du même nom remplacé ✓',
+      opened: '« {name} » rouvert.',
+      deleted: '« {name} » supprimé.',
+      open: 'Rouvrir',
+      empty:
+        'Aucun dossier enregistré. Donnez un nom au travail en cours pour le retrouver plus tard.',
+      nothingToSave:
+        'Rien à enregistrer pour l’instant : saisissez un compte-rendu ou retenez un diagnostic.',
+      full: '{max} dossiers au maximum : enregistrer en fait sortir le plus ancien.',
+      meta: '{date} · {count} diagnostic(s)',
+      openConfirm:
+        'Rouvrir « {name} » ? Le compte-rendu et les diagnostics en cours seront remplacés.',
+      deleteConfirm: 'Supprimer définitivement le dossier « {name} » ?',
+    },
+    search: {
+      title: 'Chercher un code',
+      placeholder: 'Libellé ou code (ex. diabète, E11)',
+      aria: 'Chercher un code CIM-10 par libellé ou par code',
+      hint: 'Pour coter un terme absent du compte-rendu. Le référentiel embarqué est un échantillon.',
+      clear: 'Effacer',
+      exact: 'Trouvé',
+      approx: 'Approchant',
+      resultsOne: '{count} code trouvé',
+      resultsMany: '{count} codes trouvés',
+      resultsAria: 'Résultats de la recherche de codes',
+      empty: 'Aucun code du référentiel embarqué ne correspond à « {query} ».',
+    },
     results: {
       title: 'Suggestions',
       filterPlaceholder: 'Filtrer (code, libellé, terme repéré)',
@@ -382,6 +417,41 @@ export const messages = {
         'You can dictate: use your keyboard microphone on mobile, or a Dictation button if available.',
       resetConfirm:
         'Reset the session? The report and validated diagnoses will be cleared.',
+    },
+    sessions: {
+      title: 'Saved cases',
+      countOne: '{count} case',
+      countMany: '{count} cases',
+      namePlaceholder: 'Case name (e.g. stay of 12/05)',
+      nameAria: 'Name of the case to save',
+      save: 'Save',
+      saved: 'Case saved ✓',
+      replaced: 'Case with the same name replaced ✓',
+      opened: '“{name}” reopened.',
+      deleted: '“{name}” deleted.',
+      open: 'Reopen',
+      empty:
+        'No saved case yet. Name the work in progress to find it again later.',
+      nothingToSave:
+        'Nothing to save yet: enter a report or keep a diagnosis first.',
+      full: '{max} cases at most: saving pushes out the oldest one.',
+      meta: '{date} · {count} diagnosis(es)',
+      openConfirm:
+        'Reopen “{name}”? The current report and diagnoses will be replaced.',
+      deleteConfirm: 'Permanently delete the case “{name}”?',
+    },
+    search: {
+      title: 'Search for a code',
+      placeholder: 'Label or code (e.g. diabetes, E11)',
+      aria: 'Search an ICD-10 code by label or by code',
+      hint: 'To code a term that is not in the report. The built-in reference is a sample.',
+      clear: 'Clear',
+      exact: 'Found',
+      approx: 'Close match',
+      resultsOne: '{count} code found',
+      resultsMany: '{count} codes found',
+      resultsAria: 'Code search results',
+      empty: 'No code in the built-in reference matches “{query}”.',
     },
     results: {
       title: 'Suggestions',
