@@ -43,9 +43,9 @@ import {
   BACKUP_FORMAT,
   BACKUP_VERSION,
 } from '@mister-guiiug/dev-pwa-config/backup';
-import { createStore } from '@mister-guiiug/dev-pwa-config/storage';
 import { dateSlug, downloadJson } from '@mister-guiiug/dev-pwa-config/download';
 import { APP_PREFIX, LEGACY_KEY_MAP } from './storage-migration';
+import { appStore, refreshSnapshot } from './app-store';
 
 /** Identité de l'app dans le fichier de sauvegarde. */
 const APP_ID = 'mister-cim10';
@@ -53,8 +53,12 @@ const APP_ID = 'mister-cim10';
 /** Nom court (sous le préfixe) du mot secret OMS, exclu des sauvegardes. */
 const SECRET_KEY = 'who_icd_client_secret';
 
-/** Le magasin de l'app : tout `cim10_`, rien d'autre. */
-export const appStore = createStore(APP_PREFIX);
+/**
+ * Le magasin de l'app : tout `cim10_`, rien d'autre. Défini dans
+ * `./app-store.ts`, réexporté ici parce que c'est cette façade que la
+ * sauvegarde a toujours exposée.
+ */
+export { appStore };
 
 type BackupFile = ReturnType<typeof createBackup>;
 
@@ -130,5 +134,11 @@ export function restoreAppBackup(json: string): RestoreResult {
   const backup = adaptLegacyBackup(parsed) ?? parsed;
   // Fusion volontaire (pas de `replace`) : les clés absentes du fichier
   // survivent, à commencer par le mot secret OMS que l'export ne contient plus.
-  return restoreBackup(appStore, backup);
+  const result = restoreBackup(appStore, backup);
+  // L'instantané est gardé en mémoire (`./app-store.ts`) : sans cette purge,
+  // la lecture suivante rendrait l'état d'AVANT la restauration. L'écran de
+  // réglages recharge la page dans la foulée, mais un appelant qui ne le ferait
+  // pas ne doit pas hériter d'un état périmé.
+  if (result.ok) refreshSnapshot();
+  return result;
 }

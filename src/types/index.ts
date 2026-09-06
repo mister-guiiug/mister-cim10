@@ -30,6 +30,20 @@ export interface ValidatedDiagnostic {
   source?: 'local' | 'api';
 }
 
+/**
+ * Un dossier enregistré sous un nom : le compte-rendu et les diagnostics
+ * retenus, figés au moment de l'enregistrement. Rouvrir une session remplace
+ * le plan de travail courant — elle n'est pas un journal d'actions.
+ */
+export interface SavedSession {
+  id: string;
+  name: string;
+  /** Horodatage de l'enregistrement (ms). */
+  savedAt: number;
+  crText: string;
+  validated: ValidatedDiagnostic[];
+}
+
 export interface WhoSettings {
   clientId: string;
   clientSecret: string;

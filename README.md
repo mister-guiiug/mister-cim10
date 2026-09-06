@@ -5,7 +5,7 @@
 [![Buy Me A Coffee](https://img.shields.io/badge/Soutenir-%E2%98%95-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
 
 > **Aide à la cotation CIM-10 dans votre navigateur.**
-> Saisissez ou dictez un compte-rendu médical, obtenez des suggestions de codes, validez-les et exportez-les — sans installation, sans compte, sans envoi de données.
+> Saisissez un compte-rendu médical, obtenez des suggestions de codes — ou cherchez un code par son libellé —, validez-les et exportez-les. Sans installation, sans compte, sans envoi de données.
 
 **[▶ Accéder à l'application](https://mister-guiiug.github.io/mister-CIM10/)**
 
@@ -24,10 +24,13 @@ Mister CIM-10 s'adresse aux **professionnels de santé** (médecins, DIM, techni
 ## Comment l'utiliser
 
 1. **Ouvrez l'application** — aucune installation requise, fonctionne dans Chrome, Edge, Firefox ou Safari.
-2. **Saisissez ou dictez** votre compte-rendu dans la zone de texte (microphone disponible sur mobile).
-3. **Lancez l'analyse** avec le bouton ou `Ctrl+Entrée` — les codes CIM-10 suggérés apparaissent aussitôt.
-4. **Validez, modifiez ou rejetez** chaque suggestion en un clic. Réordonnez les codes si besoin.
-5. **Exportez** la liste finale en fichier texte (`.txt`) ou tableur (`.csv`), ou imprimez-la directement.
+2. **Saisissez** votre compte-rendu dans la zone de texte (sur mobile, le micro du clavier de votre téléphone fonctionne comme dans n'importe quel champ de saisie).
+3. **Lancez l'analyse** avec le bouton **Analyser** — les codes CIM-10 suggérés apparaissent aussitôt.
+4. **Validez ou rejetez** chaque suggestion en un clic ; ajoutez une note libre sur un code retenu.
+5. **Cherchez un code** par son libellé pour coter un terme qui n'est pas dans le compte-rendu, et ajoutez-le aux diagnostics retenus.
+6. **Exportez** la liste finale en fichier texte (`.txt`), tableur (`.csv`) ou JSON, ou imprimez-la directement.
+
+Vous pouvez **enregistrer le dossier en cours sous un nom** (jusqu'à cinq) et le rouvrir plus tard : le compte-rendu et les diagnostics retenus reviennent tels quels.
 
 L'application peut être **installée sur votre appareil** (bouton d'installation du navigateur) et fonctionne **hors connexion** une fois installée.
 
@@ -37,38 +40,57 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Analyse
 
-| Fonctionnalité               | Ce que ça fait                                                                                                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Analyse du texte libre**   | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (ICD-11) si configurée |
-| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible                                                              |
-| **Terme parent**             | Pour un sous-code (ex. `E11.65`), le libellé de la rubrique parente (`E11`) est rappelé pour le contexte                 |
-| **Recherche manuelle**       | Retrouvez un code par son libellé ou saisissez-le directement si vous le connaissez                                      |
+| Fonctionnalité               | Ce que ça fait                                                                                                             |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Analyse du texte libre**   | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (CIM-11) si configurée   |
+| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible, avec son pourcentage                                          |
+| **Seuil de confiance**       | Réglable dans les paramètres : les suggestions en dessous du seuil ne s'affichent pas                                      |
+| **Filtre des suggestions**   | Restreignez la liste affichée par code, libellé ou terme repéré                                                            |
+| **Terme repéré**             | Un clic sur le terme qui a déclenché la suggestion le sélectionne dans le compte-rendu                                     |
+| **Comparer** (terme parent)  | Pour un sous-code (ex. `E11.65`), affiche la rubrique parente (`E11`) et les codes apparentés, chacun ajoutable en un clic |
 
-### Validation et saisie
+### Recherche et saisie d'un code
 
-| Fonctionnalité                   | Ce que ça fait                                                                                    |
-| -------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Valider / Modifier / Rejeter** | Traitez chaque proposition en un clic ; modifiez librement le code si besoin                      |
-| **Contrôle du format**           | L'application vérifie que le code saisi respecte le format CIM-10 et vous avertit en cas d'erreur |
-| **Réordonner les codes**         | Changez l'ordre des diagnostics retenus avant l'export avec les boutons ↑ / ↓                     |
+| Fonctionnalité           | Ce que ça fait                                                                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chercher un code**     | Par libellé, synonyme ou code (`diabète`, `dt2`, `E11`) — y compris sans accent ou mal orthographié. Pour coter un terme absent du compte-rendu |
+| **Saisie manuelle**      | Si vous connaissez déjà le code, saisissez-le avec son libellé                                                                                  |
+| **Détection de doublon** | Un code déjà retenu n'est pas ajouté deux fois, et l'application le signale                                                                     |
+| **Note libre**           | Annotez un diagnostic retenu ; la note suit dans les exports texte, CSV et JSON                                                                 |
 
 ### Confort d'utilisation
 
-| Fonctionnalité                    | Ce que ça fait                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **Dictée vocale**                 | Parlez directement dans l'application (selon le navigateur et l'appareil)                         |
-| **Sauvegarde automatique**        | Vos diagnostics validés sont mémorisés dans le navigateur — ils sont là si vous rechargez la page |
-| **Historique des comptes-rendus** | Les 5 derniers textes analysés sont mémorisés et rappelables en un clic                           |
-| **Nouvelle session**              | Réinitialisez tout (texte + diagnostics) en un clic, avec confirmation                            |
-| **Raccourci clavier**             | `Ctrl+Entrée` (ou `Cmd+Entrée` sur Mac) pour lancer l'analyse rapidement                          |
+| Fonctionnalité                | Ce que ça fait                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Sauvegarde automatique**    | Compte-rendu, diagnostics retenus et réglages sont mémorisés dans le navigateur — ils sont là si vous rechargez la page       |
+| **Dossiers enregistrés**      | Enregistrez le travail en cours sous un nom (jusqu'à cinq), rouvrez-le ou supprimez-le                                        |
+| **Nouvelle session**          | Réinitialisez le compte-rendu et les diagnostics en un clic, avec confirmation — les dossiers enregistrés, eux, restent       |
+| **Sauvegarde / restauration** | Exportez toutes vos données dans un fichier `.json` et rechargez-les sur un autre appareil (le mot secret OMS n'y figure pas) |
+| **Thème et langue**           | Clair / sombre / système, interface en français ou en anglais                                                                 |
+| **Hors connexion**            | Une fois chargée ou installée, l'application fonctionne sans réseau (sauf l'option OMS)                                       |
 
 ### Export et partage
 
-| Fonctionnalité       | Ce que ça fait                                                                    |
-| -------------------- | --------------------------------------------------------------------------------- |
-| **Export TXT / CSV** | Téléchargez la liste de codes validés en texte brut ou tableur                    |
-| **Impression / PDF** | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface) |
-| **Partage**          | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                  |
+| Fonctionnalité              | Ce que ça fait                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON              |
+| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel      |
+| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface) |
+| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                  |
+| **Partage du paramétrage**  | Un lien qui reprend le mode d'analyse et la connexion OMS — jamais le mot secret  |
+
+### Ce qui n'existe pas encore
+
+Ces fonctions ont été annoncées ici par le passé alors qu'elles n'étaient pas
+dans le code. Elles sont listées comme ce qu'elles sont — à venir — plutôt que
+retirées en silence :
+
+- **Dictée dans l'application** : il n'y a pas de bouton « Dictée ». Sur mobile, le micro du clavier fonctionne dans la zone de saisie comme dans n'importe quel champ.
+- **Contrôle du format d'un code saisi** : la saisie manuelle vérifie que le code n'est pas vide et qu'il n'est pas déjà retenu, rien de plus.
+- **Réordonner les diagnostics retenus** : l'ordre est celui de la validation (le plus récent en tête).
+- **Modifier un code retenu** : retirez-le et ajoutez le bon.
+- **Raccourci clavier pour lancer l'analyse** : passez par le bouton **Analyser**.
+- **Favoris** et **annuler / rétablir**.
 
 ---
 
@@ -149,7 +171,7 @@ npm run preview
 npm test             # Vitest unitaires (jsdom)
 npm run test:watch   # Vitest mode watch
 npm run test:e2e     # Playwright (full app + a11y)
-npm run type-check   # TypeScript strict (tsc --noEmit)
+npm run type-check   # TypeScript strict (tsc -b ; noEmit hérité du socle)
 npm run lint         # ESLint flat config
 ```
 
@@ -182,20 +204,22 @@ L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par C
 src/
 ├── App.tsx                       Router (HashRouter) + 3 routes (home / parametres / aide)
 ├── main.tsx                      Entry React + DialogProvider + bootstrap (theme, SW, web vitals)
-├── components/                   AppHeader, AppFooter, BrandMark, NavDrawer, ThemeToggle, DialogProvider
+├── components/                   AppHeader, AppFooter, BrandMark, DialogProvider, PwaUpdates, SocleLabelsBridge
 ├── pages/                        HomePage, SettingsPage, HelpPage
-├── features/workspace/           CrPanel, SuggestionsPanel, ValidatedPanel, ExportBar
+├── features/workspace/           CrPanel, SessionsPanel, SuggestionsPanel, ValidatedPanel, CodeSearch, ExportBar
 ├── store/                        settingsStore (Zustand), workspaceStore (Zustand)
-├── hooks/                        useTheme
+├── hooks/                        useDialog
 ├── lib/
-│   ├── analyzer.ts               suggestFromText — pure logic (TS strict)
-│   ├── constants.ts              LS_KEYS, MODE_SUMMARY_LABEL, FOOTER_NOTE
-│   ├── settings.ts               read/write LS pour mode, seuil de confiance, OMS
-│   ├── storage.ts                exportAppData / importAppData / dateSlug / downloadBlob
-│   └── theme.ts                  get/apply/cycle theme (pure)
-├── types/index.ts                AnalyzeMode, AnalysisResult, ValidatedDiagnostic, WhoSettings
-├── monitoring/web-vitals.ts
-├── register-sw.ts                Bannière de mise à jour PWA
+│   ├── analyzer.ts               suggestFromText + searchIcdCodes — logique pure (TS strict)
+│   ├── app-store.ts              instantané versionné { v, data } + migration 0 → 1
+│   ├── constants.ts              LS_KEYS (les deux clés hors instantané)
+│   ├── icd-hierarchy.ts          getFamily — code parent et codes apparentés
+│   ├── oms.ts                    client OAuth2 + autocodage CIM-11 via la passerelle
+│   ├── settings.ts               lecture/écriture des réglages (façade sur app-store)
+│   ├── storage.ts                sauvegarde/restauration .json (module `backup` du socle)
+│   └── storage-migration.ts      passage des clés historiques sous le préfixe cim10_
+├── types/index.ts                AnalyzeMode, AnalysisResult, ValidatedDiagnostic, SavedSession, WhoSettings
+├── i18n/                         catalogue FR + EN (chrome applicatif uniquement)
 ├── icd10-data.ts                 Échantillon de codes / synonymes FR
 ├── style.css                     Styles legacy (classes réutilisées par les composants React)
 └── tailwind.css                  @import 'tailwindcss'
@@ -205,18 +229,46 @@ scripts/                          Génération d'icônes
 docs/context.md                   Contexte produit détaillé
 ```
 
+Le thème, les Web Vitals, l'enregistrement du service worker et le bandeau de
+mise à jour ne sont plus des fichiers de ce dépôt : ils viennent de
+[`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config)
+et sont montés dans [`src/main.tsx`](src/main.tsx).
+
+### Persistance
+
+Tout l'état de l'application tient dans **un instantané versionné** —
+`{ v, data }` sous la clé `cim10_data` — servi par `createVersionedStore` du
+socle : chaîne de migrations qui monte d'un cran à la fois, validation, et
+**copie de côté avant toute perte possible** (`cim10_data.backup-v0`,
+`…backup-illisible`). L'état d'avant, réparti en dix clés `localStorage`
+séparées, est repris par la migration 0 → 1 au premier démarrage, puis les clés
+d'origine sont retirées.
+
+Deux clés restent hors de l'instantané, chacune pour une raison précise :
+`cim10_who_icd_client_secret` (le fichier de sauvegarde exclut le mot secret
+**par son nom de clé** — fondu dans l'instantané, il repartirait en clair) et
+`dwc_theme`, qui appartient au socle et se lit avant l'exécution du bundle.
+
 ### Migration vanilla TS → React (mai 2026)
 
 L'application a été entièrement réécrite en **React 19 + react-router-dom 7 + Tailwind 4 + Zustand 5**, en remplacement du runtime vanilla TS et du router maison. Les ~4 400 lignes de DOM-manipulation ([`workspace.ts`](https://github.com/mister-guiiug/mister-cim10/commits/main/src/workspace.ts), `pages.ts`, `*-html.ts`, `header-chrome.ts`, `nav-drawer.ts`, `dialog-ui.ts`, `enhancements-integration.ts`, `ui-helpers.js`) ont été remplacées par ~2 700 lignes de composants React TS strict. La logique pure (analyzer, données, theme, storage) a été conservée et reportée dans `src/lib/`.
 
-Fonctionnalités reportées dans les versions ultérieures (les hooks Zustand sont déjà en place) :
+Fonctionnalités encore absentes du code, et ce qu'il faudrait pour chacune :
 
-- Reconnaissance vocale (Dictée) — `useSpeechRecognition` à brancher
-- Sessions sauvegardées / Favoris — `LS_KEYS.SESSIONS` et `LS_KEYS.FAVORITES` réservés dans [`lib/constants.ts`](src/lib/constants.ts)
-- Recherche manuelle de codes (autocomplete) — à ajouter dans `SuggestionsPanel`
-- Annuler/Rétablir (Ctrl+Z) — pile d'actions à empiler dans `workspaceStore`
-- Highlight du compte-rendu — composant à ajouter dans `CrPanel`
-- Appel réel API OMS (autocodage ICD-11) — `// TODO` dans `HomePage.handleAnalyze`
+- Reconnaissance vocale (bouton « Dictée ») — `useSpeechRecognition` à brancher sur `CrPanel`
+- Favoris — aucune clé n'est réservée, tout est à faire
+- Annuler / rétablir (Ctrl+Z) — pile d'actions à empiler dans `workspaceStore`
+- Réordonnancement des diagnostics retenus — `ValidatedPanel` affiche dans l'ordre de validation
+- Raccourci clavier pour lancer l'analyse — aucun gestionnaire de touche dans `src/`
+- Contrôle du format d'un code saisi — `ManualEntryForm` ne vérifie que le vide et le doublon
+
+Livrées depuis, et donc sorties de cette liste : la **recherche manuelle d'un
+code** ([`CodeSearch.tsx`](src/features/workspace/CodeSearch.tsx), sur le moteur
+de trigrammes de `analyzer.ts` appelé dans l'autre sens), les **sessions
+nommées** ([`SessionsPanel.tsx`](src/features/workspace/SessionsPanel.tsx)), la
+**sélection du terme repéré** dans le compte-rendu (`CrPanel`), et l'**appel réel
+à l'API OMS** ([`lib/oms.ts`](src/lib/oms.ts), invoqué par
+`HomePage.handleAnalyze`).
 
 </details>
 

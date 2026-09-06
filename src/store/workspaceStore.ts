@@ -1,11 +1,41 @@
 import { create } from 'zustand';
-import type { AnalysisResult, ValidatedDiagnostic } from '../types/index';
-import { LS_KEYS } from '../lib/constants';
+import type {
+  AnalysisResult,
+  SavedSession,
+  ValidatedDiagnostic,
+} from '../types/index';
+import { MAX_SESSIONS, readSnapshot, updateSnapshot } from '../lib/app-store';
+
+/**
+ * Le plan de travail : compte-rendu en cours, suggestions, diagnostics
+ * retenus, et les dossiers enregistrés sous un nom.
+ *
+ * CE QUI EST PERSISTÉ, ET OÙ. Le compte-rendu, les diagnostics retenus et les
+ * sessions vivent dans l'instantané versionné (`lib/app-store.ts`) — plus de
+ * `localStorage.setItem` à la main, plus de `JSON.parse` défensif recopié.
+ * Les suggestions et les rejets, eux, sont VOLONTAIREMENT éphémères : une
+ * analyse se relance en une seconde, et rien ne justifie de faire survivre à un
+ * rechargement une liste calculée à partir d'un texte qui, lui, a pu changer.
+ */
+
+function nouvelIdentifiant(): string {
+  return typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2, 12);
+}
+
+export interface SaveSessionResult {
+  ok: boolean;
+  /** `true` si une session du même nom a été remplacée. */
+  replaced: boolean;
+}
 
 interface WorkspaceState {
   crText: string;
   suggestions: AnalysisResult[];
   validated: ValidatedDiagnostic[];
+  sessions: SavedSession[];
   filterText: string;
   rejectedIds: Set<string>;
   isAnalyzing: boolean;
@@ -24,53 +54,32 @@ interface WorkspaceState {
   validateAll: (results: AnalysisResult[]) => void;
   rejectAll: (ids: string[]) => void;
   addManualDiagnostic: (code: string, label: string) => void;
+  saveSession: (name: string) => SaveSessionResult;
+  openSession: (id: string) => boolean;
+  deleteSession: (id: string) => void;
   highlightedMatchedTerm: string | null;
   setHighlightedMatchedTerm: (term: string | null) => void;
 }
 
-function loadValidated(): ValidatedDiagnostic[] {
-  try {
-    const raw = localStorage.getItem(LS_KEYS.VALIDATED);
-    if (!raw) return [];
-    const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (v): v is ValidatedDiagnostic =>
-        typeof v === 'object' &&
-        v !== null &&
-        'code' in v &&
-        'label' in v &&
-        'id' in v
-    );
-  } catch {
-    return [];
-  }
-}
-
-function persistValidated(items: ValidatedDiagnostic[]): void {
-  try {
-    localStorage.setItem(LS_KEYS.VALIDATED, JSON.stringify(items));
-  } catch {
-    /* quota exceeded */
-  }
-}
+const initial = readSnapshot();
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
-  crText: localStorage.getItem(LS_KEYS.CR_TEXT) || '',
+  crText: initial.crText,
   suggestions: [],
-  validated: loadValidated(),
+  validated: initial.validated,
+  sessions: initial.sessions,
   filterText: '',
   rejectedIds: new Set(),
   isAnalyzing: false,
   analyzeError: null,
 
   setCrText: text => {
-    localStorage.setItem(LS_KEYS.CR_TEXT, text);
+    updateSnapshot({ crText: text });
     set({ crText: text });
   },
   appendCrText: text => {
     const next = (get().crText + ' ' + text).trim();
-    localStorage.setItem(LS_KEYS.CR_TEXT, next);
+    updateSnapshot({ crText: next });
     set({ crText: next });
   },
   setSuggestions: results =>
@@ -90,7 +99,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       validatedAt: Date.now(),
     };
     const items = [next, ...validated];
-    persistValidated(items);
+    updateSnapshot({ validated: items });
     set({ validated: items });
   },
   rejectSuggestion: id => {
@@ -100,17 +109,18 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
   removeValidated: id => {
     const items = get().validated.filter(v => v.id !== id);
-    persistValidated(items);
+    updateSnapshot({ validated: items });
     set({ validated: items });
   },
   updateValidatedNote: (id, note) => {
     const items = get().validated.map(v => (v.id === id ? { ...v, note } : v));
-    persistValidated(items);
+    updateSnapshot({ validated: items });
     set({ validated: items });
   },
   resetSession: () => {
-    localStorage.removeItem(LS_KEYS.CR_TEXT);
-    persistValidated([]);
+    // Les sessions ENREGISTRÉES survivent : « Nouvelle session » vide le plan
+    // de travail, il ne jette pas les dossiers mis de côté.
+    updateSnapshot({ crText: '', validated: [] });
     set({
       crText: '',
       suggestions: [],
@@ -133,7 +143,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         validatedAt: Date.now(),
       }));
     const items = [...additions, ...validated];
-    persistValidated(items);
+    updateSnapshot({ validated: items });
     set({ validated: items });
   },
   rejectAll: ids => {
@@ -149,19 +159,75 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     if (!trimCode || !trimLabel) return;
     const validated = get().validated;
     if (validated.some(v => v.code === trimCode)) return;
-    const id =
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : Math.random().toString(36).slice(2, 12);
     const next: ValidatedDiagnostic = {
-      id,
+      id: nouvelIdentifiant(),
       code: trimCode,
       label: trimLabel,
       source: 'local',
       validatedAt: Date.now(),
     };
     const items = [next, ...validated];
-    persistValidated(items);
+    updateSnapshot({ validated: items });
     set({ validated: items });
+  },
+
+  /**
+   * Enregistre le plan de travail courant sous un nom.
+   *
+   * Un nom déjà pris REMPLACE l'entrée existante au lieu d'en créer une
+   * seconde : sur cinq places, deux « Mme Martin » à des heures différentes
+   * coûteraient deux cinquièmes de l'historique pour un seul dossier. L'appelant
+   * reçoit `replaced` pour pouvoir le dire.
+   */
+  saveSession: name => {
+    const trimmed = name.trim();
+    if (!trimmed) return { ok: false, replaced: false };
+    const { crText, validated, sessions } = get();
+    const lower = trimmed.toLocaleLowerCase();
+    const existante = sessions.find(s => s.name.toLocaleLowerCase() === lower);
+    const entry: SavedSession = {
+      id: existante?.id ?? nouvelIdentifiant(),
+      name: trimmed,
+      savedAt: Date.now(),
+      crText,
+      validated,
+    };
+    const next = [entry, ...sessions.filter(s => s.id !== entry.id)].slice(
+      0,
+      MAX_SESSIONS
+    );
+    updateSnapshot({ sessions: next });
+    set({ sessions: next });
+    return { ok: true, replaced: existante !== undefined };
+  },
+
+  /**
+   * Rouvre un dossier : le compte-rendu et les diagnostics retenus REMPLACENT
+   * le plan de travail. Les suggestions sont vidées — elles ont été calculées
+   * sur l'autre texte, les garder afficherait des codes venus d'un autre
+   * patient.
+   */
+  openSession: id => {
+    const session = get().sessions.find(s => s.id === id);
+    if (!session) return false;
+    updateSnapshot({
+      crText: session.crText,
+      validated: session.validated,
+    });
+    set({
+      crText: session.crText,
+      validated: session.validated,
+      suggestions: [],
+      rejectedIds: new Set(),
+      filterText: '',
+      analyzeError: null,
+    });
+    return true;
+  },
+
+  deleteSession: id => {
+    const next = get().sessions.filter(s => s.id !== id);
+    updateSnapshot({ sessions: next });
+    set({ sessions: next });
   },
 }));

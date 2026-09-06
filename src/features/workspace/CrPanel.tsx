@@ -1,6 +1,7 @@
 import { useRef, useEffect, type FormEvent } from 'react';
 import type { ActionGuardResult } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useWorkspaceStore } from '../../store/workspaceStore';
+import { SessionsPanel } from './SessionsPanel';
 import { useDialog } from '../../hooks/useDialog';
 import { useI18n } from '../../i18n';
 
@@ -117,6 +118,11 @@ export function CrPanel({
           {analyzeError}
         </p>
       )}
+      {/* Les dossiers enregistrés sont ici, sous le compte-rendu : c'est ce
+          texte-là qu'on met de côté et qu'on rouvre. Repliés par défaut — la
+          journée type n'en ouvre aucun, et « Analyser » ne doit pas descendre
+          d'un écran pour autant. */}
+      <SessionsPanel />
     </section>
   );
 }
