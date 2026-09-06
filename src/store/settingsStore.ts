@@ -9,6 +9,7 @@ import {
   writeWhoSettings,
 } from '../lib/settings';
 import { resetOmsToken } from '../lib/oms';
+import { readSnapshot, updateSnapshot } from '../lib/app-store';
 
 interface SettingsState {
   mode: AnalyzeMode;
@@ -24,14 +25,11 @@ interface SettingsState {
   isReady: () => boolean;
 }
 
-import { LS_KEYS } from '../lib/constants';
-
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   mode: readAnalyzeMode(),
   minConfidence: readMinConfidenceThreshold(),
   who: readWhoSettings(),
-  disclaimerDismissed:
-    localStorage.getItem(LS_KEYS.DISCLAIMER_DISMISSED) === '1',
+  disclaimerDismissed: readSnapshot().disclaimerDismissed,
 
   setMode: mode => {
     writeAnalyzeMode(mode);
@@ -54,11 +52,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ who: next });
   },
   dismissDisclaimer: () => {
-    localStorage.setItem(LS_KEYS.DISCLAIMER_DISMISSED, '1');
+    updateSnapshot({ disclaimerDismissed: true });
     set({ disclaimerDismissed: true });
   },
   resetDisclaimer: () => {
-    localStorage.removeItem(LS_KEYS.DISCLAIMER_DISMISSED);
+    updateSnapshot({ disclaimerDismissed: false });
     set({ disclaimerDismissed: false });
   },
 
