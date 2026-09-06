@@ -99,6 +99,15 @@ afterEach(() => {
   setOnline(true);
 });
 
+/**
+ * Les appels réseau de l'ÉCRAN, et eux seuls. Depuis le socle 4.4.1, le pied
+ * de page (`AppFooter version`) sonde `version.json` une fois au montage pour
+ * dire si une version attend en ligne : ce n'est ni l'OMS, ni le sujet de ces
+ * tests, et l'ignorer ici est plus juste que l'interdire.
+ */
+const appelsMetier = (spy: ReturnType<typeof vi.fn>) =>
+  spy.mock.calls.filter(([entree]) => !String(entree).endsWith('version.json'));
+
 describe('HomePage hors connexion', () => {
   it('mode OMS seul : le bouton est bloqué ET dit pourquoi, sans appel réseau', async () => {
     const fetchSpy = vi.fn();
@@ -114,7 +123,7 @@ describe('HomePage hors connexion', () => {
     await act(async () => {
       fireEvent.click(analyzeButton());
     });
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(appelsMetier(fetchSpy)).toHaveLength(0);
     expect(useWorkspaceStore.getState().suggestions).toHaveLength(0);
   });
 
@@ -155,7 +164,7 @@ describe('HomePage hors connexion', () => {
     expect(
       screen.getByText(/la recherche OMS a été ignorée/)
     ).toBeInTheDocument();
-    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(appelsMetier(fetchSpy)).toHaveLength(0);
     expect(useWorkspaceStore.getState().analyzeError).toBeNull();
   });
 
