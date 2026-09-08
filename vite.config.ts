@@ -181,7 +181,7 @@ export default defineConfig(({ command }) => {
           id: basePath,
           lang: 'fr',
           name: 'Mister CIM10',
-          short_name: 'CIM10',
+          short_name: 'Mister CIM10',
           description: 'Explorateur interactif de la classification CIM10',
           theme_color: '#4f46e5',
           background_color: '#ffffff',
