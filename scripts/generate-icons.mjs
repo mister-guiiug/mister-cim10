@@ -26,7 +26,15 @@ const sizes = [
   { size: 384, name: 'icon-384.png' },
 ];
 
-// Maskable icon (with safe zone)
+/**
+ * L'icône maskable : le fond à FOND PERDU, le dessin dans la zone de sécurité.
+ *
+ * IL Y AVAIT UN VOILE BLANC ARRONDI par-dessus tout le reste —
+ * `<rect … fill="#ffffff" opacity="0.08" rx="…">`. Parce qu'il portait un `rx`,
+ * il éclaircissait l'intérieur d'un rectangle arrondi et laissait les coins
+ * intacts : un raccord, donc, exactement ce qu'un maskable ne doit pas avoir.
+ * Android ne cache pas ce bord, il le révèle. Le dégradé du fond suffit.
+ */
 async function generateMaskable(size) {
   const safeZone = Math.floor(size * 0.875); // 87.5% safe zone for Android maskable
 
@@ -54,7 +62,6 @@ async function generateMaskable(size) {
           <circle cx="${safeZone * 0.75}" cy="${safeZone * 0.6875}" r="${safeZone * 0.0625}"/>
         </g>
       </g>
-      <rect x="0" y="0" width="${size}" height="${size}" fill="#ffffff" opacity="0.08" rx="${size * 0.22}"/>
     </svg>
   `;
 
@@ -82,7 +89,11 @@ async function generateIcons() {
   // Generate maskable icon
   const maskableSize = 512;
   const maskableSvg = await generateMaskable(maskableSize);
-  const maskablePath = join(publicDir, 'icon-maskable.png');
+  // LE NOM QUE LE MANIFESTE DÉCLARE. Ce script écrivait `icon-maskable.png`,
+  // que rien ne référençait, pendant que le manifeste pointait sur
+  // `icon-maskable-512.png` — un fichier qu'aucun script ne produisait, et dont
+  // les coins étaient BLANCS. Deux icônes, aucune des deux à sa place.
+  const maskablePath = join(publicDir, 'icon-maskable-512.png');
 
   await sharp(maskableSvg).png().toFile(maskablePath);
 
