@@ -114,8 +114,7 @@ function adaptLegacyBackup(parsed: unknown): BackupFile | null {
 }
 
 export type RestoreResult =
-  | { ok: true; restored: number }
-  | { ok: false; problems: string[] };
+  { ok: true; restored: number } | { ok: false; problems: string[] };
 
 /**
  * Restaure une sauvegarde depuis le texte d'un fichier.
