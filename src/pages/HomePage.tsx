@@ -1,5 +1,6 @@
 import { useActionGuard } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
+import { PwaInstallPrompt } from '@mister-guiiug/dev-pwa-config/react/pwa-install-prompt';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';
@@ -95,6 +96,14 @@ export function HomePage() {
         <SuggestionsPanel />
         <ValidatedPanel />
       </main>
+
+      {/* ICI, ET PAS DANS LA COQUILLE : un bandeau global paraîtrait
+          par-dessus une tâche en cours ; sur l'accueil, l'utilisateur est au
+          repos. Ne rend rien tant qu'une installation n'est pas possible, ni
+          une fois l'application installée — et sur iOS, où l'événement natif
+          n'existe pas, donne la marche à suivre. Cadence du socle : au premier
+          lancement, puis une fois par mois, trois fois. */}
+      <PwaInstallPrompt />
       <AppFooter />
     </>
   );
