@@ -121,11 +121,6 @@ export default defineConfig(({ command }) => {
               return 'pwa';
             }
 
-            // PNGJS pour les images
-            if (norm.includes('/pngjs/')) {
-              return 'image-processing';
-            }
-
             return 'vendor';
           },
         },
