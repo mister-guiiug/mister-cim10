@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "icons": "node scripts/generate-icons.mjs",
+    "icons": "pwa-icons --source public/favicon.svg --out public --sizes 96,144,192,256,384,512 --no-apple",
+    "icons:maskable": "node scripts/generate-maskable.mjs",
     "type-check": "tsc -b",
     "prepare": "husky"
   },

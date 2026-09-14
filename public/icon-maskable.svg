@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Mister CIM10">
+  <!--
+    LE MASKABLE, ET POURQUOI CE N'EST PAS `favicon.svg` EN PLUS PETIT.
+
+    DEUX DIFFÉRENCES AVEC LA SOURCE, ET DEUX SEULEMENT :
+
+      1. LE FOND N'A PLUS DE COINS. `rx="14"` disparaît : le dégradé occupe la
+         toile entière, donc plus de bord à raccorder, quel que soit le masque
+         de l'appareil.
+
+      2. LE VOILE DE BRILLANCE DISPARAÎT. `favicon.svg` porte par-dessus tout le
+         reste un `rect` blanc à 8 % d'opacité, lui-même arrondi. Parce qu'il a
+         son propre `rx`, il éclaircit l'intérieur d'un rectangle et laisse les
+         coins intacts : c'est un raccord, exactement ce qu'un maskable ne doit
+         pas avoir. Il est aussi ce qui débordait de la zone de sécurité — son
+         coin tombe à 30,6 du centre pour une limite à 25,6.
+
+    AUCUNE RÉDUCTION, ET C'EST MESURÉ. Sans le voile, le dessin tient : la croix
+    culmine à 19,0, et les deux pastilles — qui commandent — à 24,0 pour une
+    zone sûre à 25,6. Le script précédent insérait tout à 87,5 % ; c'était une
+    marge prise contre le voile, pas contre la croix.
+
+    Ce fichier sert aussi à l'icône d'accueil iOS, qui n'accepte pas la
+    transparence : une source à fond perdu n'a aucun coin à combler.
+  -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="100%" style="stop-color:#0c1222"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#0ea5e9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" fill="url(#bgGrad)"/>
+
+  <!-- Croix médicale -->
+  <g fill="url(#accentGrad)">
+    <rect x="26" y="14" width="12" height="36" rx="2"/>
+    <rect x="14" y="26" width="36" height="12" rx="2"/>
+  </g>
+
+  <!-- Le « 10 » de CIM-10, stylisé -->
+  <g fill="#38bdf8" opacity="0.9">
+    <circle cx="48" cy="20" r="4"/>
+    <circle cx="48" cy="44" r="4"/>
+  </g>
+</svg>
