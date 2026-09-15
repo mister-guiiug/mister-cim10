@@ -1,5 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { Routes, Route, useLocation, Navigate, Link } from 'react-router-dom';
+import { ConsentBanner } from '@mister-guiiug/dev-pwa-config/react/consent-banner';
+import { usePageViews } from '@mister-guiiug/dev-pwa-config/react/use-page-views';
 import { BottomNav } from '@mister-guiiug/dev-pwa-config/react/bottom-nav';
 import { HomePage } from './pages/HomePage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -93,6 +95,11 @@ export function App() {
   const location = useLocation();
   const { t } = useI18n();
 
+  // Une vue de page par navigation. GA4 n'en envoie qu'une par chargement de
+  // document — sous `HashRouter`, toute la navigation serait invisible. Ne fait
+  // rien tant que le consentement n'est pas accordé.
+  usePageViews(location.pathname);
+
   useEffect(() => {
     const route = pathToRoute(location.pathname);
     document.title = t(ROUTE_TITLE_KEY[route]);
@@ -110,6 +117,9 @@ export function App() {
         <Route path="/aide" element={<HelpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {/* Une `region`, pas une boîte modale : elle ne recouvre rien et ne
+          piège pas le focus. Ne rend RIEN sans `VITE_GA_MEASUREMENT_ID`. */}
+      <ConsentBanner gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID} />
       <BottomNav
         className="bottom-nav"
         label={t('nav.primary')}
