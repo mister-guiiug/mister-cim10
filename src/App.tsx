@@ -119,10 +119,7 @@ export function App() {
       </Routes>
       {/* Une `region`, pas une boîte modale : elle ne recouvre rien et ne
           piège pas le focus. Ne rend RIEN sans `VITE_GA_MEASUREMENT_ID`. */}
-      <ConsentBanner
-        gtmContainerId={import.meta.env.VITE_GTM_CONTAINER_ID}
-        gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID}
-      />
+      <ConsentBanner gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID} />
       <BottomNav
         className="bottom-nav"
         label={t('nav.primary')}

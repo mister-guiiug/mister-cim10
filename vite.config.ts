@@ -14,14 +14,15 @@ const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
 // avec le bouton « Recharger l'application » des Paramètres.
 const buildDate = new Date().toISOString().slice(0, 10);
 
-// GTM-W4SRNX5C et G-64VBY2ZJBX ont quitté ce fichier : ce sont désormais les
-// variables `VITE_GTM_CONTAINER_ID` et `VITE_GA_MEASUREMENT_ID` du dépôt, lues
-// par `ConsentBanner`. Écrits ici, ils partaient au build sans condition.
+// GTM-W4SRNX5C et G-64VBY2ZJBX ont quitté ce fichier ; écrits ici, ils
+// partaient au build sans condition. Seul GA4 subsiste, en variable de dépôt
+// `VITE_GA_MEASUREMENT_ID` lue par `ConsentBanner` : le conteneur GTM est
+// abandonné, une voie de mesure valant mieux que deux qui se doublent.
 const GSC_TOKEN = 'iUfQ7_dOztC3XoSGesC2b7IkxyNL2O9fegKXECoOg30';
 
 const analyze = process.env.ANALYZE === '1';
 
-/** Injecte Google Tag Manager et Google Analytics uniquement dans le build de production. */
+/** Injecte la balise de vérification de propriété Google, au build de production. */
 function analyticsPlugin(): Plugin {
   return {
     name: 'inject-analytics',
