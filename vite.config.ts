@@ -14,8 +14,9 @@ const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
 // avec le bouton « Recharger l'application » des Paramètres.
 const buildDate = new Date().toISOString().slice(0, 10);
 
-const GTM_ID = 'GTM-W4SRNX5C';
-const GA_ID = 'G-64VBY2ZJBX';
+// GTM-W4SRNX5C et G-64VBY2ZJBX ont quitté ce fichier : ce sont désormais les
+// variables `VITE_GTM_CONTAINER_ID` et `VITE_GA_MEASUREMENT_ID` du dépôt, lues
+// par `ConsentBanner`. Écrits ici, ils partaient au build sans condition.
 const GSC_TOKEN = 'iUfQ7_dOztC3XoSGesC2b7IkxyNL2O9fegKXECoOg30';
 
 const analyze = process.env.ANALYZE === '1';
@@ -28,33 +29,32 @@ function analyticsPlugin(): Plugin {
       order: 'post',
       handler() {
         return [
+          /*
+           * SEULE LA VÉRIFICATION DE PROPRIÉTÉ RESTE ICI.
+           *
+           * Ce plugin injectait aussi, au build et SANS AUCUNE CONDITION, le
+           * bootstrap de Google Tag Manager, son iframe `noscript`, le script
+           * `gtag/js` et un `gtag('config', …)`. Tout cela partait dans le
+           * `<head>`, donc AVANT le premier rendu, donc avant que quiconque
+           * ait pu accepter quoi que ce soit — et avant même que le mode
+           * consentement de Google ait pu déclarer son état par défaut, qui
+           * n'a aucun effet rétroactif une fois le tag évalué.
+           *
+           * La mesure passe désormais par `ConsentBanner` : rien n'est injecté
+           * tant que l'utilisateur n'a pas accepté, et les identifiants
+           * viennent des variables du dépôt au lieu d'être écrits ici.
+           *
+           * La balise ci-dessous ne dépose rien chez l'utilisateur : elle
+           * prouve à Google que le domaine est à nous. Elle n'a pas à attendre
+           * un consentement.
+           */
           {
             tag: 'meta',
             injectTo: 'head',
-            attrs: { name: 'google-site-verification', content: GSC_TOKEN },
-          },
-          {
-            tag: 'script',
-            injectTo: 'head',
-            children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`,
-          },
-          {
-            tag: 'script',
-            injectTo: 'head',
             attrs: {
-              async: true,
-              src: `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
+              name: 'google-site-verification',
+              content: GSC_TOKEN,
             },
-          },
-          {
-            tag: 'script',
-            injectTo: 'head',
-            children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`,
-          },
-          {
-            tag: 'noscript',
-            injectTo: 'body-prepend',
-            children: `<iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
           },
         ];
       },
