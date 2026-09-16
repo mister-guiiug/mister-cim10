@@ -122,6 +122,18 @@ export function App() {
       <ConsentBanner gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID} />
       <BottomNav
         className="bottom-nav"
+        // LA BARRE EST COLLÉE, ET ELLE DOIT LE DIRE. `style.css` la posait en
+        // `position: fixed` sans que le socle en sache rien : il n'émet
+        // `data-placement="fixed"` que si on le lui demande, et tout son
+        // dégagement est gardé là-dessus —
+        // `:root:has([data-dwc='bottom-nav'][data-placement='fixed'])`.
+        //
+        // Mesuré en production le 16/09/2026, en 375 × 812 :
+        // `--_dwc-bottom-clearance` valait `max(0px, 0px)`, et le bandeau de
+        // consentement — boîte de 753 à 891 px pour une fenêtre de 812 —
+        // passait SOUS la barre, dont le bord haut est à 756. Le bandeau qui
+        // demande le consentement était derrière la navigation.
+        placement="fixed"
         label={t('nav.primary')}
         // HashRouter : `window.location.pathname` ne bouge jamais — le chemin
         // courant vient du routeur, et le socle calcule l'état actif.

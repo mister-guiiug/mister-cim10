@@ -160,12 +160,18 @@ body {
 
 /* ── Barre de navigation inférieure (mobile-first, principe miss-supaboss).
    Composant du socle ([data-dwc='bottom-nav…'], classe .bottom-nav posée via
-   className) ; l'habillage ci-dessous écrase la base de components.css. ── */
+   className) ; l'habillage ci-dessous écrase la base de components.css.
+
+   LE PLACEMENT N'EST PLUS ICI. `position` / `left` / `right` / `bottom`
+   venaient de ce bloc, et le socle ne savait donc pas que la barre était
+   collée : son dégagement valait zéro et les bandeaux flottants passaient
+   dessous. C'est `<BottomNav placement="fixed">` (src/App.tsx) qui les pose
+   désormais, et qui publie `--_dwc-bottom-clearance` avec.
+
+   Ce qui reste ci-dessous est ce que le socle ne fait PAS : la largeur
+   maximale, le fond translucide, l'ombre, et le `z-index: 40` que cette app a
+   choisi au-dessus du 20 du socle. ── */
 .bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
   z-index: 40;
   margin-inline: auto;
   max-width: 920px;
