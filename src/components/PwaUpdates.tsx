@@ -43,6 +43,7 @@ export function PwaUpdates({ children }: { children: ReactNode }) {
 
   return (
     <AppUpdates
+      snoozeHours={0}
       registerSW={registerSW}
       checkEvery="1h"
       bannerProps={{
