@@ -84,17 +84,37 @@ export function HomePage() {
   return (
     <>
       <AppHeader />
+      {/*
+       * DEUX COLONNES AU-DESSUS DE 1024 px, et ce n'est pas de l'esthétique.
+       *
+       * Mesuré en production le 17/09/2026, en 1280 × 900 : la page faisait
+       * 3 475 px, « Diagnostics retenus » commençait à 2 582 px, et un
+       * « Valider » se trouvait à 1 834 px — DEUX ÉCRANS — de l'endroit où son
+       * code allait atterrir. Valider n'avait donc aucun effet visible. La
+       * place existait pourtant : les cartes s'étiraient sur 1 234 px pour un
+       * code et quatre mots de libellé.
+       *
+       * Le travail à gauche (saisie puis suggestions), le résultat à droite,
+       * collant. Sous le seuil, la colonne unique reste — et le rappel du
+       * panneau des suggestions prend le relais.
+       */}
       <main id="main-content" className="workspace" tabIndex={-1}>
-        <CrPanel
-          // `wrap` neutralise le clic quand le garde bloque : `aria-disabled`
-          // laisse le bouton focusable (donc son motif atteignable), il ne
-          // l'empêche pas de se déclencher.
-          onAnalyze={analyzeGuard.wrap(handleAnalyze)}
-          analyzeGuard={analyzeGuard}
-          omsOfflineNotice={omsSkipped ? t('errors.oms.offlineSkipped') : null}
-        />
-        <SuggestionsPanel />
-        <ValidatedPanel />
+        <div className="workspace-col workspace-col--travail">
+          <CrPanel
+            // `wrap` neutralise le clic quand le garde bloque : `aria-disabled`
+            // laisse le bouton focusable (donc son motif atteignable), il ne
+            // l'empêche pas de se déclencher.
+            onAnalyze={analyzeGuard.wrap(handleAnalyze)}
+            analyzeGuard={analyzeGuard}
+            omsOfflineNotice={
+              omsSkipped ? t('errors.oms.offlineSkipped') : null
+            }
+          />
+          <SuggestionsPanel />
+        </div>
+        <div className="workspace-col workspace-col--retenus">
+          <ValidatedPanel />
+        </div>
       </main>
 
       {/* ICI, ET PAS DANS LA COQUILLE : un bandeau global paraîtrait

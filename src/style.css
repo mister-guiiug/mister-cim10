@@ -1090,6 +1090,116 @@ a.brand-link:hover .brand-mark {
   }
 }
 
+/* ── Le parcours tient dans un écran ────────────────────────────
+   Relevé en production le 17/09/2026, en 1280 × 900 : page de 3 475 px,
+   « Diagnostics retenus » à 2 582 px, soit 1 834 px — DEUX ÉCRANS — sous le
+   « Valider » qui l'alimente. Valider un code n'avait aucun effet visible.
+   La place existait : les cartes s'étiraient sur 1 234 px pour un code et
+   quatre mots.
+
+   Le travail à gauche, le résultat à droite et COLLANT, pour qu'il reste sous
+   les yeux pendant qu'on tranche. Sous 1024 px, colonne unique : c'est le
+   rappel `.retenus-rappel` qui prend le relais. */
+@media (min-width: 1024px) {
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .workspace-col {
+    min-width: 0;
+  }
+
+  .workspace-col--retenus {
+    position: sticky;
+    top: 0.75rem;
+    /* Il défile pour lui-même quand la liste s'allonge, sans entraîner la
+       page : la colonne de gauche reste maîtresse du défilement. */
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+/* ── Le rappel des retenus, là où le regard travaille ────────────
+   Sur mobile, « Diagnostics retenus » commence 1 150 px SOUS le bas de
+   l'écran : rien ne disait qu'un code venait d'être retenu. Ce rappel colle en
+   haut du panneau des suggestions, se remplit à chaque validation, et mène au
+   panneau d'un clic. Au-dessus de 1024 px les deux colonnes se voient : il
+   n'a plus lieu d'être. */
+.retenus-rappel {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0.35rem 0.55rem;
+  /* Opaque : il glisse au-dessus des cartes, un fond teinté les laisserait
+     lire au travers. */
+  background: var(--surface);
+  border: 1px solid var(--surface2);
+  border-radius: var(--radius);
+}
+
+.retenus-rappel-compte {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .retenus-rappel {
+    display: none;
+  }
+}
+
+/* ── Les précisions d'un même terme ─────────────────────────────
+   `J44.1` et `J44.9` sortaient en DEUX cartes, même terme repéré, même
+   confiance (61 %) : un choix sans critère. Réunies, la hiérarchie se lit. */
+.suggestion-precisions {
+  margin: 0.4rem 0 0;
+  padding: 0.4rem 0.5rem;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+
+.suggestion-precisions-titre {
+  margin: 0 0 0.3rem;
+  font-size: 0.74rem;
+  opacity: 0.85;
+}
+
+.suggestion-precisions ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion-precisions li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestion-precision-code {
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.suggestion-precision-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
 section.panel {
   margin-bottom: 1rem;
   padding: 0.9rem 0.55rem 1rem;
