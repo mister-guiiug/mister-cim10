@@ -475,20 +475,32 @@ export function SettingsPage() {
               </div>
             </section>
 
-            {/* ── Nos autres applications (catalogue famille) ── */}
-            <section className="settings-section" aria-labelledby="sec-famille">
-              <h2 className="settings-section-title" id="sec-famille">
-                {t('settings.familyTitle')}
-              </h2>
-              <p className="settings-hint">{t('settings.familyHint')}</p>
-              <div className="cim-family">
-                <FamilyApps
-                  currentAppId="mister-cim10"
-                  showSource={false}
-                  showSponsor={false}
-                />
+            {/* ── Nos autres applications (catalogue famille) ──
+                REPLIÉ, et ce n'est pas une mise au placard. Mesuré le
+                17/09/2026 : la page faisait 3 272 px et ce bloc en occupait
+                1 866 — 57 % d'une page de RÉGLAGES consacrés à dix-neuf
+                applications qui n'en sont pas. Les réglages de l'outil
+                méritent la page ; le catalogue reste à un clic. */}
+            <details className="settings-section settings-section--collapsible">
+              <summary className="settings-section-summary">
+                <span className="settings-section-title">
+                  {t('settings.familyTitle')}
+                </span>
+                <span className="settings-section-summary-hint">
+                  {t('settings.familySummaryHint')}
+                </span>
+              </summary>
+              <div className="settings-section-body">
+                <p className="settings-hint">{t('settings.familyHint')}</p>
+                <div className="cim-family">
+                  <FamilyApps
+                    currentAppId="mister-cim10"
+                    showSource={false}
+                    showSponsor={false}
+                  />
+                </div>
               </div>
-            </section>
+            </details>
           </div>
         </div>
       </main>

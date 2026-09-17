@@ -243,6 +243,7 @@ export const messages = {
         'Une nouvelle version vous est annoncée par un bandeau. Si l’application vous semble figée sur une ancienne version, rechargez-la : le cache est vidé, vos données restent sur cet appareil.',
       appReload: 'Recharger l’application',
       familyTitle: 'Nos autres applications',
+      familySummaryHint: 'Dix-neuf applications gratuites de la même famille',
       familyHint: 'D’autres applications gratuites de la même famille.',
       shareDocTitle: 'Mister CIM-10 — paramétrage',
       importedFromLink:
@@ -267,6 +268,8 @@ export const messages = {
       tocAccount: 'Créer un compte et une application API OMS',
       tocGateway: 'Passerelle et confidentialité',
       tocLinks: 'Liens utiles',
+      useLead:
+        'Rien à configurer pour commencer : le dictionnaire CIM-10 est embarqué et répond hors connexion.',
       use1Strong: 'Configurer la source des suggestions',
       use1Mid: 'dans la page ',
       use1After:
@@ -276,10 +279,17 @@ export const messages = {
       use2Link: 'accueil',
       use2After:
         ', éventuellement à la voix (dictée du navigateur ou du clavier sur mobile).',
-      use3: 'Cliquer sur Analyser pour obtenir des propositions de codes. Chaque carte peut être validée, modifiée ou rejetée.',
-      use4: 'Les diagnostics retenus sont listés en bas de page ; vous pouvez les exporter en fichier texte simple (.txt) ou tableur (.csv), et les envoyer par e-mail ou via le partage du système.',
+      use3: 'Cliquer sur Analyser pour obtenir des propositions de codes.',
+      use4: 'Retenir ou écarter chaque proposition. Le focus suit la liste : on peut enchaîner au clavier sans quitter les boutons.',
+      use5: 'Les diagnostics retenus s’affichent à côté des suggestions sur grand écran, et sous elles sinon ; vous pouvez les exporter en texte (.txt) ou tableur (.csv), et les envoyer par e-mail ou via le partage du système.',
+      useSourceNoteBefore:
+        'Pour ajouter la classification CIM-11 de l’OMS aux suggestions, voir « Aller plus loin » ci-dessous, puis la page ',
+      useSourceNoteAfter: '. Ce n’est pas nécessaire pour coter.',
       useNote:
         'Les suggestions sont indicatives : vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.',
+      advancedTitle: 'Aller plus loin : ajouter la source OMS',
+      advancedHint:
+        'Facultatif — compte développeur OMS et passerelle à déployer',
       accountTitle: 'Créer un compte pour utiliser l’API de l’OMS',
       accountIntro:
         'Pour que l’application interroge le service officiel de classification ICD-11 (MMS), l’OMS exige une authentification OAuth2 avec un identifiant client et un mot secret. Voici le déroulement habituel.',
@@ -591,6 +601,7 @@ export const messages = {
         'A banner announces each new version. If the app seems stuck on an old version, reload it: the cache is cleared, your data stays on this device.',
       appReload: 'Reload the app',
       familyTitle: 'Our other apps',
+      familySummaryHint: 'Nineteen free apps from the same family',
       familyHint: 'More free apps from the same family.',
       shareDocTitle: 'Mister CIM-10 — settings',
       importedFromLink:
@@ -614,6 +625,8 @@ export const messages = {
       tocAccount: 'Create a WHO API account and application',
       tocGateway: 'Gateway and privacy',
       tocLinks: 'Useful links',
+      useLead:
+        'Nothing to set up to get started: the ICD-10 dictionary is bundled and works offline.',
       use1Strong: 'Set the suggestion source',
       use1Mid: 'in the ',
       use1After:
@@ -623,10 +636,16 @@ export const messages = {
       use2Link: 'home page',
       use2After:
         ', optionally by voice (browser or mobile keyboard dictation).',
-      use3: 'Click Analyze to get code suggestions. Each card can be validated, edited, or rejected.',
-      use4: 'The kept diagnoses are listed at the bottom of the page; you can export them as a plain text file (.txt) or spreadsheet (.csv), and send them by email or via the system share.',
+      use3: 'Click Analyze to get code suggestions.',
+      use4: 'Keep or dismiss each suggestion. Focus follows the list: you can work through it from the keyboard without leaving the buttons.',
+      use5: 'Kept diagnoses appear next to the suggestions on a wide screen, and below them otherwise; you can export them as text (.txt) or spreadsheet (.csv), and send them by email or via the system share.',
+      useSourceNoteBefore:
+        'To add the WHO ICD-11 classification to the suggestions, see “Going further” below, then the ',
+      useSourceNoteAfter: ' page. It is not required for coding.',
       useNote:
         'Suggestions are indicative: you remain responsible for the final choice of codes and for complying with the applicable coding rules.',
+      advancedTitle: 'Going further: adding the WHO source',
+      advancedHint: 'Optional — WHO developer account and a gateway to deploy',
       accountTitle: 'Create an account to use the WHO API',
       accountIntro:
         'For the app to query the official ICD-11 (MMS) classification service, the WHO requires OAuth2 authentication with a client ID and a client secret. Here is the usual process.',
