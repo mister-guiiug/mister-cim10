@@ -1587,16 +1587,59 @@ button.mic.listening {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
+/* ── 44 px sur tout ce qui se touche ────────────────────────────
+   Deux trous, relevés en production le 17/09/2026 : 38 éléments interactifs
+   sous 44 px en largeur mobile.
+
+   1. `button.ghost` n'était pas dans la règle — « Rejeter » et « Comparer »,
+      les deux gestes les plus fréquents après « Valider », faisaient 32 px.
+   2. La règle était indexée sur la LARGEUR et les 44 px disparaissaient
+      au-dessus de 640 px. Or elle parle du DOIGT, pas de la fenêtre : une
+      tablette tactile de 1024 px n'avait donc aucune cible correcte.
+
+   On interroge le pointeur. `pointer: fine` (souris, stylet) n'a pas besoin
+   de 44 px et l'interface y respire ; tout le reste — doigt, pointeur absent,
+   appareil hybride — les garde. Le doute profite à la cible. */
 button.primary,
 button.secondary,
-button.mic {
+button.mic,
+button.ghost,
+button.disclaimer-dismiss {
   min-height: 44px;
 }
 
-@media (min-width: 640px) {
+@media (pointer: fine) {
   button.primary,
   button.secondary,
-  button.mic {
+  button.mic,
+  button.ghost,
+  button.disclaimer-dismiss {
+    min-height: unset;
+  }
+}
+
+/* La croix est carrée : sans largeur, elle resterait un trait de 28 px. */
+button.disclaimer-dismiss {
+  min-width: 44px;
+}
+
+@media (pointer: fine) {
+  button.disclaimer-dismiss {
+    min-width: unset;
+  }
+}
+
+/* Les CHAMPS se touchent aussi, et la règle les oubliait : le nom de dossier
+   faisait 36 px, le filtre des suggestions 43. Un doigt vise un champ comme il
+   vise un bouton. */
+input[type='text'],
+input[type='search'] {
+  min-height: 44px;
+}
+
+@media (pointer: fine) {
+  input[type='text'],
+  input[type='search'] {
     min-height: unset;
   }
 }
@@ -1714,6 +1757,10 @@ button.ghost:hover {
 }
 
 /* ── Suggestion term highlight link ── */
+/* Ce lien vit DANS une phrase : le grandir à 44 px casserait l'interligne, et
+   WCAG 2.5.8 exempte justement les cibles en ligne dans un texte. Il faisait
+   19 px de haut ; on lui rend de la surface par le rembourrage, repris en
+   marge négative pour que la ligne ne bouge pas d'un pixel. */
 .suggestion-term-link {
   display: inline;
   font-style: italic;
@@ -1721,8 +1768,8 @@ button.ghost:hover {
   color: var(--accent);
   background: none;
   border: none;
-  padding: 0;
-  margin: 0;
+  padding: 0.3rem 0.2rem;
+  margin: -0.3rem -0.2rem;
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
@@ -3389,4 +3436,51 @@ html[data-theme='dark'] .cim-family [data-maturity='alpha'] {
   list-style: none;
   margin: 0.5rem 0 0;
   padding: 0;
+}
+
+/* ── Aide : « aller plus loin » ─────────────────────────────────
+   La source OMS est facultative et coûteuse — compte développeur, OAuth2 avec
+   secret, passerelle Cloudflare à déployer soi-même. Dépliée d'office, elle
+   donnait à croire qu'il fallait en passer par là pour coter, alors que le
+   dictionnaire embarqué ne demande rien. */
+.help-avance {
+  margin: 1.25rem 0;
+  padding: 0 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--surface2);
+  border-radius: var(--radius);
+}
+
+.help-avance-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.7rem;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.help-avance-summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-avance-summary .help-h2 {
+  margin: 0;
+}
+
+.help-avance-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.help-avance[open] .help-avance-summary {
+  border-bottom: 1px solid var(--surface2);
+}
+
+/* L'app marche telle quelle : le dire avant la première étape, pas après. */
+.help-lead {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
 }

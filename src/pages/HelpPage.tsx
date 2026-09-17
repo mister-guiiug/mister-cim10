@@ -27,11 +27,13 @@ export function HelpPage() {
             <li>
               <a href="#aide-utilisation">{t('help.tocUse')}</a>
             </li>
+            {/* UNE SEULE ENTRÉE, VERS LE BLOC LUI-MÊME. Les deux ancres
+                d'avant (`#aide-compte-oms`, `#aide-passerelle`) vivent
+                maintenant dans un `<details>` replié : tous les navigateurs ne
+                le déplient pas pour rejoindre un fragment, et un sommaire qui
+                mène à du vide est pire que pas de sommaire. */}
             <li>
-              <a href="#aide-compte-oms">{t('help.tocAccount')}</a>
-            </li>
-            <li>
-              <a href="#aide-passerelle">{t('help.tocGateway')}</a>
+              <a href="#aide-avance">{t('help.advancedTitle')}</a>
             </li>
             <li>
               <a href="#aide-liens">{t('help.tocLinks')}</a>
@@ -39,14 +41,17 @@ export function HelpPage() {
           </ul>
         </nav>
 
+        {/* ── Utiliser l'application ──
+            L'ÉTAPE 1 ÉTAIT « CONFIGURER LA SOURCE ». Or activer la source OMS
+            demande un compte développeur, un OAuth2 avec secret et le
+            DÉPLOIEMENT D'UNE PASSERELLE Cloudflare : une tâche d'intégrateur
+            placée en tête du mode d'emploi d'un outil de cotation. Le
+            dictionnaire embarqué, lui, ne demande rien. On commence donc par
+            ce qui marche tout de suite, et l'OMS devient « aller plus loin ». */}
         <article className="help-article" id="aide-utilisation">
           <h2 className="help-h2">{t('help.tocUse')}</h2>
+          <p className="help-lead">{t('help.useLead')}</p>
           <ol className="help-steps">
-            <li>
-              <strong>{t('help.use1Strong')}</strong> {t('help.use1Mid')}
-              <Link to="/parametres">{t('nav.settings')}</Link>
-              {t('help.use1After')}
-            </li>
             <li>
               <strong>{t('help.use2Strong')}</strong> {t('help.use2Mid')}
               <Link to="/">{t('help.use2Link')}</Link>
@@ -54,72 +59,93 @@ export function HelpPage() {
             </li>
             <li>{t('help.use3')}</li>
             <li>{t('help.use4')}</li>
+            <li>{t('help.use5')}</li>
           </ol>
           <p className="help-note">{t('help.useNote')}</p>
-        </article>
-
-        <article className="help-article" id="aide-compte-oms">
-          <h2 className="help-h2">{t('help.accountTitle')}</h2>
-          <p>{t('help.accountIntro')}</p>
-
-          <details className="help-details">
-            <summary className="help-details-summary">
-              {t('help.accountDetailsSummary')}
-            </summary>
-
-            <h3 className="help-h3">{t('help.accountStep1Title')}</h3>
-            <ul className="help-list">
-              <li>
-                {t('help.openPortal')}
-                <a href={PORTAL_URL} target="_blank" rel="noopener noreferrer">
-                  {PORTAL_URL}
-                </a>
-                .
-              </li>
-              <li>{t('help.accountStep1b')}</li>
-              <li>{t('help.accountStep1c')}</li>
-            </ul>
-
-            <h3 className="help-h3">{t('help.accountStep2Title')}</h3>
-            <p>{t('help.accountStep2Intro')}</p>
-            <ul className="help-list">
-              <li>{t('help.accountStep2a')}</li>
-              <li>{t('help.accountStep2b')}</li>
-              <li>{t('help.accountStep2c')}</li>
-            </ul>
-
-            <h3 className="help-h3">{t('help.accountStep3Title')}</h3>
-            <ul className="help-list">
-              <li>
-                {t('help.goTo')}
-                <Link to="/parametres">{t('nav.settings')}</Link>
-                {t('help.accountStep3aAfter')}
-              </li>
-              <li>{t('help.accountStep3b')}</li>
-            </ul>
-          </details>
-
           <p className="help-note">
-            {t('help.accountNoteBefore')}
-            <a href={DOC_API_URL} target="_blank" rel="noopener noreferrer">
-              {t('help.accountNoteLink')}
-            </a>
-            {t('help.accountNoteAfter')}
+            {t('help.useSourceNoteBefore')}
+            <Link to="/parametres">{t('nav.settings')}</Link>
+            {t('help.useSourceNoteAfter')}
           </p>
         </article>
 
-        <article className="help-article" id="aide-passerelle">
-          <h2 className="help-h2">{t('help.gatewayTitle')}</h2>
-          <p>{t('help.gatewayP1')}</p>
-          <p>
-            {t('help.gatewayP2a')}
-            <code className="help-code">workers/</code>
-            {t('help.gatewayP2b')}
-            <code className="help-code">README</code>
-            {t('help.gatewayP2c')}
-          </p>
-          <p className="help-note">{t('help.gatewayNote')}</p>
-        </article>
+        {/* ── Aller plus loin : la source OMS ──
+            REPLIÉ, parce que c'est facultatif et coûteux : compte développeur,
+            OAuth2 avec secret, et une passerelle Cloudflare à déployer
+            soi-même. Déplié d'office, ça donnait à croire qu'il fallait en
+            passer par là pour coter. Le sommaire y mène toujours. */}
+        <details className="help-avance" id="aide-avance">
+          <summary className="help-avance-summary">
+            <span className="help-h2">{t('help.advancedTitle')}</span>
+            <span className="help-avance-hint">{t('help.advancedHint')}</span>
+          </summary>
+          <article className="help-article" id="aide-compte-oms">
+            <h3 className="help-h2">{t('help.accountTitle')}</h3>
+            <p>{t('help.accountIntro')}</p>
+
+            <details className="help-details">
+              <summary className="help-details-summary">
+                {t('help.accountDetailsSummary')}
+              </summary>
+
+              <h4 className="help-h3">{t('help.accountStep1Title')}</h4>
+              <ul className="help-list">
+                <li>
+                  {t('help.openPortal')}
+                  <a
+                    href={PORTAL_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {PORTAL_URL}
+                  </a>
+                  .
+                </li>
+                <li>{t('help.accountStep1b')}</li>
+                <li>{t('help.accountStep1c')}</li>
+              </ul>
+
+              <h4 className="help-h3">{t('help.accountStep2Title')}</h4>
+              <p>{t('help.accountStep2Intro')}</p>
+              <ul className="help-list">
+                <li>{t('help.accountStep2a')}</li>
+                <li>{t('help.accountStep2b')}</li>
+                <li>{t('help.accountStep2c')}</li>
+              </ul>
+
+              <h4 className="help-h3">{t('help.accountStep3Title')}</h4>
+              <ul className="help-list">
+                <li>
+                  {t('help.goTo')}
+                  <Link to="/parametres">{t('nav.settings')}</Link>
+                  {t('help.accountStep3aAfter')}
+                </li>
+                <li>{t('help.accountStep3b')}</li>
+              </ul>
+            </details>
+
+            <p className="help-note">
+              {t('help.accountNoteBefore')}
+              <a href={DOC_API_URL} target="_blank" rel="noopener noreferrer">
+                {t('help.accountNoteLink')}
+              </a>
+              {t('help.accountNoteAfter')}
+            </p>
+          </article>
+
+          <article className="help-article" id="aide-passerelle">
+            <h3 className="help-h2">{t('help.gatewayTitle')}</h3>
+            <p>{t('help.gatewayP1')}</p>
+            <p>
+              {t('help.gatewayP2a')}
+              <code className="help-code">workers/</code>
+              {t('help.gatewayP2b')}
+              <code className="help-code">README</code>
+              {t('help.gatewayP2c')}
+            </p>
+            <p className="help-note">{t('help.gatewayNote')}</p>
+          </article>
+        </details>
 
         <article className="help-article" id="aide-liens">
           <h2 className="help-h2">{t('help.tocLinks')}</h2>
