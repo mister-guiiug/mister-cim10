@@ -39,6 +39,67 @@ function trigramSim(ta: Set<string>, tb: Set<string>): number {
 const FUZZY_THRESHOLD = 0.78;
 
 /**
+ * UNE DÉRIVATION N'EST PAS UNE FAUTE DE FRAPPE, et les trigrammes ne savent
+ * pas faire la différence.
+ *
+ * Mesuré en production le 17/09/2026 : « Diabète de type 2 » rendait `E11.9`,
+ * « Patient DIABÉTIQUE de type 2 » ne rendait RIEN — alors que les accents et
+ * l'abréviation « DT2 » passaient. L'exemple affiché par l'application dit
+ * pourtant « Ex. : Patient diabétique type 2 » : elle proposait un exemple sur
+ * lequel elle échouait.
+ *
+ * BAISSER LE SEUIL NE MARCHE PAS, et c'est la mesure qui le dit :
+ *
+ *   diabete / diabetique    0,667     ← à reconnaître
+ *   asthme  / asthmatique   0,571     ← à reconnaître
+ *   hepatite / hepatique    0,667     ← à NE PAS reconnaître
+ *   gastrite / gastrique    0,667     ← à NE PAS reconnaître
+ *
+ * Les mauvaises paires scorent AUSSI HAUT que les bonnes. Ce qui les sépare
+ * est ailleurs : une dérivation partage un long préfixe (« diabet »), une
+ * confusion partage une racine courte suivie de suffixes qui divergent tôt.
+ *
+ * D'où la règle : préfixe commun d'au moins 5 caractères ET couvrant au moins
+ * 80 % du plus court des deux mots, les deux mots faisant au moins 6
+ * caractères. Éprouvée sur le référentiel entier (438 mots significatifs) avant
+ * d'être écrite ici, puis de bout en bout sur des comptes-rendus réalistes.
+ */
+const PREFIXE_MIN = 5;
+const COUVERTURE_MIN = 0.8;
+const MOT_MIN = 6;
+
+/**
+ * Ce que vaut une dérivation reconnue.
+ *
+ * Au plancher (0,78), un terme court tombait à 38 % de confiance — sous le
+ * seuil d'affichage par défaut (40 %) : « Patiente asthmatique » reconnaissait
+ * `J45.9` sans jamais le montrer. Une dérivation est pourtant un signal SÛR,
+ * plus sûr qu'une ressemblance de trigrammes limite ; 0,9 la place au-dessus du
+ * plancher et en dessous d'une correspondance littérale, qui reste la seule à
+ * dépasser 62 %.
+ *
+ * CE QUE ÇA LAISSE PASSER, et il faut le savoir : « gastro » est un synonyme
+ * DÉLIBÉRÉ du référentiel (on dit « j'ai la gastro »), et « gastrite » en
+ * dérive au sens de cette règle. Un compte-rendu de gastrite propose donc aussi
+ * `A09.9`, à ~40 % — sous `K29.7` à 79 %. Aucune formulation ne sépare cette
+ * paire de `asthme`/`asthmatique` : elles sont structurellement identiques,
+ * seul le lexique les distingue. On préfère une suggestion de trop, classée
+ * dernière et rejetable d'un clic, à cinq diagnostics courants jamais
+ * reconnus.
+ */
+const DERIVATION_SIM = 0.9;
+
+function estDerive(a: string, b: string): boolean {
+  const court = Math.min(a.length, b.length);
+  // Sous six lettres, on n'a plus affaire à un mot mais à un fragment
+  // (`lymph`, `septic`) : tout lui ressemble.
+  if (court < MOT_MIN) return false;
+  let p = 0;
+  while (p < a.length && p < b.length && a[p] === b[p]) p++;
+  return p >= PREFIXE_MIN && p / court >= COUVERTURE_MIN;
+}
+
+/**
  * Correspondance approchée : CHAQUE mot significatif de `needles` doit trouver,
  * dans `haystack`, un mot dont il est proche par trigrammes. Rend la similarité
  * moyenne, ou `null` dès qu'un mot n'a pas de répondant.
@@ -64,9 +125,12 @@ function fuzzyTermMatch(
   for (const tw of significant) {
     const twTg = trigrams(tw);
     let best = 0;
-    for (const { tg } of haystack) {
+    for (const { w, tg } of haystack) {
       const sim = trigramSim(twTg, tg);
       if (sim > best) best = sim;
+      // Une dérivation compte comme une reconnaissance sûre, sans jamais
+      // égaler une correspondance littérale.
+      if (best < DERIVATION_SIM && estDerive(tw, w)) best = DERIVATION_SIM;
     }
     if (best < FUZZY_THRESHOLD) return null;
     totalSim += best;
