@@ -36,8 +36,11 @@ export function AppFooter() {
   return (
     <div className="app-footer">
       <p className="footer-privacy">{t('footer.privacy')}</p>
+      {/* PAS DE PROP `version` : le numéro qu'elle affichait portait un lien
+          vers `…/releases/tag/vX.Y.Z`, et aucune app du parc ne crée de tag
+          git — 404 garanti. Le numéro part toujours dans le rapport de bug
+          ouvert par `issues`. */}
       <SocleAppFooter
-        version
         issues
         className="footer-actions"
         repoUrl={repoUrl('mister-cim10')}

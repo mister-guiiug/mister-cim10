@@ -473,12 +473,6 @@ export function SettingsPage() {
                   label={t('settings.appReload')}
                 />
               </div>
-              <p className="settings-app-version">
-                {t('settings.appVersion', {
-                  version: __APP_VERSION__,
-                  build: __BUILD_TIME__,
-                })}
-              </p>
             </section>
 
             {/* ── Nos autres applications (catalogue famille) ── */}
