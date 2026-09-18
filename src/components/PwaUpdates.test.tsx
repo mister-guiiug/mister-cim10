@@ -54,7 +54,7 @@ describe('PwaUpdates', () => {
     expect(swStub.options?.immediate).toBe(true);
   });
 
-  it('affiche le bandeau quand une version attend, avec les libellés de l’app', () => {
+  it('affiche le bandeau quand une version attend, avec les libellés du socle', () => {
     renderApp();
     expect(banner()).toBeNull();
 
@@ -63,9 +63,7 @@ describe('PwaUpdates', () => {
     });
 
     expect(banner()).not.toBeNull();
-    expect(
-      screen.getByText('🎨 Nouveau logo ! Une mise à jour est disponible.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Mise à jour disponible')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Mettre à jour' })
     ).toBeInTheDocument();
