@@ -142,8 +142,10 @@ export default defineConfig(({ command }) => {
       react(),
       tailwindcss(),
       // SEO partagé famille : canonical/OG via placeholders index.html +
-      // sitemap.xml/robots.txt générés au build. L'analytics reste géré par
-      // analyticsPlugin() local (GTM + GA4 + GSC).
+      // sitemap.xml/robots.txt générés au build. La MESURE, elle, n'est plus
+      // ici du tout : `ConsentBanner` la monte à l'exécution, après accord.
+      // `analyticsPlugin()` ci-dessus ne pose plus que la balise de
+      // vérification de propriété Google, qui ne dépose rien chez le visiteur.
       pwaSeoPlugin({
         siteName: 'Mister CIM-10',
         basePath,
