@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { registerSW } from 'virtual:pwa-register';
 import { AppUpdates } from '@mister-guiiug/dev-pwa-config/react/app-updates';
-import { useI18n } from '../i18n';
 import { createLogger } from '@mister-guiiug/dev-pwa-config/logger';
 
 const log = createLogger('pwa');
@@ -39,16 +38,12 @@ const log = createLogger('pwa');
  * périmée qu'avant la migration.
  */
 export function PwaUpdates({ children }: { children: ReactNode }) {
-  const { t } = useI18n();
-
   return (
     <AppUpdates
       snoozeHours={0}
       registerSW={registerSW}
       checkEvery="1h"
       bannerProps={{
-        title: t('pwa.updateAvailable'),
-        updateLabel: t('pwa.updateAction'),
         // Le bandeau du socle n'est pas positionné : `components.css` lui donne
         // l'habillage (fond, filet, rayon, cible tactile), l'app le place. Il
         // passe au-dessus de l'en-tête collant (`z-index: 50`) et sous le lien

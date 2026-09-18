@@ -354,10 +354,6 @@ export const messages = {
           'Hors connexion : seul le dictionnaire CIM-10 local a répondu, la recherche OMS a été ignorée.',
       },
     },
-    pwa: {
-      updateAvailable: '🎨 Nouveau logo ! Une mise à jour est disponible.',
-      updateAction: 'Mettre à jour',
-    },
     footer: {
       privacy:
         'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Rien n’est envoyé à nos serveurs tant que vous n’activez pas la connexion OMS ; seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
@@ -705,10 +701,6 @@ export const messages = {
         offlineSkipped:
           'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
       },
-    },
-    pwa: {
-      updateAvailable: '🎨 New logo! An update is available.',
-      updateAction: 'Update',
     },
     footer: {
       privacy:
