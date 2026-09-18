@@ -95,9 +95,11 @@ export function App() {
   const location = useLocation();
   const { t } = useI18n();
 
-  // Une vue de page par navigation. GA4 n'en envoie qu'une par chargement de
-  // document — sous `HashRouter`, toute la navigation serait invisible. Ne fait
-  // rien tant que le consentement n'est pas accordé.
+  // Une vue de page par navigation — ni zéro, ni deux. Sans ce hook, sous
+  // `HashRouter`, toute la navigation serait invisible ; et si on laissait
+  // PostHog compter seul, chaque navigation serait comptée DEUX fois. Le socle
+  // pose donc `capture_pageview: false`. Ne fait rien tant que le consentement
+  // n'est pas accordé.
   usePageViews(location.pathname);
 
   useEffect(() => {
@@ -118,8 +120,11 @@ export function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {/* Une `region`, pas une boîte modale : elle ne recouvre rien et ne
-          piège pas le focus. Ne rend RIEN sans `VITE_GA_MEASUREMENT_ID`. */}
-      <ConsentBanner gaMeasurementId={import.meta.env.VITE_GA_MEASUREMENT_ID} />
+          piège pas le focus. Ne rend RIEN sans `VITE_POSTHOG_KEY`. */}
+      <ConsentBanner
+        posthogKey={import.meta.env.VITE_POSTHOG_KEY}
+        loader={() => import('posthog-js/dist/module.slim.js')}
+      />
       <BottomNav
         className="bottom-nav"
         // LA BARRE EST COLLÉE, ET ELLE DOIT LE DIRE. `style.css` la posait en
