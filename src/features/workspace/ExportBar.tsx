@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { dateSlug, downloadBlob } from '@mister-guiiug/dev-pwa-config/download';
 import { toCsv } from '@mister-guiiug/dev-pwa-config/csv';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { useI18n } from '../../i18n';
 import type { ValidatedDiagnostic } from '../../types/index';
 
@@ -100,6 +101,7 @@ export function ExportBar({ disabled }: ExportBarProps) {
       .join('\n');
     try {
       await navigator.clipboard.writeText(text);
+      trackEvent(GESTES.EXPORT, { format: 'presse-papiers' });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -113,6 +115,7 @@ export function ExportBar({ disabled }: ExportBarProps) {
       { type: 'text/plain;charset=utf-8' }
     );
     downloadBlob(blob, `cim10-${dateSlug()}.txt`);
+    trackEvent(GESTES.EXPORT, { format: 'txt' });
   };
 
   const exportCsv = () => {
@@ -120,6 +123,7 @@ export function ExportBar({ disabled }: ExportBarProps) {
       type: 'text/csv;charset=utf-8',
     });
     downloadBlob(blob, `cim10-${dateSlug()}.csv`);
+    trackEvent(GESTES.EXPORT, { format: 'csv' });
   };
 
   const exportJson = () => {
@@ -127,6 +131,7 @@ export function ExportBar({ disabled }: ExportBarProps) {
       type: 'application/json',
     });
     downloadBlob(blob, `cim10-${dateSlug()}.json`);
+    trackEvent(GESTES.EXPORT, { format: 'json' });
   };
 
   const exportEmail = () => {

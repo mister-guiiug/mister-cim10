@@ -1,6 +1,7 @@
 import { useActionGuard } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
 import { PwaInstallPrompt } from '@mister-guiiug/dev-pwa-config/react/pwa-install-prompt';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';
@@ -50,6 +51,20 @@ export function HomePage() {
     }
     setAnalyzeError(null);
     setIsAnalyzing(true);
+    /*
+     * L'ANALYSE, MESURÉE PAR SON ISSUE — et par son MODE, qui est le point.
+     *
+     * Cette application a deux référentiels : le dictionnaire local, immédiat,
+     * et la passerelle OMS, qui passe par le réseau. `mode` dit lequel a été
+     * demandé (`local`, `api`, `both`) et c'est la seule ventilation utile :
+     * la passerelle est le point faible connu de l'app, et on ne savait pas à
+     * quelle fréquence elle échoue chez les utilisateurs.
+     *
+     * RIEN D'AUTRE NE PART. Ni le compte-rendu, ni sa longueur, ni le nombre
+     * de codes trouvés, ni leur nature. Chacune de ces mesures serait un pas
+     * vers le texte clinique, et c'est exactement ce que l'ADR 0012 refuse.
+     */
+    trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'lancee', mode });
     try {
       const results: AnalysisResult[] = [];
       // Dictionnaire local CIM-10 (immédiat).
@@ -67,7 +82,21 @@ export function HomePage() {
       setSuggestions(
         [...byCode.values()].sort((a, b) => b.confidence - a.confidence)
       );
+      trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'reussie', mode });
     } catch (err) {
+      /*
+       * CE COMPTEUR VA RÉVÉLER UN DÉFAUT CONNU, et c'est une raison de plus de
+       * le poser. Quand la passerelle OMS lève, ce `catch` affiche l'erreur
+       * — mais n'appelle JAMAIS `setSuggestions`. En mode `both`, le
+       * dictionnaire local a pourtant déjà répondu : ses résultats sont jetés
+       * avec l'échec réseau, et l'utilisateur voit une erreur là où il aurait
+       * dû voir des suggestions.
+       *
+       * L'écart entre `etape: 'echouee'` en mode `both` et le même en mode
+       * `api` mesurera exactement la portée de ce défaut. Le corriger est un
+       * autre commit : une PR de mesure ne change pas un comportement.
+       */
+      trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'echouee', mode });
       setAnalyzeError(
         err instanceof OmsError
           ? t(
