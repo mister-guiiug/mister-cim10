@@ -352,6 +352,12 @@ export const messages = {
         unknown: 'Erreur inattendue pendant l’analyse.',
         offlineSkipped:
           'Hors connexion : seul le dictionnaire CIM-10 local a répondu, la recherche OMS a été ignorée.',
+        // La passerelle a échoué, le dictionnaire local avait déjà répondu :
+        // le message porte la raison exacte de l'échec ET dit que les codes
+        // locaux sont toujours là, sinon l'alerte donne à croire que l'analyse
+        // entière est perdue.
+        localKept:
+          '{raison} Les codes du dictionnaire CIM-10 local restent affichés.',
       },
     },
     footer: {
@@ -700,6 +706,8 @@ export const messages = {
         unknown: 'Unexpected error during analysis.',
         offlineSkipped:
           'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
+        localKept:
+          '{raison} The local ICD-10 dictionary codes are still shown.',
       },
     },
     footer: {
