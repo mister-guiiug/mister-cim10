@@ -14,6 +14,19 @@ import { OmsError, suggestFromOms } from '../lib/oms';
 import { useI18n } from '../i18n';
 import type { AnalysisResult } from '../types/index';
 
+/**
+ * Dédup par code (CIM-10 et CIM-11 ne se chevauchent pas), tri par confiance.
+ *
+ * Sortie du corps de `handleAnalyze` parce qu'elle a maintenant DEUX
+ * appelants : l'analyse complète, et l'échec OMS qui ne garde que la moitié
+ * locale. Fonction pure — elle ne lit ni l'état ni les réglages.
+ */
+function classerParConfiance(results: AnalysisResult[]): AnalysisResult[] {
+  const byCode = new Map<string, AnalysisResult>();
+  for (const r of results) if (!byCode.has(r.code)) byCode.set(r.code, r);
+  return [...byCode.values()].sort((a, b) => b.confidence - a.confidence);
+}
+
 export function HomePage() {
   const setSuggestions = useWorkspaceStore(s => s.setSuggestions);
   const setIsAnalyzing = useWorkspaceStore(s => s.setIsAnalyzing);
@@ -65,45 +78,57 @@ export function HomePage() {
      * vers le texte clinique, et c'est exactement ce que l'ADR 0012 refuse.
      */
     trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'lancee', mode });
+    /*
+     * DÉCLARÉS HORS DU `try`, ET C'EST TOUT LE CORRECTIF. Le dictionnaire
+     * local remplit `results` AVANT que la passerelle OMS soit interrogée :
+     * tant que ces deux variables vivaient dans le `try`, l'échec réseau
+     * emportait avec lui des résultats déjà calculés.
+     */
+    const results: AnalysisResult[] = [];
+    let localRepondu = false;
     try {
-      const results: AnalysisResult[] = [];
       // Dictionnaire local CIM-10 (immédiat).
       if (mode === 'local' || mode === 'both') {
         results.push(...suggestFromText(crText));
+        localRepondu = true;
       }
       // OMS CIM-11 via la passerelle (réseau) — sautée hors connexion, où elle
       // ne peut qu'échouer : la partie locale, elle, a déjà répondu.
       if ((mode === 'api' || mode === 'both') && isOnline) {
         results.push(...(await suggestFromOms(crText, who)));
       }
-      // Dédup par code (CIM-10 et CIM-11 ne se chevauchent pas), tri par confiance.
-      const byCode = new Map<string, AnalysisResult>();
-      for (const r of results) if (!byCode.has(r.code)) byCode.set(r.code, r);
-      setSuggestions(
-        [...byCode.values()].sort((a, b) => b.confidence - a.confidence)
-      );
+      setSuggestions(classerParConfiance(results));
       trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'reussie', mode });
     } catch (err) {
       /*
-       * CE COMPTEUR VA RÉVÉLER UN DÉFAUT CONNU, et c'est une raison de plus de
-       * le poser. Quand la passerelle OMS lève, ce `catch` affiche l'erreur
-       * — mais n'appelle JAMAIS `setSuggestions`. En mode `both`, le
-       * dictionnaire local a pourtant déjà répondu : ses résultats sont jetés
-       * avec l'échec réseau, et l'utilisateur voit une erreur là où il aurait
-       * dû voir des suggestions.
+       * UN ÉCHEC DE L'OMS N'EST PAS UN ÉCHEC DE L'ANALYSE. En mode « both »,
+       * le dictionnaire CIM-10 a déjà répondu quand la passerelle lève : ses
+       * codes sont publiés, et le message dit seulement ce qui manque. Avant,
+       * ce `catch` n'appelait jamais `setSuggestions` — l'utilisateur voyait
+       * une erreur nue là où la moitié locale de son analyse était prête.
        *
-       * L'écart entre `etape: 'echouee'` en mode `both` et le même en mode
-       * `api` mesurera exactement la portée de ce défaut. Le corriger est un
-       * autre commit : une PR de mesure ne change pas un comportement.
+       * EN MODE « API », RIEN N'A ÉTÉ PRODUIT, et la liste précédente est
+       * laissée en place : l'effacer ferait perdre des codes valides sur une
+       * simple reprise après une passerelle qui tousse.
+       *
+       * Le compteur, lui, ne change pas de sens : `etape: 'echouee'` dit que
+       * la passerelle a échoué, `mode` dit ce que l'utilisateur a quand même
+       * obtenu.
        */
       trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'echouee', mode });
-      setAnalyzeError(
+      if (localRepondu) setSuggestions(classerParConfiance(results));
+      const raison =
         err instanceof OmsError
           ? t(
               `errors.oms.${err.code}`,
               err.status === undefined ? undefined : { status: err.status }
             )
-          : t('errors.oms.unknown')
+          : t('errors.oms.unknown');
+      // Le suffixe n'est ajouté que s'il y a vraiment quelque chose à voir :
+      // une analyse locale sans correspondance ne doit pas annoncer des codes
+      // qui n'existent pas.
+      setAnalyzeError(
+        results.length > 0 ? t('errors.oms.localKept', { raison }) : raison
       );
     } finally {
       setIsAnalyzing(false);
