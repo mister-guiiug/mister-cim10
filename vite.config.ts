@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { pwaSeoPlugin } from '@mister-guiiug/dev-pwa-config/vite-pwa-base';
+import { cspPlugin } from '@mister-guiiug/dev-pwa-config/vite-csp';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
 import { versionPlugin } from '@mister-guiiug/dev-pwa-config/vite-version';
@@ -171,6 +172,32 @@ export default defineConfig(({ command }) => {
         // barre du navigateur suit le système dès le premier rendu ; le choix
         // explicite contraire au système est couvert par ThemeProvider.
         themeColor: { light: '#eef2f7', dark: '#0c1222' },
+      }),
+      // LA CSP VIENT DU SOCLE, ET PLUS D'UNE BALISE ÉCRITE À LA MAIN.
+      //
+      // Cette app est celle où ça coûtait le plus cher. Elle reçoit du texte
+      // clinique, elle embarque un DSN Sentry — et sa `<meta>` recopiée dans
+      // `index.html` n'a jamais autorisé `sentry.io`. Quand le socle a ouvert
+      // `connect-src` à l'hôte du DSN pour tout le parc, le 19/09/2026, elle
+      // n'a rien reçu : aucune montée de paquet n'atteint une chaîne de
+      // caractères. Sa remontée d'erreurs était entièrement morte, et rien ne
+      // pouvait le dire — exactement la panne qui avait déjà coupé les deux
+      // modes réseau de cette app quand la passerelle OMS manquait ici.
+      //
+      // Le greffon apporte en prime `script-src` par HASH des scripts inline
+      // en production, au lieu de `'unsafe-inline'`.
+      cspPlugin({
+        dev: command === 'serve',
+        // Ouvre les hôtes de PostHog — le nuage EUROPÉEN (ADR 0012).
+        analytics: true,
+        // `*.who.int` : l'API CIM de l'OMS, telle que la balise l'autorisait
+        // déjà. ATTENTION — la passerelle que l'utilisateur configure dans les
+        // réglages (`who_icd_proxy_url`) n'est PAS couverte : son adresse
+        // n'existe qu'à l'exécution, la politique est figée au build. C'est la
+        // limite connue, pas une régression de cette PR.
+        connectSrc: ["'self'", 'https://*.who.int'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
       }),
       VitePWA({
         // `'prompt'`, et non `'autoUpdate'`. Avec `autoUpdate`, le module
