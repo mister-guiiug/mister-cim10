@@ -511,6 +511,18 @@ export function SettingsPage() {
                     currentAppId="mister-cim10"
                     showSource={false}
                     showSponsor={false}
+                    // Les deux réglages que `style.css` posait en CSS : le
+                    // <summary> ci-dessus annonce déjà la section, et l'app
+                    // refaisait la grille en une colonne.
+                    showTitle={false}
+                    layout="list"
+                    // UN REPLI DANS UN REPLI, ET C'EST VOULU. Le <details>
+                    // ci-dessus décide si le catalogue paraît ; celui-ci
+                    // décide de quelle catégorie. Ouvrir la section montre
+                    // donc sept lignes au lieu des dix-neuf cartes qui
+                    // occupaient 1 866 px — la mesure qui a justifié le
+                    // premier repli vaut encore pour le second.
+                    groupBy="category"
                   />
                 </div>
               </div>
