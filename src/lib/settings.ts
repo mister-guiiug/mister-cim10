@@ -12,6 +12,7 @@
  */
 import { LS_KEYS } from './constants';
 import { readSnapshot, updateSnapshot, borneSeuil } from './app-store';
+import { defautsWho } from './who-defaults';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 
 export function readAnalyzeMode(): AnalyzeMode {
@@ -22,10 +23,26 @@ export function writeAnalyzeMode(mode: AnalyzeMode): void {
   updateSnapshot({ mode });
 }
 
+/**
+ * Les réglages OMS, l'enregistré d'abord, le défaut du build pour combler.
+ *
+ * LE COMBLEMENT SE FAIT À LA LECTURE, pas à l'initialisation de l'instantané :
+ * l'application est déjà déployée et les appareils en service ont un instantané
+ * écrit avant que ces variables existent. Comblé à l'initialisation seulement,
+ * le nouveau défaut ne serait jamais arrivé chez eux.
+ *
+ * Une valeur enregistrée l'emporte toujours : celui qui a saisi sa propre
+ * passerelle la garde.
+ */
 export function readWhoSettings(): WhoSettings {
+  const enregistre = readSnapshot().who;
+  const defauts = defautsWho();
   return {
-    ...readSnapshot().who,
+    clientId: enregistre.clientId,
     clientSecret: localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET) || '',
+    proxyUrl: enregistre.proxyUrl || defauts.proxyUrl,
+    releaseId: enregistre.releaseId || defauts.releaseId,
+    lang: enregistre.lang || defauts.lang,
   };
 }
 

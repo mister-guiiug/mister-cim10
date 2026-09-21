@@ -201,7 +201,7 @@ export const messages = {
       modeApi: 'OMS en ligne (CIM-11)',
       modeBoth: 'Les deux (CIM-10 + CIM-11)',
       modeHint:
-        'Par défaut, tout se fait dans la page. Si vous choisissez une option avec OMS, les champs de connexion s’affichent : compte OMS et adresse de passerelle requis.',
+        'Par défaut, tout se fait dans la page — aucun envoi du compte-rendu. Si vous choisissez une option avec OMS, des segments de texte partent vers la passerelle puis vers les serveurs de l’OMS, et les champs de connexion s’affichent.',
       thresholdTitle: 'Seuil de confiance minimal',
       thresholdHint:
         'Les suggestions avec une confiance inférieure à ce seuil restent ignorées par défaut dans la liste.',
@@ -213,11 +213,13 @@ export const messages = {
       clientId: 'Identifiant',
       clientSecret: 'Mot secret',
       proxyUrl: 'Adresse de la passerelle',
+      omsPreconfigured:
+        'Cette installation est déjà reliée à un compte OMS, côté passerelle : les deux champs ci-dessous sont facultatifs. Ne les remplissez que pour utiliser VOTRE compte — ce sont alors vos identifiants qui porteront les requêtes.',
       versionLangSummary: 'Version de la classification et langue',
       version: 'Version',
       labelLang: 'Langue des libellés',
       omsRisk:
-        'Identifiants enregistrés dans ce navigateur (éviter sur poste partagé). La passerelle doit autoriser ce site.',
+        'Un compte saisi ici est enregistré dans ce navigateur (éviter sur poste partagé). La passerelle doit autoriser ce site.',
       forgetSecret: 'Oublier mot secret et session OMS',
       appearanceTitle: 'Apparence',
       themeLabel: 'Thème',
@@ -561,7 +563,7 @@ export const messages = {
       modeApi: 'WHO online (ICD-11)',
       modeBoth: 'Both (ICD-10 + ICD-11)',
       modeHint:
-        'By default, everything happens in the page. If you choose an option with WHO, the connection fields appear: WHO account and gateway address required.',
+        'By default, everything happens in the page — the report is never sent. If you choose an option with WHO, segments of text go to the gateway and then to the WHO servers, and the connection fields appear.',
       thresholdTitle: 'Minimum confidence threshold',
       thresholdHint:
         'Suggestions with a confidence below this threshold stay hidden from the list by default.',
@@ -573,11 +575,13 @@ export const messages = {
       clientId: 'Client ID',
       clientSecret: 'Client secret',
       proxyUrl: 'Gateway address',
+      omsPreconfigured:
+        'This installation is already linked to a WHO account, on the gateway side: the two fields below are optional. Fill them in only to use YOUR own account — your credentials will then carry the requests.',
       versionLangSummary: 'Classification version and language',
       version: 'Version',
       labelLang: 'Label language',
       omsRisk:
-        'Credentials saved in this browser (avoid on shared computers). The gateway must allow this site.',
+        'An account entered here is saved in this browser (avoid on shared computers). The gateway must allow this site.',
       forgetSecret: 'Forget client secret and WHO session',
       appearanceTitle: 'Appearance',
       themeLabel: 'Theme',

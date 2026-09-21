@@ -6,11 +6,27 @@
  * - ALLOWED_ORIGINS : origines autorisées, séparées par des virgules
  *   ex. https://votrecompte.github.io,http://localhost:5173
  *   Si vide, Access-Control-Allow-Origin: * (déconseillé en production).
+ *
+ * SECRETS (`wrangler secret put`) :
+ * - WHO_CLIENT_ID / WHO_CLIENT_SECRET : le compte OMS de la passerelle.
+ *
+ * Posés, l’application n’a plus rien à demander : elle appelle `/token` sans
+ * identifiants et la passerelle met les siens. C’est le SEUL endroit où ils
+ * peuvent vivre. Une application de navigateur n’a pas de coffre : tout ce
+ * qu’on lui donne au build part dans le bundle public, lisible par quiconque
+ * ouvre l’onglet Réseau. Ici, le mot secret ne franchit jamais la frontière.
  */
 const TOKEN_URL = 'https://icdaccessmanagement.who.int/connect/token';
 const API_BASE = 'https://id.who.int';
 
-/** @param {Request} request @param {{ ALLOWED_ORIGINS?: string }} env */
+/**
+ * @typedef {object} Env
+ * @property {string} [ALLOWED_ORIGINS]
+ * @property {string} [WHO_CLIENT_ID]
+ * @property {string} [WHO_CLIENT_SECRET]
+ */
+
+/** @param {Request} request @param {Env} env */
 function corsHeaders(request, env) {
   const origin = request.headers.get('Origin') || '';
   const raw = (env.ALLOWED_ORIGINS || '').trim();
@@ -36,7 +52,7 @@ function corsHeaders(request, env) {
 }
 
 export default {
-  /** @param {Request} request @param {{ ALLOWED_ORIGINS?: string }} env */
+  /** @param {Request} request @param {Env} env */
   async fetch(request, env) {
     const ch = corsHeaders(request, env);
     if (!ch) {
@@ -58,12 +74,21 @@ export default {
 
     try {
       if (path === 'token' && request.method === 'POST') {
-        const body = await request.json();
-        const clientId = body?.clientId;
-        const clientSecret = body?.clientSecret;
+        // Corps ABSENT ou illisible toléré : c'est le cas normal quand la
+        // passerelle porte ses propres identifiants. Sans ce `catch`, un POST
+        // sans corps levait et ressortait en 502 — un échec de configuration
+        // déguisé en panne de l'OMS.
+        const body = await request.json().catch(() => null);
+        // LE CORPS L'EMPORTE SUR LES SECRETS DE LA PASSERELLE : qui apporte son
+        // propre compte OMS doit pouvoir s'en servir, quota et journal compris.
+        const clientId = body?.clientId || env.WHO_CLIENT_ID;
+        const clientSecret = body?.clientSecret || env.WHO_CLIENT_SECRET;
         if (!clientId || !clientSecret) {
           return new Response(
-            JSON.stringify({ error: 'clientId et clientSecret requis' }),
+            JSON.stringify({
+              error:
+                'clientId et clientSecret requis (ou secrets WHO_CLIENT_ID / WHO_CLIENT_SECRET sur la passerelle)',
+            }),
             {
               status: 400,
               headers: { ...ch, 'Content-Type': 'application/json' },

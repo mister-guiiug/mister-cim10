@@ -5,6 +5,7 @@ import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
+import { passerelleFournieParLeBuild } from '../lib/who-defaults';
 import type { AnalyzeMode, WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
@@ -64,6 +65,9 @@ export function SettingsPage() {
   }, [searchParams, setSearchParams, setMode, setWho, t]);
 
   const showWhoSection = mode !== 'local';
+  // La passerelle du build s'authentifie seule : les champs de compte deviennent
+  // des champs de REMPLACEMENT, plus des champs à remplir.
+  const preconfigure = passerelleFournieParLeBuild(who.proxyUrl);
 
   const handleExportAll = () => {
     downloadAppBackup();
@@ -235,6 +239,16 @@ export function SettingsPage() {
                     </a>
                   </nav>
                 </div>
+
+                {/* LE COMPTE EST FACULTATIF QUAND LA PASSERELLE PORTE LE SIEN.
+                    Sans cette phrase, deux champs vides sur une page de
+                    réglages se lisent comme une configuration inachevée : on
+                    cherche des identifiants qu'on n'a pas, et on renonce. */}
+                {preconfigure && (
+                  <p className="hint hint--compact">
+                    {t('settings.omsPreconfigured')}
+                  </p>
+                )}
 
                 <div className="api-fields-grid" role="group">
                   <label className="who-field">

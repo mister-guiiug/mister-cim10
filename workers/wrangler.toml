@@ -1,0 +1,28 @@
+# Passerelle OMS de mister-cim10, déployée par `.github/workflows/deploy-worker.yml`.
+#
+# CE FICHIER EST VERSIONNÉ, et il ne contient aucun secret — c'est précisément
+# la ligne de partage. `ALLOWED_ORIGINS` est une liste d'origines publiques ; le
+# compte OMS (`WHO_CLIENT_ID`, `WHO_CLIENT_SECRET`) se pose par
+# `wrangler secret put`, qui ne l'écrit nulle part sur le disque.
+#
+# `wrangler.toml.example` reste, pour qui déploie sa propre passerelle sous un
+# autre nom de compte.
+
+name = "mister-cim10"
+main = "who-icd-proxy.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Les origines d'où l'application appelle : le site de production et le serveur
+# de développement. Une liste VIDE ferait répondre `Access-Control-Allow-Origin:
+# *` — la passerelle est publique, ce serait offrir le quota OMS du compte à
+# n'importe quel site.
+#
+# CES DEUX VALEURS SONT CELLES DE LA PASSERELLE EN SERVICE, relevées le
+# 21/09/2026 en interrogeant le worker origine par origine (204 = autorisée,
+# 403 = refusée). Un `wrangler deploy` REMPLACE les variables du worker : écrire
+# ici une liste devinée aurait coupé l'application au premier déploiement. Ni
+# `localhost:4173` (aperçu Playwright) ni `127.0.0.1` n'y figuraient — ils n'y
+# sont pas ajoutés au passage, élargir l'accès à la passerelle n'est pas l'objet
+# de ce changement.
+ALLOWED_ORIGINS = "https://mister-guiiug.github.io,http://localhost:5173"

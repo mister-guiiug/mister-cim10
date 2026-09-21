@@ -1,0 +1,13 @@
+{
+  "name": "mister-cim10-who-icd-proxy",
+  "private": true,
+  "type": "module",
+  "description": "Passerelle CORS Cloudflare Worker vers l'ICD API de l'OMS (jeton + autocode CIM-11). Porte le compte OMS en secrets, pour que l'application n'ait rien à demander.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dry-run": "wrangler deploy --dry-run --outdir=.wrangler-dryrun"
+  },
+  "devDependencies": {
+    "wrangler": "^4.135.0"
+  }
+}
