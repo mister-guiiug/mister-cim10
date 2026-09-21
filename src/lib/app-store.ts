@@ -26,6 +26,14 @@
  * `v` en version 0 (c'est le chemin d'adoption qu'il documente), et la
  * migration 0 → 1 ci-dessous les traduit au premier chargement.
  *
+ * LA PASSERELLE N'EST PLUS UN RÉGLAGE D'APPAREIL — C'EST LA VERSION 2. Son
+ * adresse venait du stockage, et un champ des Réglages la changeait. La CSP a
+ * vidé ce choix de son sens : `connect-src` est figée au build, et toute autre
+ * adresse est coupée par le navigateur avant que la requête parte. Elle vient
+ * donc du build seul (`./who-defaults.ts`), et la migration 1 → 2 EFFACE celle
+ * que les appareils en service ont gardée — la laisser, ce serait garder un
+ * réglage qui fait semblant de régler quelque chose.
+ *
  * LE MOT SECRET OMS N'ENTRE PAS DANS L'INSTANTANÉ. Il garde sa clé propre,
  * `cim10_who_icd_client_secret`. Ce n'est pas un oubli : `buildAppBackup()`
  * (voir `./storage.ts`) énumère TOUT le préfixe et retire le secret par son nom
@@ -53,7 +61,7 @@ export const appStore = createStore(APP_PREFIX);
 export const SNAPSHOT_KEY = 'data';
 
 /** Version du schéma de l'instantané. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /** Nombre de sessions nommées conservées — au-delà, la plus ancienne sort. */
 export const MAX_SESSIONS = 5;
@@ -61,8 +69,12 @@ export const MAX_SESSIONS = 5;
 /** Seuil de confiance par défaut, repris de l'ancien `settings.ts`. */
 const DEFAULT_MIN_CONFIDENCE = 0.4;
 
-/** Connexion OMS SANS le mot secret (cf. en-tête). */
-export type WhoPublicSettings = Omit<WhoSettings, 'clientSecret'>;
+/**
+ * Connexion OMS telle que l'APPAREIL la garde : ni le mot secret, ni la
+ * passerelle (cf. en-tête). `WhoSettings`, lui, porte les deux — c'est le
+ * réglage EFFECTIF, recomposé à la lecture par `./settings.ts`.
+ */
+export type WhoPublicSettings = Omit<WhoSettings, 'clientSecret' | 'proxyUrl'>;
 
 /** L'état complet de l'application sous une seule clé. */
 export interface AppSnapshot {
@@ -90,7 +102,6 @@ function etatInitial(): AppSnapshot {
     disclaimerDismissed: false,
     who: {
       clientId: '',
-      proxyUrl: '',
       releaseId: '2025-01',
       lang: 'fr',
     },
@@ -165,7 +176,6 @@ function valider(data: unknown): AppSnapshot {
     disclaimerDismissed: data.disclaimerDismissed === true,
     who: {
       clientId: texte(who.clientId, '').trim(),
-      proxyUrl: texte(who.proxyUrl, '').trim(),
       releaseId: texte(who.releaseId, initial.who.releaseId),
       lang: texte(who.lang, initial.who.lang),
     },
@@ -176,13 +186,14 @@ function valider(data: unknown): AppSnapshot {
  * Les clés éparses reprises dans l'instantané. Le mot secret et la langue n'y
  * sont PAS (cf. en-tête).
  *
- * `analyze_mode` Y RESTE ALORS QU'ELLE NE SE TRADUIT PLUS. Le sélecteur à trois
- * modes a disparu : l'analyse interroge les deux référentiels, et il n'y a plus
- * de mode à reprendre. Mais la clé existe encore sur les appareils en service —
- * la garder dans cette liste est ce qui la fait LIRE, donc EFFACER
- * (`retirerClesEparses`). Retirée d'ici, elle traînerait indéfiniment dans le
- * stockage et dans chaque fichier de sauvegarde. Même raison pour
- * `who_icd_enabled`, son ancêtre booléen.
+ * DEUX CLÉS Y RESTENT ALORS QU'ELLES NE SE TRADUISENT PLUS. `analyze_mode` :
+ * le sélecteur à trois modes a disparu, l'analyse interroge les deux
+ * référentiels. `who_icd_proxy_url` : la passerelle vient du build. Mais ces
+ * clés existent encore sur les appareils en service — les garder dans cette
+ * liste est ce qui les fait LIRE, donc EFFACER (`retirerClesEparses`). Retirées
+ * d'ici, elles traîneraient indéfiniment dans le stockage et dans chaque
+ * fichier de sauvegarde. Même raison pour `who_icd_enabled`, ancêtre booléen du
+ * mode.
  */
 const CLES_EPARSES = [
   'analyze_mode',
@@ -224,8 +235,9 @@ function traduireClesEparses(data: unknown): Partial<AppSnapshot> {
       jsonOuNull(plat.validated_diagnostics)
     );
   }
-  // `analyze_mode` est LUE mais plus traduite : il n'y a plus de mode. Elle est
-  // lue pour être effacée (cf. l'en-tête de `CLES_EPARSES`).
+  // `analyze_mode` et `who_icd_proxy_url` sont LUES mais plus traduites : il n'y
+  // a plus de mode, et la passerelle vient du build. Elles sont lues pour être
+  // effacées (cf. l'en-tête de `CLES_EPARSES`).
   if (plat.min_confidence_threshold !== undefined) {
     patch.minConfidence = borneSeuil(plat.min_confidence_threshold);
   }
@@ -235,8 +247,6 @@ function traduireClesEparses(data: unknown): Partial<AppSnapshot> {
   const who: Partial<WhoPublicSettings> = {};
   if (typeof plat.who_icd_client_id === 'string')
     who.clientId = plat.who_icd_client_id;
-  if (typeof plat.who_icd_proxy_url === 'string')
-    who.proxyUrl = plat.who_icd_proxy_url;
   if (typeof plat.who_icd_release === 'string')
     who.releaseId = plat.who_icd_release;
   if (typeof plat.who_icd_lang === 'string') who.lang = plat.who_icd_lang;
@@ -251,11 +261,30 @@ function migrerV0(data: unknown): unknown {
   return { ...etatInitial(), ...traduireClesEparses(data) };
 }
 
+/**
+ * Migration 1 → 2 : la passerelle enregistrée est RETIRÉE, pas ignorée.
+ *
+ * `valider()` ne la lit plus — ça suffirait à ce que l'application ne la voie
+ * plus. Mais le socle ne réécrit l'instantané que lorsqu'il MIGRE : sans ce
+ * cran de version, l'adresse resterait dans le JSON stocké et repartirait dans
+ * chaque fichier de sauvegarde jusqu'à la prochaine écriture — un réglage
+ * fantôme qu'aucun écran ne montre plus et qu'aucun code ne lit.
+ *
+ * Rien n'est perdu pour autant : le socle copie de côté (`…data.backup-v1`)
+ * avant de migrer.
+ */
+function migrerV1(data: unknown): unknown {
+  if (!estObjet(data)) return data;
+  const who = estObjet(data.who) ? { ...data.who } : {};
+  delete who.proxyUrl;
+  return { ...data, who };
+}
+
 const versionne = createVersionedStore<AppSnapshot>({
   store: appStore,
   key: SNAPSHOT_KEY,
   version: SCHEMA_VERSION,
-  migrations: { 0: migrerV0 },
+  migrations: { 0: migrerV0, 1: migrerV1 },
   validate: valider,
   seed: etatInitial,
 });

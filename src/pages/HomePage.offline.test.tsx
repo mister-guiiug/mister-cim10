@@ -167,7 +167,12 @@ describe('HomePage — repli sur le dictionnaire', () => {
     expect(useWorkspaceStore.getState().analyzeError).toBeNull();
   });
 
-  it('sans passerelle configurée : même repli, et il dit comment le corriger', async () => {
+  // LE MESSAGE NE RENVOIE PLUS AUX PARAMÈTRES, et c'est le correctif : le
+  // champ « adresse de la passerelle » a disparu — la CSP le rendait
+  // inopérant — donc envoyer l'utilisateur le remplir, c'était l'envoyer
+  // chercher un champ qui n'existe pas. La passerelle se pose au déploiement ;
+  // le message le dit, au lieu de promettre une manœuvre impossible.
+  it('sans passerelle au build : même repli, sans consigne intenable', async () => {
     const fetchSpy = vi.fn();
     vi.stubGlobal('fetch', fetchSpy);
     useSettingsStore.setState({ who: { ...WHO, proxyUrl: '' } });
@@ -181,9 +186,8 @@ describe('HomePage — repli sur le dictionnaire', () => {
         useWorkspaceStore.getState().suggestions.some(s => s.code === 'I10')
       ).toBe(true)
     );
-    expect(
-      screen.getByText(/Aucune passerelle OMS configurée/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/n’est pas reliée à l’OMS/)).toBeInTheDocument();
+    expect(screen.queryByText(/dans les Paramètres/)).not.toBeInTheDocument();
     // En ligne, mais rien à appeler : la passerelle n'a pas d'adresse.
     expect(appelsMetier(fetchSpy)).toHaveLength(0);
     expect(useWorkspaceStore.getState().analyzeError).toBeNull();

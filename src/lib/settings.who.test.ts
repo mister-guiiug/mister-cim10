@@ -5,10 +5,10 @@
  * application du parc quand elles manquaient : un réglage enregistré l'emporte
  * sur un défaut (sinon on écrase le choix de l'utilisateur à la mise à jour),
  * un défaut doit atteindre les appareils DÉJÀ en service (sinon la
- * configuration n'arrive jamais là où elle est utile) — et, depuis que la CSP
- * ne laisse joindre que la passerelle du build, une adresse enregistrée qu'elle
- * refuse est reprise : la garder ne respecterait qu'une règle, au prix d'un OMS
- * muet.
+ * configuration n'arrive jamais là où elle est utile) — et LA PASSERELLE FAIT
+ * EXCEPTION À LA PREMIÈRE : la CSP ne laisse joindre que celle du build, donc
+ * une adresse enregistrée ne peut plus que priver d'OMS. Elle est effacée, pas
+ * arbitrée.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { refreshSnapshot, updateSnapshot } from './app-store';
@@ -16,6 +16,17 @@ import { LS_KEYS } from './constants';
 import { readWhoSettings, writeWhoSettings } from './settings';
 
 const PASSERELLE = 'https://mister-cim10.mister-guiiug.workers.dev';
+
+/**
+ * Pose un instantané de VERSION 1 — celui d'avant, le seul qui pouvait porter
+ * une passerelle. `updateSnapshot` ne sait plus en écrire une : le champ a
+ * quitté le type. C'est donc par le stockage brut qu'on rejoue un appareil en
+ * service, et c'est le seul moyen honnête de le faire.
+ */
+function poserInstantaneV1(who: Record<string, string>): void {
+  localStorage.setItem('cim10_data', JSON.stringify({ v: 1, data: { who } }));
+  refreshSnapshot();
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -47,64 +58,51 @@ describe('readWhoSettings', () => {
   // à l'initialisation seulement, le défaut ne leur serait jamais parvenu.
   it('le build comble un instantané DÉJÀ écrit avec une passerelle vide', () => {
     updateSnapshot({
-      who: { clientId: '', proxyUrl: '', releaseId: '2025-01', lang: 'fr' },
+      who: { clientId: '', releaseId: '2025-01', lang: 'fr' },
     });
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
     expect(readWhoSettings().proxyUrl).toBe(PASSERELLE);
   });
 
-  it('une passerelle que la CSP refuse retombe sur celle du build', () => {
-    // LA RÈGLE A CHANGÉ, ET C'EST VOULU. Elle était « une valeur enregistrée
-    // l'emporte toujours », et elle tenait tant qu'une passerelle saisie
-    // pouvait répondre. Depuis que `connect-src` ne porte que l'origine du
-    // build et `*.who.int`, une autre adresse est coupée par le navigateur :
-    // l'appareil n'obtient plus rien de l'OMS, sans un mot d'explication.
-    updateSnapshot({
-      who: {
-        clientId: 'a-moi',
-        proxyUrl: 'https://passerelle-a-moi.test',
-        releaseId: '2023-01',
-        lang: 'en',
-      },
+  // LA RÈGLE A CHANGÉ, ET C'EST VOULU. Elle était « une valeur enregistrée
+  // l'emporte toujours », et elle tenait tant qu'une passerelle saisie pouvait
+  // répondre. Depuis que `connect-src` ne porte que l'origine du build, une
+  // autre adresse est coupée par le navigateur : l'appareil n'obtient plus rien
+  // de l'OMS, sans un mot d'explication. Le champ a disparu, et l'adresse
+  // enregistrée est EFFACÉE au passage en version 2 (`./app-store.test.ts`).
+  it('une passerelle enregistrée ne compte plus : celle du build reprend la main', () => {
+    poserInstantaneV1({
+      clientId: 'a-moi',
+      proxyUrl: 'https://passerelle-a-moi.test',
+      releaseId: '2023-01',
+      lang: 'en',
     });
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
     vi.stubEnv('VITE_WHO_RELEASE_ID', '2025-01');
     vi.stubEnv('VITE_WHO_LANG', 'fr');
     const who = readWhoSettings();
     expect(who.proxyUrl).toBe(PASSERELLE);
-    // Le reste des réglages enregistrés, lui, l'emporte toujours : seule
-    // l'adresse injoignable est reprise.
+    // Le reste des réglages enregistrés, lui, l'emporte toujours : la
+    // passerelle est la SEULE exception.
     expect(who.releaseId).toBe('2023-01');
     expect(who.lang).toBe('en');
     expect(who.clientId).toBe('a-moi');
   });
 
-  it('une passerelle sur who.int est gardée : la CSP l’autorise', () => {
-    updateSnapshot({
-      who: {
-        clientId: '',
-        proxyUrl: 'https://id.who.int',
-        releaseId: '',
-        lang: '',
-      },
-    });
-    vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
-    expect(readWhoSettings().proxyUrl).toBe('https://id.who.int');
-  });
-
-  it('sans passerelle au build, on n’efface pas la seule qu’on ait', () => {
-    // Un fork, le développement : il n'y a rien de mieux à proposer, et
-    // effacer l'adresse ne réparerait rien — ça priverait seulement.
-    updateSnapshot({
-      who: {
-        clientId: '',
-        proxyUrl: 'https://passerelle-a-moi.test',
-        releaseId: '',
-        lang: '',
-      },
+  // Le cas d'un fork, ou du développement sans variable. L'ancienne version
+  // gardait alors l'adresse enregistrée, faute de mieux. Mais « faute de
+  // mieux » se payait cher : la CSP de CE build ne la déclare pas davantage,
+  // l'appel partait pour être coupé, et l'écran annonçait une OMS joignable
+  // qui ne l'était pas. Pas de passerelle au build, pas de passerelle.
+  it('sans passerelle au build, une adresse enregistrée n’en tient pas lieu', () => {
+    poserInstantaneV1({
+      clientId: '',
+      proxyUrl: 'https://passerelle-a-moi.test',
+      releaseId: '',
+      lang: '',
     });
     vi.stubEnv('VITE_WHO_PROXY_URL', '');
-    expect(readWhoSettings().proxyUrl).toBe('https://passerelle-a-moi.test');
+    expect(readWhoSettings().proxyUrl).toBe('');
   });
 
   it('le mot secret reste hors de l’instantané, et le build n’en fournit aucun', () => {

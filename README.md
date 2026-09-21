@@ -71,13 +71,13 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Export et partage
 
-| Fonctionnalité              | Ce que ça fait                                                                        |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON                  |
-| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel          |
-| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface)     |
-| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                      |
-| **Partage du paramétrage**  | Un lien qui reprend la connexion OMS (identifiant, passerelle) — jamais le mot secret |
+| Fonctionnalité              | Ce que ça fait                                                                               |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON                         |
+| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel                 |
+| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface)            |
+| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                             |
+| **Partage du paramétrage**  | Un lien qui reprend le paramétrage OMS (identifiant, version, langue) — jamais le mot secret |
 
 ### Ce qui n'existe pas encore
 
@@ -100,10 +100,10 @@ La protection des données est une priorité pour un outil traitant des informat
 
 L'analyse interroge **deux référentiels** : le dictionnaire CIM-10 embarqué, qui répond dans la page, et l'OMS (CIM-11) par la passerelle. Il n'y a pas de réglage à choisir — et donc pas de mode « tout local » à sélectionner.
 
-| Situation                              | Données transmises                                                                                                                                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Hors connexion, ou sans passerelle** | **Aucune donnée ne quitte votre navigateur** : le dictionnaire embarqué répond seul, et l'application vous le dit à l'écran.                                                               |
-| **En ligne, passerelle joignable**     | Des fragments du compte-rendu transitent vers la passerelle du site (ou la vôtre), puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
+| Situation                              | Données transmises                                                                                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hors connexion, ou sans passerelle** | **Aucune donnée ne quitte votre navigateur** : le dictionnaire embarqué répond seul, et l'application vous le dit à l'écran.                                                 |
+| **En ligne, passerelle joignable**     | Des fragments du compte-rendu transitent vers la passerelle du site, puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
 
 - Aucun compte utilisateur requis.
 - Aucun stockage serveur.
@@ -197,7 +197,7 @@ C'est la seule place possible pour ce compte. Une PWA est un bundle public : une
 | `VITE_WHO_PROXY_URL`, `VITE_WHO_RELEASE_ID`, `VITE_WHO_LANG` | variables de dépôt (`vars`) — publiques |
 | `WHO_CLIENT_ID`, `WHO_CLIENT_SECRET`                         | secrets **du worker**                   |
 
-Qui préfère son propre compte OMS le saisit dans **Paramètres › Suggestions** : il l'emporte alors sur celui de la passerelle. Détails et déploiement : [`workers/README.md`](workers/README.md).
+Qui préfère son propre compte OMS le saisit dans **Paramètres › Connexion OMS** : il substitue alors celui de la passerelle. L'adresse de la passerelle, elle, ne se saisit plus — la CSP n'en autorise qu'une, celle du build. Détails et déploiement : [`workers/README.md`](workers/README.md).
 
 ### Déploiement sur GitHub Pages
 
@@ -218,7 +218,7 @@ src/
 ├── hooks/                        useDialog
 ├── lib/
 │   ├── analyzer.ts               suggestFromText + searchIcdCodes — logique pure (TS strict)
-│   ├── app-store.ts              instantané versionné { v, data } + migration 0 → 1
+│   ├── app-store.ts              instantané versionné { v, data } + migrations 0 → 1 → 2
 │   ├── constants.ts              LS_KEYS (les deux clés hors instantané)
 │   ├── icd-hierarchy.ts          getFamily — code parent et codes apparentés
 │   ├── oms.ts                    client OAuth2 + autocodage CIM-11 via la passerelle
@@ -250,7 +250,9 @@ socle : chaîne de migrations qui monte d'un cran à la fois, validation, et
 **copie de côté avant toute perte possible** (`cim10_data.backup-v0`,
 `…backup-illisible`). L'état d'avant, réparti en dix clés `localStorage`
 séparées, est repris par la migration 0 → 1 au premier démarrage, puis les clés
-d'origine sont retirées.
+d'origine sont retirées. La migration 1 → 2 en RETIRE une : l'adresse de la
+passerelle, que la CSP a privée de sens — elle vient du build, et la garder en
+stockage laissait un réglage fantôme dans chaque sauvegarde.
 
 Deux clés restent hors de l'instantané, chacune pour une raison précise :
 `cim10_who_icd_client_secret` (le fichier de sauvegarde exclut le mot secret
