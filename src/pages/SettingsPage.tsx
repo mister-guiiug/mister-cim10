@@ -60,6 +60,12 @@ export function SettingsPage() {
     if (lang) patch.lang = lang;
     if (Object.keys(patch).length > 0) setWho(patch);
     setSearchParams({}, { replace: true });
+    // L'URL est une source EXTÉRIEURE, et un lien ouvert n'est pas un
+    // événement qu'on puisse écouter : il n'existe pas de `onLinkOpened`. La
+    // seule place où s'en saisir est l'effet, et dire ce qu'on vient
+    // d'appliquer fait partie du travail — un réglage changé en silence est un
+    // réglage qu'on croit ne pas avoir reçu.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShareFeedback(t('settings.importedFromLink'));
   }, [searchParams, setSearchParams, setWho, t]);
 
