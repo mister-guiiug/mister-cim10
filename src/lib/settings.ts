@@ -12,7 +12,7 @@
  */
 import { LS_KEYS } from './constants';
 import { readSnapshot, updateSnapshot, borneSeuil } from './app-store';
-import { defautsWho } from './who-defaults';
+import { defautsWho, passerelleAutorisee } from './who-defaults';
 import type { WhoSettings } from '../types/index';
 
 /**
@@ -23,16 +23,26 @@ import type { WhoSettings } from '../types/index';
  * écrit avant que ces variables existent. Comblé à l'initialisation seulement,
  * le nouveau défaut ne serait jamais arrivé chez eux.
  *
- * Une valeur enregistrée l'emporte toujours : celui qui a saisi sa propre
- * passerelle la garde.
+ * ⚠️ UNE PASSERELLE QUE LA CSP N'AUTORISE PAS EST ÉCARTÉE. La règle était
+ * « une valeur enregistrée l'emporte toujours », et elle se tenait tant qu'une
+ * passerelle saisie à la main pouvait répondre. Depuis que `connect-src` ne
+ * porte que l'origine du build et `*.who.int`, une autre adresse est coupée
+ * par le navigateur : l'appareil n'obtient plus rien de l'OMS, sans un mot
+ * d'explication. La garder par respect d'une règle, ce serait préférer la
+ * règle à l'utilisateur — on reprend donc celle du build, qui, elle, répond.
  */
 export function readWhoSettings(): WhoSettings {
   const enregistre = readSnapshot().who;
   const defauts = defautsWho();
+  // On ne REMPLACE que si l'on a de quoi remplacer : un build sans passerelle
+  // (un fork, le développement) n'a rien de mieux à proposer, et effacer la
+  // seule adresse que l'appareil possède ne réparerait rien.
+  const stocke = enregistre.proxyUrl || defauts.proxyUrl;
+  const remplacable = defauts.proxyUrl !== '' && !passerelleAutorisee(stocke);
   return {
     clientId: enregistre.clientId,
     clientSecret: localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET) || '',
-    proxyUrl: enregistre.proxyUrl || defauts.proxyUrl,
+    proxyUrl: remplacable ? defauts.proxyUrl : stocke,
     releaseId: enregistre.releaseId || defauts.releaseId,
     lang: enregistre.lang || defauts.lang,
   };

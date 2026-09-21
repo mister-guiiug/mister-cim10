@@ -44,19 +44,18 @@ export function SettingsPage() {
   // passerelle depuis l'URL (le mot secret n'y figure jamais), puis nettoie
   // l'URL pour ne pas le réappliquer ni le laisser dans l'historique.
   //
-  // Le paramètre `mode` des anciens liens est IGNORÉ en silence, et c'est le bon
-  // comportement : il ne désigne plus rien, et refuser le lien entier pour un
-  // champ périmé ferait perdre la passerelle qu'il porte.
+  // Les paramètres `mode` et `proxyUrl` des anciens liens sont IGNORÉS en
+  // silence, et c'est le bon comportement : le premier ne désigne plus rien, le
+  // second imposerait une adresse que la CSP du destinataire refuse. Rejeter le
+  // lien entier pour un champ périmé ferait perdre ce qu'il porte encore.
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     if ([...searchParams.keys()].length === 0) return;
     const patch: Partial<WhoSettings> = {};
     const cid = searchParams.get('clientId');
-    const proxy = searchParams.get('proxyUrl');
     const rel = searchParams.get('release');
     const lang = searchParams.get('lang');
     if (cid) patch.clientId = cid;
-    if (proxy) patch.proxyUrl = proxy;
     if (rel) patch.releaseId = rel;
     if (lang) patch.lang = lang;
     if (Object.keys(patch).length > 0) setWho(patch);
@@ -97,7 +96,11 @@ export function SettingsPage() {
     if (who.clientId) params.set('clientId', who.clientId);
     // Le mot secret n'est JAMAIS mis dans l'URL (sécurité) : le destinataire
     // saisit le sien.
-    if (who.proxyUrl) params.set('proxyUrl', who.proxyUrl);
+    //
+    // LA PASSERELLE NON PLUS, et pour une autre raison : le destinataire a
+    // déjà celle de son build, et la CSP de son site refuserait la nôtre.
+    // L'envoyer, c'était lui transmettre une adresse qui ne pouvait que le
+    // priver de l'OMS.
     params.set('release', who.releaseId);
     params.set('lang', who.lang);
     url.hash = `#/parametres?${params.toString()}`;
@@ -182,10 +185,11 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              {/* PLUS DE `hidden` : cette section n'apparaissait qu'en mode OMS,
-                  donc jamais avec le défaut `local` — le compte OMS était
-                  invisible à qui n'avait pas d'abord changé un réglage dont il
-                  ignorait l'existence. */}
+              {/* DEUX CHAMPS, ET PLUS TROIS. L'adresse de la passerelle a
+                  disparu : la CSP ne laisse joindre que celle du build et
+                  `*.who.int`, donc toute autre valeur saisie ici ne produisait
+                  qu'un silence — l'OMS ne répondait plus, sans un mot. Elle
+                  reste dans le modèle, servie par le build. */}
               <div className="settings-block api-section api-section--compact">
                 <div className="api-compact-bar">
                   <span className="api-compact-heading">
@@ -247,20 +251,6 @@ export function SettingsPage() {
                       autoComplete="current-password"
                       value={who.clientSecret}
                       onChange={e => setWho({ clientSecret: e.target.value })}
-                    />
-                  </label>
-                  <label className="who-field api-field-span2">
-                    <span className="who-field-label">
-                      {t('settings.proxyUrl')}
-                    </span>
-                    <input
-                      type="url"
-                      inputMode="url"
-                      autoComplete="off"
-                      placeholder="https://…"
-                      spellCheck={false}
-                      value={who.proxyUrl}
-                      onChange={e => setWho({ proxyUrl: e.target.value })}
                     />
                   </label>
                 </div>
