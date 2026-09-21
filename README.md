@@ -42,7 +42,7 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 | Fonctionnalité               | Ce que ça fait                                                                                                             |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Analyse du texte libre**   | Propose des codes CIM-10 à partir de votre compte-rendu, via le dictionnaire intégré ou l'API OMS (CIM-11) si configurée   |
+| **Analyse du texte libre**   | Propose des codes à partir de votre compte-rendu : le dictionnaire CIM-10 intégré **et** l'API OMS (CIM-11), sans réglage  |
 | **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible, avec son pourcentage                                          |
 | **Seuil de confiance**       | Réglable dans les paramètres : les suggestions en dessous du seuil ne s'affichent pas                                      |
 | **Filtre des suggestions**   | Restreignez la liste affichée par code, libellé ou terme repéré                                                            |
@@ -71,13 +71,13 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Export et partage
 
-| Fonctionnalité              | Ce que ça fait                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON              |
-| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel      |
-| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface) |
-| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                  |
-| **Partage du paramétrage**  | Un lien qui reprend le mode d'analyse et la connexion OMS — jamais le mot secret  |
+| Fonctionnalité              | Ce que ça fait                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON                  |
+| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel          |
+| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface)     |
+| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                      |
+| **Partage du paramétrage**  | Un lien qui reprend la connexion OMS (identifiant, passerelle) — jamais le mot secret |
 
 ### Ce qui n'existe pas encore
 
@@ -98,10 +98,12 @@ retirées en silence :
 
 La protection des données est une priorité pour un outil traitant des informations médicales.
 
-| Mode                    | Données transmises                                                                                                                                                                                                    |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement.                                                                                                                                             |
-| **Avec option API OMS** | Des fragments du compte-rendu transitent vers la passerelle du site (ou la vôtre, si vous en configurez une), puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
+L'analyse interroge **deux référentiels** : le dictionnaire CIM-10 embarqué, qui répond dans la page, et l'OMS (CIM-11) par la passerelle. Il n'y a pas de réglage à choisir — et donc pas de mode « tout local » à sélectionner.
+
+| Situation                              | Données transmises                                                                                                                                                                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Hors connexion, ou sans passerelle** | **Aucune donnée ne quitte votre navigateur** : le dictionnaire embarqué répond seul, et l'application vous le dit à l'écran.                                                               |
+| **En ligne, passerelle joignable**     | Des fragments du compte-rendu transitent vers la passerelle du site (ou la vôtre), puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
 
 - Aucun compte utilisateur requis.
 - Aucun stockage serveur.
@@ -195,7 +197,7 @@ C'est la seule place possible pour ce compte. Une PWA est un bundle public : une
 | `VITE_WHO_PROXY_URL`, `VITE_WHO_RELEASE_ID`, `VITE_WHO_LANG` | variables de dépôt (`vars`) — publiques |
 | `WHO_CLIENT_ID`, `WHO_CLIENT_SECRET`                         | secrets **du worker**                   |
 
-Qui préfère son propre compte OMS le saisit dans **Paramètres › Source des suggestions** : il l'emporte alors sur celui de la passerelle. Détails et déploiement : [`workers/README.md`](workers/README.md).
+Qui préfère son propre compte OMS le saisit dans **Paramètres › Suggestions** : il l'emporte alors sur celui de la passerelle. Détails et déploiement : [`workers/README.md`](workers/README.md).
 
 ### Déploiement sur GitHub Pages
 

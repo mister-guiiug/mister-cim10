@@ -8,11 +8,7 @@ import {
   updateSnapshot,
 } from './app-store';
 import { APP_PREFIX } from './storage-migration';
-import {
-  readAnalyzeMode,
-  readMinConfidenceThreshold,
-  readWhoSettings,
-} from './settings';
+import { readMinConfidenceThreshold, readWhoSettings } from './settings';
 import { buildAppBackup, restoreAppBackup } from './storage';
 
 /**
@@ -75,8 +71,9 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     expect(snapshot.crText).toBe(HIER.cr_text);
     expect(snapshot.validated).toEqual(JSON.parse(HIER.validated_diagnostics));
 
-    // Réglages : mode, seuil, avertissement masqué.
-    expect(snapshot.mode).toBe('both');
+    // Réglages : seuil, avertissement masqué. LE MODE N'EST PLUS REPRIS —
+    // le sélecteur a disparu — mais sa clé doit être EFFACÉE, pas laissée à
+    // traîner dans le stockage et dans chaque sauvegarde (cf. plus bas).
     expect(snapshot.minConfidence).toBe(0.65);
     expect(snapshot.disclaimerDismissed).toBe(true);
 
@@ -89,7 +86,6 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     });
 
     // Et par les fonctions que l'application appelle réellement.
-    expect(readAnalyzeMode()).toBe('both');
     expect(readMinConfidenceThreshold()).toBe(0.65);
     expect(readWhoSettings()).toEqual({
       clientId: 'mon-identifiant',
@@ -98,6 +94,36 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
       releaseId: '2024-01',
       lang: 'en',
     });
+  });
+
+  // LA CLÉ D'UN RÉGLAGE SUPPRIMÉ DOIT PARTIR, PAS ÊTRE IGNORÉE. `analyze_mode`
+  // ne se traduit plus — le sélecteur à trois modes a disparu — mais elle existe
+  // encore sur tous les appareils en service. Retirée de `CLES_EPARSES`, elle ne
+  // serait plus lue, donc plus effacée : elle traînerait indéfiniment dans le
+  // stockage ET dans chaque fichier de sauvegarde, que `buildAppBackup` produit
+  // en énumérant tout le préfixe.
+  it('efface `analyze_mode` et son ancêtre `who_icd_enabled`, devenus sans objet', () => {
+    poserEtatDHier();
+    localStorage.setItem('who_icd_enabled', '1');
+
+    readSnapshot();
+
+    expect(localStorage.getItem(`${APP_PREFIX}analyze_mode`)).toBeNull();
+    expect(localStorage.getItem('who_icd_enabled')).toBeNull();
+    // Le reste de l'état d'hier, lui, a bien été repris.
+    expect(readSnapshot().crText).toBe(HIER.cr_text);
+  });
+
+  // Le cas limite : un appareil qui ne porte QUE le vestige booléen. Sa valeur
+  // ne veut plus rien dire, mais sa présence doit encore déclencher le ménage —
+  // sinon `lireClesEparses` rend `null` et `retirerClesEparses` n'est jamais
+  // appelé.
+  it('efface `who_icd_enabled` même quand c’est la SEULE clé d’hier', () => {
+    localStorage.setItem('who_icd_enabled', '1');
+
+    readSnapshot();
+
+    expect(localStorage.getItem('who_icd_enabled')).toBeNull();
   });
 
   it('écrit l’enveloppe versionnée et met l’état d’hier de côté', () => {
@@ -163,7 +189,6 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     expect(snapshot.crText).toBe('');
     expect(snapshot.validated).toEqual([]);
     expect(snapshot.sessions).toEqual([]);
-    expect(snapshot.mode).toBe('local');
     expect(localStorage.getItem(`${APP_PREFIX}${SNAPSHOT_KEY}`)).toBeNull();
   });
 });
@@ -211,12 +236,11 @@ describe('l’instantané et la sauvegarde JSON', () => {
     const snapshot = readSnapshot();
     expect(snapshot.crText).toBe(HIER.cr_text);
     expect(snapshot.validated).toHaveLength(2);
-    expect(snapshot.mode).toBe('both');
   });
 
   it('reprend une sauvegarde d’AVANT l’instantané sans être muette', () => {
     // L'appareil a déjà basculé sur l'instantané…
-    updateSnapshot({ crText: 'travail du jour', mode: 'local' });
+    updateSnapshot({ crText: 'travail du jour' });
     // …et l'utilisateur restaure un fichier produit par une version d'avant,
     // qui ne contient que des clés éparses. Les ignorer ferait une
     // restauration qui écrit le fichier sans que rien ne change à l'écran.
@@ -229,7 +253,6 @@ describe('l’instantané et la sauvegarde JSON', () => {
     const snapshot = readSnapshot();
 
     expect(snapshot.crText).toBe('compte-rendu restauré');
-    expect(snapshot.mode).toBe('both');
     // Les champs que le fichier ne portait pas survivent (fusion, pas
     // remplacement) et les clés éparses ne traînent plus.
     expect(snapshot.sessions).toEqual([]);

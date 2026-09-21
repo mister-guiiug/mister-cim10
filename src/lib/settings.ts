@@ -13,15 +13,7 @@
 import { LS_KEYS } from './constants';
 import { readSnapshot, updateSnapshot, borneSeuil } from './app-store';
 import { defautsWho } from './who-defaults';
-import type { AnalyzeMode, WhoSettings } from '../types/index';
-
-export function readAnalyzeMode(): AnalyzeMode {
-  return readSnapshot().mode;
-}
-
-export function writeAnalyzeMode(mode: AnalyzeMode): void {
-  updateSnapshot({ mode });
-}
+import type { WhoSettings } from '../types/index';
 
 /**
  * Les réglages OMS, l'enregistré d'abord, le défaut du build pour combler.

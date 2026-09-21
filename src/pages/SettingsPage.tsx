@@ -6,17 +6,15 @@ import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
 import { passerelleFournieParLeBuild } from '../lib/who-defaults';
-import type { AnalyzeMode, WhoSettings } from '../types/index';
+import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import { useI18n } from '../i18n';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react';
 
 export function SettingsPage() {
-  const mode = useSettingsStore(s => s.mode);
   const minConfidence = useSettingsStore(s => s.minConfidence);
   const who = useSettingsStore(s => s.who);
-  const setMode = useSettingsStore(s => s.setMode);
   const setMinConfidence = useSettingsStore(s => s.setMinConfidence);
   const setWho = useSettingsStore(s => s.setWho);
   const forgetSecret = useSettingsStore(s => s.forgetSecret);
@@ -42,14 +40,16 @@ export function SettingsPage() {
     return () => clearTimeout(id);
   }, [resetFeedback]);
 
-  // Import d'un lien « Partager le paramétrage » : applique mode / identifiant /
+  // Import d'un lien « Partager le paramétrage » : applique identifiant et
   // passerelle depuis l'URL (le mot secret n'y figure jamais), puis nettoie
   // l'URL pour ne pas le réappliquer ni le laisser dans l'historique.
+  //
+  // Le paramètre `mode` des anciens liens est IGNORÉ en silence, et c'est le bon
+  // comportement : il ne désigne plus rien, et refuser le lien entier pour un
+  // champ périmé ferait perdre la passerelle qu'il porte.
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     if ([...searchParams.keys()].length === 0) return;
-    const m = searchParams.get('mode');
-    if (m === 'local' || m === 'api' || m === 'both') setMode(m);
     const patch: Partial<WhoSettings> = {};
     const cid = searchParams.get('clientId');
     const proxy = searchParams.get('proxyUrl');
@@ -62,9 +62,8 @@ export function SettingsPage() {
     if (Object.keys(patch).length > 0) setWho(patch);
     setSearchParams({}, { replace: true });
     setShareFeedback(t('settings.importedFromLink'));
-  }, [searchParams, setSearchParams, setMode, setWho, t]);
+  }, [searchParams, setSearchParams, setWho, t]);
 
-  const showWhoSection = mode !== 'local';
   // La passerelle du build s'authentifie seule : les champs de compte deviennent
   // des champs de REMPLACEMENT, plus des champs à remplir.
   const preconfigure = passerelleFournieParLeBuild(who.proxyUrl);
@@ -95,7 +94,6 @@ export function SettingsPage() {
   const handleShareSettings = async () => {
     const url = new URL(window.location.href);
     const params = new URLSearchParams();
-    params.set('mode', mode);
     if (who.clientId) params.set('clientId', who.clientId);
     // Le mot secret n'est JAMAIS mis dans l'URL (sécurité) : le destinataire
     // saisit le sien.
@@ -134,45 +132,21 @@ export function SettingsPage() {
             </Link>
             {t('settings.leadAfter')}
           </p>
-          <p className="settings-page-badge-line" aria-live="polite">
-            <span className="settings-page-badge-label">
-              {t('settings.modeSavedLabel')}
-            </span>
-            <span className="settings-summary-badge settings-summary-badge--inline">
-              {t(`settings.modeSummary.${mode}`)}
-            </span>
-          </p>
         </header>
 
         <div className="panel panel--settings-page">
           <div className="settings-body settings-body--compact settings-body--page">
-            {/* ── Source des suggestions ── */}
+            {/* ── Suggestions ──
+                LE SÉLECTEUR À TROIS MODES A DISPARU. Il demandait d'arbitrer
+                entre deux classifications avant d'obtenir le moindre code, et
+                son défaut (`local`) faisait que l'OMS, pourtant livrée, ne
+                servait à personne. L'analyse interroge les deux ; reste ici ce
+                qui se règle vraiment — la finesse, et le compte OMS. */}
             <section className="settings-section" aria-labelledby="sec-source">
               <h2 className="settings-section-title" id="sec-source">
                 {t('settings.sourceTitle')}
               </h2>
-              <div className="settings-mode-line">
-                <label
-                  className="settings-mode-label"
-                  htmlFor="analyze-mode-select"
-                >
-                  {t('settings.modeLabel')}
-                </label>
-                <select
-                  id="analyze-mode-select"
-                  className="settings-select"
-                  aria-describedby="analyze-mode-hint"
-                  value={mode}
-                  onChange={e => setMode(e.target.value as AnalyzeMode)}
-                >
-                  <option value="local">{t('settings.modeLocal')}</option>
-                  <option value="api">{t('settings.modeApi')}</option>
-                  <option value="both">{t('settings.modeBoth')}</option>
-                </select>
-              </div>
-              <p className="settings-hint" id="analyze-mode-hint">
-                {t('settings.modeHint')}
-              </p>
+              <p className="settings-hint">{t('settings.sourceHint')}</p>
 
               <div className="settings-block">
                 <p className="settings-block-title">
@@ -208,10 +182,11 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              <div
-                className="settings-block api-section api-section--compact"
-                hidden={!showWhoSection}
-              >
+              {/* PLUS DE `hidden` : cette section n'apparaissait qu'en mode OMS,
+                  donc jamais avec le défaut `local` — le compte OMS était
+                  invisible à qui n'avait pas d'abord changé un réglage dont il
+                  ignorait l'existence. */}
+              <div className="settings-block api-section api-section--compact">
                 <div className="api-compact-bar">
                   <span className="api-compact-heading">
                     {t('settings.omsTitle')}

@@ -1,4 +1,3 @@
-import { useActionGuard } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
 import { PwaInstallPrompt } from '@mister-guiiug/dev-pwa-config/react/pwa-install-prompt';
 import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
@@ -31,92 +30,93 @@ export function HomePage() {
   const setSuggestions = useWorkspaceStore(s => s.setSuggestions);
   const setIsAnalyzing = useWorkspaceStore(s => s.setIsAnalyzing);
   const setAnalyzeError = useWorkspaceStore(s => s.setAnalyzeError);
+  const setAnalyzeNotice = useWorkspaceStore(s => s.setAnalyzeNotice);
   const crText = useWorkspaceStore(s => s.crText);
-  const mode = useSettingsStore(s => s.mode);
   const who = useSettingsStore(s => s.who);
-  const isReady = useSettingsStore(s => s.isReady());
   const { t } = useI18n();
 
   /**
-   * L'OMS est le SEUL appel réseau de l'app ; le dictionnaire CIM-10, lui, est
-   * embarqué et répond hors connexion. D'où deux traitements distincts :
+   * DEUX RÉFÉRENTIELS, PLUS AUCUN CHOIX À FAIRE.
    *
-   *   - mode « api » : l'OMS est l'unique source. Hors connexion le bouton n'a
-   *     rien à produire, on le garde (motif `offline` du socle, message affiché).
-   *   - mode « both » : le local suffit à répondre. Le bouton RESTE actif, et
-   *     seule la moitié OMS s'annonce indisponible. Avant, l'échec de l'OMS
-   *     levait avant `setSuggestions` : les résultats locaux déjà calculés
-   *     partaient à la poubelle et l'utilisateur repartait les mains vides.
-   *   - mode « local » (défaut) : rien ne change, aucun mot.
+   * Il y avait un sélecteur à trois modes — local, OMS, les deux — et un garde
+   * qui désactivait « Analyser » hors connexion en mode OMS seul. C'était
+   * demander à un professionnel d'arbitrer entre deux classifications avant
+   * d'obtenir le moindre code, et le mode par défaut (`local`) faisait que
+   * l'OMS, pourtant livrée, ne servait à personne.
+   *
+   * L'analyse interroge donc les deux, toujours : le dictionnaire CIM-10
+   * embarqué, immédiat, puis la passerelle OMS (CIM-11) quand elle est
+   * joignable. Le dictionnaire porte seul le résultat quand le réseau manque —
+   * et le dit. « Analyser » n'est plus jamais désactivé : il y a toujours
+   * quelque chose à produire.
    */
   const isOnline = useOnline();
-  const analyzeGuard = useActionGuard({ online: mode === 'api' });
-  const omsSkipped = mode === 'both' && !isOnline;
+
+  /** La passerelle est-elle interrogeable ? Réseau ET adresse configurée. */
+  const omsJoignable = isOnline && who.proxyUrl.trim() !== '';
 
   const handleAnalyze = async () => {
-    if (!isReady) {
-      setAnalyzeError(t('errors.configure'));
-      return;
-    }
     if (!crText.trim()) {
       setAnalyzeError(t('errors.emptyReport'));
       return;
     }
     setAnalyzeError(null);
+    setAnalyzeNotice(null);
     setIsAnalyzing(true);
     /*
-     * L'ANALYSE, MESURÉE PAR SON ISSUE — et par son MODE, qui est le point.
+     * L'ANALYSE, MESURÉE PAR SON ISSUE.
      *
-     * Cette application a deux référentiels : le dictionnaire local, immédiat,
-     * et la passerelle OMS, qui passe par le réseau. `mode` dit lequel a été
-     * demandé (`local`, `api`, `both`) et c'est la seule ventilation utile :
-     * la passerelle est le point faible connu de l'app, et on ne savait pas à
-     * quelle fréquence elle échoue chez les utilisateurs.
+     * La ventilation par `mode` a disparu avec le sélecteur. Reste `oms`, qui
+     * dit si la passerelle a été interrogée : elle est le point faible connu de
+     * l'app, et c'est la seule chose qu'on ait besoin de savoir.
      *
      * RIEN D'AUTRE NE PART. Ni le compte-rendu, ni sa longueur, ni le nombre
      * de codes trouvés, ni leur nature. Chacune de ces mesures serait un pas
      * vers le texte clinique, et c'est exactement ce que l'ADR 0012 refuse.
      */
-    trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'lancee', mode });
+    trackEvent(GESTES.OPERATION, {
+      nom: 'analyse',
+      etape: 'lancee',
+      oms: omsJoignable,
+    });
     /*
-     * DÉCLARÉS HORS DU `try`, ET C'EST TOUT LE CORRECTIF. Le dictionnaire
-     * local remplit `results` AVANT que la passerelle OMS soit interrogée :
-     * tant que ces deux variables vivaient dans le `try`, l'échec réseau
-     * emportait avec lui des résultats déjà calculés.
+     * DÉCLARÉ HORS DU `try`. Le dictionnaire local remplit `results` AVANT que
+     * la passerelle soit interrogée : tant que cette variable vivait dans le
+     * `try`, l'échec réseau emportait avec lui des résultats déjà calculés.
      */
-    const results: AnalysisResult[] = [];
-    let localRepondu = false;
+    const results: AnalysisResult[] = suggestFromText(crText);
     try {
-      // Dictionnaire local CIM-10 (immédiat).
-      if (mode === 'local' || mode === 'both') {
-        results.push(...suggestFromText(crText));
-        localRepondu = true;
-      }
-      // OMS CIM-11 via la passerelle (réseau) — sautée hors connexion, où elle
-      // ne peut qu'échouer : la partie locale, elle, a déjà répondu.
-      if ((mode === 'api' || mode === 'both') && isOnline) {
+      if (omsJoignable) {
         results.push(...(await suggestFromOms(crText, who)));
+      } else {
+        // Le repli est ANNONCÉ, jamais silencieux : sur un outil de cotation,
+        // savoir quel référentiel a répondu fait partie du résultat.
+        setAnalyzeNotice(
+          isOnline
+            ? t('errors.oms.notConfigured')
+            : t('errors.oms.offlineSkipped')
+        );
       }
       setSuggestions(classerParConfiance(results));
-      trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'reussie', mode });
+      trackEvent(GESTES.OPERATION, {
+        nom: 'analyse',
+        etape: 'reussie',
+        oms: omsJoignable,
+      });
     } catch (err) {
       /*
-       * UN ÉCHEC DE L'OMS N'EST PAS UN ÉCHEC DE L'ANALYSE. En mode « both »,
-       * le dictionnaire CIM-10 a déjà répondu quand la passerelle lève : ses
-       * codes sont publiés, et le message dit seulement ce qui manque. Avant,
-       * ce `catch` n'appelait jamais `setSuggestions` — l'utilisateur voyait
-       * une erreur nue là où la moitié locale de son analyse était prête.
-       *
-       * EN MODE « API », RIEN N'A ÉTÉ PRODUIT, et la liste précédente est
-       * laissée en place : l'effacer ferait perdre des codes valides sur une
-       * simple reprise après une passerelle qui tousse.
-       *
-       * Le compteur, lui, ne change pas de sens : `etape: 'echouee'` dit que
-       * la passerelle a échoué, `mode` dit ce que l'utilisateur a quand même
-       * obtenu.
+       * UN ÉCHEC DE L'OMS N'EST PAS UN ÉCHEC DE L'ANALYSE. Le dictionnaire a
+       * déjà répondu quand la passerelle lève : ses codes sont publiés, et le
+       * message ne dit que ce qui manque. Avant, ce `catch` n'appelait jamais
+       * `setSuggestions` — l'utilisateur voyait une erreur nue là où la moitié
+       * locale de son analyse était prête.
        */
-      trackEvent(GESTES.OPERATION, { nom: 'analyse', etape: 'echouee', mode });
-      if (localRepondu) setSuggestions(classerParConfiance(results));
+      trackEvent(GESTES.OPERATION, {
+        nom: 'analyse',
+        etape: 'echouee',
+        oms: omsJoignable,
+      });
+      setSuggestions(classerParConfiance(results));
       const raison =
         err instanceof OmsError
           ? t(
@@ -154,16 +154,12 @@ export function HomePage() {
        */}
       <main id="main-content" className="workspace" tabIndex={-1}>
         <div className="workspace-col workspace-col--travail">
-          <CrPanel
-            // `wrap` neutralise le clic quand le garde bloque : `aria-disabled`
-            // laisse le bouton focusable (donc son motif atteignable), il ne
-            // l'empêche pas de se déclencher.
-            onAnalyze={analyzeGuard.wrap(handleAnalyze)}
-            analyzeGuard={analyzeGuard}
-            omsOfflineNotice={
-              omsSkipped ? t('errors.oms.offlineSkipped') : null
-            }
-          />
+          {/* PLUS DE GARDE `useActionGuard` : il désactivait « Analyser » hors
+              connexion en mode OMS seul. Ce mode n'existe plus, le dictionnaire
+              embarqué répond toujours, et un bouton d'analyse qu'on ne peut pas
+              presser sur un outil de cotation était le pire des deux mondes. Le
+              motif du repli passe par `analyzeNotice`, que `CrPanel` lit. */}
+          <CrPanel onAnalyze={handleAnalyze} />
           <SuggestionsPanel />
         </div>
         <div className="workspace-col workspace-col--retenus">

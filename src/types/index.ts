@@ -2,8 +2,6 @@
  * Types centraux de l'application.
  */
 
-export type AnalyzeMode = 'local' | 'api' | 'both';
-
 export interface ICD10Code {
   code: string;
   label: string;
@@ -50,11 +48,6 @@ export interface WhoSettings {
   proxyUrl: string;
   releaseId: string;
   lang: string;
-}
-
-export interface AnalyzeSettings extends WhoSettings {
-  mode: AnalyzeMode;
-  minConfidence: number;
 }
 
 export type AppRoute = 'home' | 'parametres' | 'aide';

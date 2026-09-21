@@ -45,20 +45,9 @@ export const messages = {
     },
     home: {
       taglineReady: 'Saisir · analyser · valider · exporter',
-      taglineSetup: 'Du texte clinique aux codes — à valider et exporter',
       disclaimerReady:
         'Suggestions indicatives — vous restez responsable des codes retenus et des règles en vigueur.',
-      disclaimerSetup:
-        'Outil d’aide : les suggestions sont indicatives. Vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.',
       disclaimerHide: 'Masquer cet avertissement',
-      setupLead:
-        'Pour la première configuration, ouvrez Paramètres depuis la barre de navigation en bas de l’écran.',
-      setupStepsLabel: 'Utilisation en trois étapes',
-      setupStep1:
-        '— source des suggestions (intégré, OMS ou les deux) et connexion OMS si besoin.',
-      setupStep2: '— saisie ou dictée, puis Analyser.',
-      setupStep3: '— retenir ou écarter les propositions, puis exporter.',
-      validationLabel: 'Validation',
       dailyLabel: 'En pratique',
       dailyText: 'Texte',
       dailyValidateExport: 'Valider & exporter',
@@ -183,25 +172,15 @@ export const messages = {
       shareDocTitle: 'Mister CIM-10 — diagnostics',
     },
     settings: {
-      subTagline: 'Source des suggestions et connexion OMS',
+      subTagline: 'Finesse des suggestions et connexion OMS',
       kicker: 'Configuration',
       title: 'Paramètres',
       leadBefore:
-        'Choisissez comment les codes sont proposés, puis renseignez la connexion à l’OMS si vous l’activez. Pour obtenir un compte et des identifiants API, suivez le guide sur la page ',
+        'Réglez la finesse des suggestions, et la connexion à l’OMS si vous utilisez votre propre compte. Pour en obtenir un, suivez le guide sur la page ',
       leadAfter: ' (section compte OMS).',
-      modeSavedLabel: 'Mode enregistré',
-      modeSummary: {
-        local: 'CIM-10',
-        api: 'OMS CIM-11',
-        both: 'CIM-10 + CIM-11',
-      },
-      sourceTitle: 'Source des suggestions',
-      modeLabel: 'Mode d’analyse',
-      modeLocal: 'Dictionnaire local (CIM-10)',
-      modeApi: 'OMS en ligne (CIM-11)',
-      modeBoth: 'Les deux (CIM-10 + CIM-11)',
-      modeHint:
-        'Par défaut, tout se fait dans la page — aucun envoi du compte-rendu. Si vous choisissez une option avec OMS, des segments de texte partent vers la passerelle puis vers les serveurs de l’OMS, et les champs de connexion s’affichent.',
+      sourceTitle: 'Suggestions',
+      sourceHint:
+        'L’analyse interroge les deux référentiels : le dictionnaire CIM-10 embarqué, qui répond dans la page, et l’OMS (CIM-11) par la passerelle. Hors connexion, le dictionnaire répond seul et l’application vous le dit. Les suggestions de l’OMS supposent que des segments du compte-rendu partent vers ses serveurs.',
       thresholdTitle: 'Seuil de confiance minimal',
       thresholdHint:
         'Les suggestions avec une confiance inférieure à ce seuil restent ignorées par défaut dans la liste.',
@@ -337,13 +316,13 @@ export const messages = {
       backHome: 'Retour à l’accueil',
     },
     errors: {
-      configure:
-        'Configurez d’abord la source des suggestions dans les Paramètres.',
       emptyReport: 'Saisissez un compte-rendu avant de lancer l’analyse.',
       oms: {
         proxyUnreachable: 'Passerelle injoignable — vérifiez l’URL du proxy.',
         credentialsRejected:
           'Identifiants OMS refusés (Client ID / mot secret).',
+        gatewayAccountMissing:
+          'La passerelle n’a pas de compte OMS utilisable : la CIM-11 est indisponible. Vous pouvez saisir le vôtre dans les Paramètres.',
         corsForbidden: 'Origine non autorisée par la passerelle (CORS).',
         authFailed: 'Authentification OMS impossible (HTTP {status}).',
         authInvalid: 'Réponse d’authentification OMS invalide.',
@@ -354,6 +333,11 @@ export const messages = {
         unknown: 'Erreur inattendue pendant l’analyse.',
         offlineSkipped:
           'Hors connexion : seul le dictionnaire CIM-10 local a répondu, la recherche OMS a été ignorée.',
+        // Pas une erreur : l'app fonctionne, avec un référentiel sur deux. Elle
+        // le dit parce que sur un outil de cotation, savoir QUELLE
+        // classification a répondu fait partie du résultat.
+        notConfigured:
+          'Aucune passerelle OMS configurée : seul le dictionnaire CIM-10 local a répondu. Renseignez une passerelle dans les Paramètres pour obtenir aussi la CIM-11.',
         // La passerelle a échoué, le dictionnaire local avait déjà répondu :
         // le message porte la raison exacte de l'échec ET dit que les codes
         // locaux sont toujours là, sinon l'alerte donne à croire que l'analyse
@@ -405,21 +389,9 @@ export const messages = {
     },
     home: {
       taglineReady: 'Enter · analyze · validate · export',
-      taglineSetup:
-        'From clinical text to codes — ready to validate and export',
       disclaimerReady:
         'Suggestions are indicative — you remain responsible for the codes you keep and the applicable rules.',
-      disclaimerSetup:
-        'Assistive tool: suggestions are indicative. You remain responsible for the final choice of codes and for complying with the applicable coding rules.',
       disclaimerHide: 'Hide this notice',
-      setupLead:
-        'For first-time setup, open Settings from the navigation bar at the bottom of the screen.',
-      setupStepsLabel: 'Three-step usage',
-      setupStep1:
-        '— suggestion source (built-in, WHO, or both) and WHO connection if needed.',
-      setupStep2: '— type or dictate, then Analyze.',
-      setupStep3: '— keep or discard the suggestions, then export.',
-      validationLabel: 'Validation',
       dailyLabel: 'In practice',
       dailyText: 'Text',
       dailyValidateExport: 'Validate & export',
@@ -545,25 +517,15 @@ export const messages = {
       shareDocTitle: 'Mister CIM-10 — diagnoses',
     },
     settings: {
-      subTagline: 'Suggestion source and WHO connection',
+      subTagline: 'Suggestion tuning and WHO connection',
       kicker: 'Configuration',
       title: 'Settings',
       leadBefore:
-        'Choose how codes are suggested, then fill in the WHO connection if you enable it. To get an account and API credentials, follow the guide on the ',
+        'Tune how fine the suggestions are, and the WHO connection if you use your own account. To get one, follow the guide on the ',
       leadAfter: ' page (WHO account section).',
-      modeSavedLabel: 'Saved mode',
-      modeSummary: {
-        local: 'ICD-10',
-        api: 'WHO ICD-11',
-        both: 'ICD-10 + ICD-11',
-      },
-      sourceTitle: 'Suggestion source',
-      modeLabel: 'Analysis mode',
-      modeLocal: 'Local dictionary (ICD-10)',
-      modeApi: 'WHO online (ICD-11)',
-      modeBoth: 'Both (ICD-10 + ICD-11)',
-      modeHint:
-        'By default, everything happens in the page — the report is never sent. If you choose an option with WHO, segments of text go to the gateway and then to the WHO servers, and the connection fields appear.',
+      sourceTitle: 'Suggestions',
+      sourceHint:
+        'The analysis queries both references: the built-in ICD-10 dictionary, which answers in the page, and the WHO (ICD-11) through the gateway. Offline, the dictionary answers alone and the application says so. WHO suggestions mean segments of the report are sent to its servers.',
       thresholdTitle: 'Minimum confidence threshold',
       thresholdHint:
         'Suggestions with a confidence below this threshold stay hidden from the list by default.',
@@ -696,11 +658,12 @@ export const messages = {
       backHome: 'Back to home',
     },
     errors: {
-      configure: 'First set the suggestion source in Settings.',
       emptyReport: 'Enter a report before running the analysis.',
       oms: {
         proxyUnreachable: 'Gateway unreachable — check the proxy URL.',
         credentialsRejected: 'WHO credentials rejected (Client ID / secret).',
+        gatewayAccountMissing:
+          'The gateway has no usable WHO account: ICD-11 is unavailable. You can enter your own in Settings.',
         corsForbidden: 'Origin not allowed by the gateway (CORS).',
         authFailed: 'WHO authentication failed (HTTP {status}).',
         authInvalid: 'Invalid WHO authentication response.',
@@ -710,6 +673,8 @@ export const messages = {
         unknown: 'Unexpected error during analysis.',
         offlineSkipped:
           'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
+        notConfigured:
+          'No WHO gateway configured: only the local ICD-10 dictionary answered. Set a gateway in Settings to get ICD-11 as well.',
         localKept:
           '{raison} The local ICD-10 dictionary codes are still shown.',
       },

@@ -146,4 +146,26 @@ describe('suggestFromOms', () => {
       OmsError
     );
   });
+
+  // À QUI EST LE COMPTE REFUSÉ ? Le même 400 veut dire deux choses selon que
+  // l'appelant avait fourni un compte ou non, et le message doit le distinguer :
+  // envoyer chercher « ses » identifiants quelqu'un à qui on vient de dire qu'il
+  // n'en a pas besoin, c'est une impasse.
+  it('400 avec un compte fourni → « identifiants refusés »', async () => {
+    stubFetch(url => (url.endsWith('/token') ? json({}, 400) : json(null)));
+    await expect(suggestFromOms('Diabète type 2.', who)).rejects.toMatchObject({
+      code: 'credentialsRejected',
+    });
+  });
+
+  it('400 SANS compte fourni → c’est la passerelle qui n’en a pas', async () => {
+    stubFetch(url => (url.endsWith('/token') ? json({}, 400) : json(null)));
+    await expect(
+      suggestFromOms('Diabète type 2.', {
+        ...who,
+        clientId: '',
+        clientSecret: '',
+      })
+    ).rejects.toMatchObject({ code: 'gatewayAccountMissing' });
+  });
 });

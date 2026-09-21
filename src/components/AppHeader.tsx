@@ -15,27 +15,34 @@ function pathToRoute(pathname: string): AppRoute {
   return 'home';
 }
 
+/**
+ * IL N'Y A PLUS D'ÉTAT « À CONFIGURER », donc plus de guide de démarrage.
+ *
+ * L'en-tête montrait un `SetupGuide` en trois étapes tant que `isReady()` était
+ * faux, et sa première étape était « choisir la source des suggestions ». Le
+ * sélecteur de mode a disparu, la passerelle OMS vient du build et le
+ * dictionnaire embarqué répond toujours : « pas prêt » est devenu inatteignable.
+ * Garder une branche qui ne peut plus être vraie, c'est promettre une
+ * configuration qui n'existe pas.
+ */
 export function AppHeader({ subTagline }: AppHeaderProps) {
   const location = useLocation();
   const route = pathToRoute(location.pathname);
   const isHome = route === 'home';
-  const settingsReady = useSettingsStore(s => s.isReady());
   const disclaimerDismissed = useSettingsStore(s => s.disclaimerDismissed);
   const dismissDisclaimer = useSettingsStore(s => s.dismissDisclaimer);
   const { t } = useI18n();
 
-  const defaultTagline = settingsReady
+  const taglineText = isHome
     ? t('home.taglineReady')
-    : t('home.taglineSetup');
-  const taglineText = isHome ? defaultTagline : (subTagline ?? defaultTagline);
+    : (subTagline ?? t('home.taglineReady'));
 
   return (
     <header className="app-header">
       <div
         className={[
           'app-header-inner',
-          settingsReady && isHome ? 'app-header-inner--daily' : '',
-          !isHome ? 'app-header-inner--subpage' : '',
+          isHome ? 'app-header-inner--daily' : 'app-header-inner--subpage',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -60,17 +67,10 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
           </div>
           {isHome && (
             <>
-              {!settingsReady && <SetupGuide />}
-              {settingsReady && <DailyGuide />}
+              <DailyGuide />
               {!disclaimerDismissed && (
-                <p
-                  className={`disclaimer${settingsReady ? ' disclaimer--compact' : ''}`}
-                >
-                  <span>
-                    {settingsReady
-                      ? t('home.disclaimerReady')
-                      : t('home.disclaimerSetup')}
-                  </span>
+                <p className="disclaimer disclaimer--compact">
+                  <span>{t('home.disclaimerReady')}</span>
                   <button
                     type="button"
                     className="disclaimer-dismiss"
@@ -86,41 +86,6 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
         </div>
       </div>
     </header>
-  );
-}
-
-function SetupGuide() {
-  const { t } = useI18n();
-  return (
-    <div className="header-guide">
-      <p className="setup-lead">{t('home.setupLead')}</p>
-      <ol className="quick-steps" aria-label={t('home.setupStepsLabel')}>
-        <li className="quick-step">
-          <span className="step-num" aria-hidden="true">
-            1
-          </span>
-          <span className="step-body">
-            <strong>{t('nav.settings')}</strong> {t('home.setupStep1')}
-          </span>
-        </li>
-        <li className="quick-step">
-          <span className="step-num" aria-hidden="true">
-            2
-          </span>
-          <span className="step-body">
-            <strong>{t('report.title')}</strong> {t('home.setupStep2')}
-          </span>
-        </li>
-        <li className="quick-step">
-          <span className="step-num" aria-hidden="true">
-            3
-          </span>
-          <span className="step-body">
-            <strong>{t('home.validationLabel')}</strong> {t('home.setupStep3')}
-          </span>
-        </li>
-      </ol>
-    </div>
   );
 }
 

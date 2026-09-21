@@ -1,5 +1,4 @@
 import { useRef, useEffect, type FormEvent } from 'react';
-import type { ActionGuardResult } from '@mister-guiiug/dev-pwa-config/react/use-action-guard';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SessionsPanel } from './SessionsPanel';
 import { useDialog } from '../../hooks/useDialog';
@@ -7,21 +6,18 @@ import { useI18n } from '../../i18n';
 
 interface CrPanelProps {
   onAnalyze: () => void;
-  /** Décision du socle sur « Analyser » (motif `offline` en mode OMS seul). */
-  analyzeGuard?: ActionGuardResult;
-  /** Mode mixte hors connexion : l'OMS est sautée, le local a répondu. */
-  omsOfflineNotice?: string | null;
 }
 
-export function CrPanel({
-  onAnalyze,
-  analyzeGuard,
-  omsOfflineNotice,
-}: CrPanelProps) {
+export function CrPanel({ onAnalyze }: CrPanelProps) {
   const crText = useWorkspaceStore(s => s.crText);
   const setCrText = useWorkspaceStore(s => s.setCrText);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const analyzeError = useWorkspaceStore(s => s.analyzeError);
+  // Lu dans le magasin, plus reçu en propriété : le motif du repli n'est connu
+  // qu'APRÈS la tentative, il ne peut donc plus être calculé par le parent au
+  // rendu. Le garde `useActionGuard` a disparu avec le mode OMS seul — le
+  // dictionnaire embarqué répond toujours, « Analyser » n'est plus désactivé.
+  const analyzeNotice = useWorkspaceStore(s => s.analyzeNotice);
   const resetSession = useWorkspaceStore(s => s.resetSession);
   const highlightedMatchedTerm = useWorkspaceStore(
     s => s.highlightedMatchedTerm
@@ -83,9 +79,6 @@ export function CrPanel({
             type="submit"
             className="primary"
             disabled={isAnalyzing || !crText.trim()}
-            // `aria-disabled` et non `disabled` : le bouton reste focusable,
-            // donc son motif reste DÉCOUVRABLE au clavier et au lecteur d'écran.
-            {...analyzeGuard?.disabledProps}
           >
             {isAnalyzing ? t('report.analyzing') : t('common.analyze')}
           </button>
@@ -103,14 +96,9 @@ export function CrPanel({
         </div>
       </form>
       <p className="hint">{t('report.dictationHint')}</p>
-      {analyzeGuard?.reason && (
+      {analyzeNotice && (
         <p className="hint offline" role="status">
-          {analyzeGuard.reason}
-        </p>
-      )}
-      {omsOfflineNotice && (
-        <p className="hint offline" role="status">
-          {omsOfflineNotice}
+          {analyzeNotice}
         </p>
       )}
       {analyzeError && (
