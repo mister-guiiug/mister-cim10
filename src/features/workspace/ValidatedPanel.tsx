@@ -176,6 +176,13 @@ function ManualEntryForm({ onAdd, existingCodes }: ManualEntryFormProps) {
           aria-label={t('validated.codeAria')}
           value={code}
           onChange={e => setCode(e.target.value)}
+          // LA RÈGLE VISE LE CHARGEMENT DE PAGE, où un focus déplacé sans
+          // qu'on ait rien demandé désoriente et fait perdre le lecteur
+          // d'écran. Ce formulaire, lui, n'existe QUE parce qu'on vient de
+          // cliquer « Ajouter un code » : le focus va là où l'attention est
+          // déjà. Ne pas le poser obligerait à tabuler jusqu'au champ qu'on a
+          // demandé à remplir.
+          // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           spellCheck={false}
         />
