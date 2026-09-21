@@ -1,41 +1,42 @@
 import { create } from 'zustand';
-import type { AnalyzeMode, WhoSettings } from '../types/index';
+import type { WhoSettings } from '../types/index';
 import {
-  readAnalyzeMode,
   readMinConfidenceThreshold,
   readWhoSettings,
-  writeAnalyzeMode,
   writeMinConfidenceThreshold,
   writeWhoSettings,
 } from '../lib/settings';
 import { resetOmsToken } from '../lib/oms';
 import { readSnapshot, updateSnapshot } from '../lib/app-store';
-import { passerelleFournieParLeBuild } from '../lib/who-defaults';
 
 interface SettingsState {
-  mode: AnalyzeMode;
   minConfidence: number;
   who: WhoSettings;
   disclaimerDismissed: boolean;
-  setMode: (mode: AnalyzeMode) => void;
   setMinConfidence: (value: number) => void;
   setWho: (patch: Partial<WhoSettings>) => void;
   forgetSecret: () => void;
   dismissDisclaimer: () => void;
   resetDisclaimer: () => void;
-  isReady: () => boolean;
 }
 
+/**
+ * LE MODE D'ANALYSE A DISPARU, ET `isReady` AVEC LUI.
+ *
+ * Il y avait un sélecteur à trois valeurs — dictionnaire local, OMS, les deux —
+ * et un `isReady()` qui bloquait « Analyser » tant que l'OMS n'était pas
+ * configurée. Trois choix pour une question que l'utilisateur n'a pas à se
+ * poser : il veut des codes, pas arbitrer entre deux référentiels.
+ *
+ * L'analyse interroge maintenant les deux, systématiquement, et le dictionnaire
+ * embarqué porte seul le résultat quand le réseau manque (`HomePage`). Il n'y a
+ * donc plus d'état « pas prêt » : le dictionnaire répond toujours.
+ */
 export const useSettingsStore = create<SettingsState>((set, get) => ({
-  mode: readAnalyzeMode(),
   minConfidence: readMinConfidenceThreshold(),
   who: readWhoSettings(),
   disclaimerDismissed: readSnapshot().disclaimerDismissed,
 
-  setMode: mode => {
-    writeAnalyzeMode(mode);
-    set({ mode });
-  },
   setMinConfidence: value => {
     writeMinConfidenceThreshold(value);
     set({ minConfidence: value });
@@ -59,16 +60,5 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   resetDisclaimer: () => {
     updateSnapshot({ disclaimerDismissed: false });
     set({ disclaimerDismissed: false });
-  },
-
-  isReady: () => {
-    const { mode, who } = get();
-    if (mode === 'local') return true;
-    if (!who.proxyUrl) return false;
-    // La passerelle du parc porte le compte OMS en secrets, côté serveur : il
-    // n'y a rien à saisir, et exiger des identifiants ici rendrait
-    // l'application inutilisable alors que tout est en place.
-    if (passerelleFournieParLeBuild(who.proxyUrl)) return true;
-    return Boolean(who.clientId && who.clientSecret);
   },
 }));

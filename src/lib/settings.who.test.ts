@@ -86,7 +86,7 @@ describe('readWhoSettings', () => {
   });
 });
 
-describe('isReady', () => {
+describe('le magasin de réglages', () => {
   /** Le magasin lit son état au chargement : il faut le réimporter par test. */
   async function magasin() {
     vi.resetModules();
@@ -94,37 +94,37 @@ describe('isReady', () => {
     return useSettingsStore;
   }
 
-  it('mode local : prêt, sans rien', async () => {
-    const store = await magasin();
-    expect(store.getState().isReady()).toBe(true);
-  });
-
-  it('mode OMS sans passerelle : pas prêt', async () => {
-    const store = await magasin();
-    store.getState().setMode('api');
-    expect(store.getState().isReady()).toBe(false);
-  });
-
-  // LE CŒUR DU CHANGEMENT. La passerelle du parc porte le compte OMS en secrets,
-  // côté serveur : exiger des identifiants ici rendait l'application
-  // inutilisable alors que tout était en place.
-  it('mode OMS sur la passerelle du build, sans identifiants : PRÊT', async () => {
+  // LE CŒUR DU CHANGEMENT : la passerelle du build arrive CONFIGURÉE, et sans
+  // qu'on ait à saisir d'identifiants — elle porte le compte OMS en secrets,
+  // côté serveur. L'application n'a plus qu'à s'en servir.
+  it('la passerelle du build arrive posée, sans identifiants', async () => {
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
     const store = await magasin();
-    store.getState().setMode('api');
     expect(store.getState().who.proxyUrl).toBe(PASSERELLE);
+    expect(store.getState().who.clientId).toBe('');
     expect(store.getState().who.clientSecret).toBe('');
-    expect(store.getState().isReady()).toBe(true);
   });
 
-  it('mode OMS sur une passerelle saisie à la main : il faut un compte', async () => {
+  // `isReady()` A DISPARU AVEC LE MODE. Il bloquait « Analyser » tant que l'OMS
+  // n'était pas configurée ; le dictionnaire embarqué répondant toujours, il n'y
+  // a plus d'état « pas prêt » — et plus rien à désactiver. Ce test le fige :
+  // le réintroduire serait revenir en arrière sans le vouloir.
+  it('n’expose plus d’état « pas prêt »', async () => {
+    const store = await magasin();
+    expect('isReady' in store.getState()).toBe(false);
+    expect('mode' in store.getState()).toBe(false);
+    expect('setMode' in store.getState()).toBe(false);
+  });
+
+  it('un compte saisi à la main est conservé et l’emporte', async () => {
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
     const store = await magasin();
-    store.getState().setMode('both');
-    store.getState().setWho({ proxyUrl: 'https://passerelle-a-moi.test' });
-    expect(store.getState().isReady()).toBe(false);
-
-    store.getState().setWho({ clientId: 'cid', clientSecret: 'sec' });
-    expect(store.getState().isReady()).toBe(true);
+    store.getState().setWho({
+      proxyUrl: 'https://passerelle-a-moi.test',
+      clientId: 'cid',
+      clientSecret: 'sec',
+    });
+    expect(store.getState().who.proxyUrl).toBe('https://passerelle-a-moi.test');
+    expect(store.getState().who.clientSecret).toBe('sec');
   });
 });

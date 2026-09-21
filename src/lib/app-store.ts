@@ -41,7 +41,6 @@ import { createVersionedStore } from '@mister-guiiug/dev-pwa-config/versioned-st
 import { readRaw, removeKey } from '@mister-guiiug/dev-pwa-config/storage';
 import { APP_PREFIX } from './storage-migration';
 import type {
-  AnalyzeMode,
   SavedSession,
   ValidatedDiagnostic,
   WhoSettings,
@@ -73,8 +72,6 @@ export interface AppSnapshot {
   validated: ValidatedDiagnostic[];
   /** Dossiers enregistrés sous un nom, le plus récent en tête. */
   sessions: SavedSession[];
-  /** Source des suggestions. */
-  mode: AnalyzeMode;
   /** Confiance minimale d'affichage d'une suggestion. */
   minConfidence: number;
   /** L'avertissement d'accueil a été masqué. */
@@ -89,7 +86,6 @@ function etatInitial(): AppSnapshot {
     crText: '',
     validated: [],
     sessions: [],
-    mode: 'local',
     minConfidence: DEFAULT_MIN_CONFIDENCE,
     disclaimerDismissed: false,
     who: {
@@ -107,12 +103,6 @@ function estObjet(value: unknown): value is Record<string, unknown> {
 
 function texte(value: unknown, defaut: string): string {
   return typeof value === 'string' ? value : defaut;
-}
-
-function modeValide(value: unknown): AnalyzeMode {
-  return value === 'local' || value === 'api' || value === 'both'
-    ? value
-    : 'local';
 }
 
 /** Le seuil, ramené dans [0,1 ; 1] au centième — comme l'ancien lecteur. */
@@ -171,7 +161,6 @@ function valider(data: unknown): AppSnapshot {
     crText: texte(data.crText, initial.crText),
     validated: diagnosticsValides(data.validated),
     sessions: sessionsValides(data.sessions),
-    mode: modeValide(data.mode),
     minConfidence: borneSeuil(data.minConfidence),
     disclaimerDismissed: data.disclaimerDismissed === true,
     who: {
@@ -185,8 +174,15 @@ function valider(data: unknown): AppSnapshot {
 
 /**
  * Les clés éparses reprises dans l'instantané. Le mot secret et la langue n'y
- * sont PAS (cf. en-tête) ; `who_icd_enabled`, lui, est un vestige d'avant le
- * mode à trois valeurs et se traduit à l'adoption.
+ * sont PAS (cf. en-tête).
+ *
+ * `analyze_mode` Y RESTE ALORS QU'ELLE NE SE TRADUIT PLUS. Le sélecteur à trois
+ * modes a disparu : l'analyse interroge les deux référentiels, et il n'y a plus
+ * de mode à reprendre. Mais la clé existe encore sur les appareils en service —
+ * la garder dans cette liste est ce qui la fait LIRE, donc EFFACER
+ * (`retirerClesEparses`). Retirée d'ici, elle traînerait indéfiniment dans le
+ * stockage et dans chaque fichier de sauvegarde. Même raison pour
+ * `who_icd_enabled`, son ancêtre booléen.
  */
 const CLES_EPARSES = [
   'analyze_mode',
@@ -228,8 +224,8 @@ function traduireClesEparses(data: unknown): Partial<AppSnapshot> {
       jsonOuNull(plat.validated_diagnostics)
     );
   }
-  if (plat.analyze_mode !== undefined)
-    patch.mode = modeValide(plat.analyze_mode);
+  // `analyze_mode` est LUE mais plus traduite : il n'y a plus de mode. Elle est
+  // lue pour être effacée (cf. l'en-tête de `CLES_EPARSES`).
   if (plat.min_confidence_threshold !== undefined) {
     patch.minConfidence = borneSeuil(plat.min_confidence_threshold);
   }
@@ -271,8 +267,10 @@ function lireClesEparses(): Record<string, string> | null {
     const valeur = appStore.getRaw(court);
     if (valeur !== null) plat[court] = valeur;
   }
-  // Vestige d'avant le mode à trois valeurs : un booléen NON préfixé, que
-  // `readAnalyzeMode` traduisait en « les deux » à chaque lecture.
+  // Vestige d'avant le mode à trois valeurs : un booléen NON préfixé. Sa valeur
+  // ne veut plus rien dire, mais sa PRÉSENCE doit encore déclencher le ménage —
+  // sans cette ligne, un appareil qui ne porte QUE cette clé ne passerait jamais
+  // par `retirerClesEparses` et la garderait pour toujours.
   if (plat.analyze_mode === undefined && readRaw('who_icd_enabled') === '1') {
     plat.analyze_mode = 'both';
   }

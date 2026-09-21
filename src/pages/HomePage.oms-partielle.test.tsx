@@ -23,9 +23,14 @@ import { HomePage } from './HomePage';
  * celui-ci éprouve le cas plus vicieux : le réseau est là, et c'est la
  * PASSERELLE qui tombe.
  *
- * L'enjeu est clinique, pas cosmétique. En mode mixte, le dictionnaire local a
- * déjà rendu ses codes quand l'OMS lève : les jeter renvoie l'utilisateur à un
- * message d'erreur pour un travail qui était fait.
+ * L'enjeu est clinique, pas cosmétique. Le dictionnaire local a déjà rendu ses
+ * codes quand l'OMS lève : les jeter renvoie l'utilisateur à un message
+ * d'erreur pour un travail qui était fait.
+ *
+ * LE SÉLECTEUR DE MODE A DISPARU. Ces cas ne se distinguent donc plus par un
+ * réglage mais par le CONTENU : un compte-rendu que le dictionnaire reconnaît,
+ * ou un qu'il ne reconnaît pas. C'est plus proche de la réalité — personne ne
+ * choisissait « OMS seul » pour se priver du dictionnaire.
  */
 
 const WHO: WhoSettings = {
@@ -88,7 +93,7 @@ beforeEach(() => {
   resetOmsToken();
   useWorkspaceStore.getState().resetSession();
   useWorkspaceStore.getState().setCrText('Hypertension artérielle sévère.');
-  useSettingsStore.setState({ mode: 'local', who: WHO });
+  useSettingsStore.setState({ who: WHO });
 });
 
 afterEach(() => {
@@ -96,9 +101,8 @@ afterEach(() => {
 });
 
 describe('HomePage quand la passerelle OMS tombe', () => {
-  it('mode mixte : les codes locaux SORTENT quand même, et l’alerte le dit', async () => {
+  it('les codes locaux SORTENT quand même, et l’alerte le dit', async () => {
     passerelleInjoignable();
-    useSettingsStore.setState({ mode: 'both' });
     renderHome();
 
     await analyser();
@@ -118,9 +122,11 @@ describe('HomePage quand la passerelle OMS tombe', () => {
     );
   });
 
-  it('mode OMS seul : rien n’a été produit, l’alerte ne promet donc rien', async () => {
+  it('aucune correspondance locale : l’alerte ne promet donc rien', async () => {
     passerelleInjoignable();
-    useSettingsStore.setState({ mode: 'api' });
+    act(() => {
+      useWorkspaceStore.getState().setCrText('Xxxxxx yyyyyy zzzzzz.');
+    });
     renderHome();
 
     await analyser();
@@ -128,13 +134,16 @@ describe('HomePage quand la passerelle OMS tombe', () => {
     expect(useWorkspaceStore.getState().suggestions).toHaveLength(0);
     const alerte = screen.getByRole('alert');
     expect(alerte).toHaveTextContent('Passerelle injoignable');
+    // Le suffixe « restent affichés » serait un mensonge : il n'y a rien.
     expect(alerte).not.toHaveTextContent('restent affichés');
   });
 
-  it('mode mixte sans correspondance locale : pas de codes PÉRIMÉS sur l’écran', async () => {
+  it('sans correspondance locale : pas de codes PÉRIMÉS sur l’écran', async () => {
     renderHome();
 
-    // Une première analyse réussie, en local : l'écran porte des codes.
+    // Une première analyse, avec un texte que le dictionnaire reconnaît :
+    // l'écran porte des codes. (La passerelle n'est pas encore doublée, elle
+    // échoue donc toute seule — ce n'est pas le sujet de ce test.)
     await analyser();
     expect(
       useWorkspaceStore.getState().suggestions.length
@@ -142,7 +151,6 @@ describe('HomePage quand la passerelle OMS tombe', () => {
 
     // Puis un autre compte-rendu, sans correspondance, et l'OMS qui tombe.
     passerelleInjoignable();
-    useSettingsStore.setState({ mode: 'both' });
     act(() => {
       useWorkspaceStore.getState().setCrText('Xxxxxx yyyyyy zzzzzz.');
     });

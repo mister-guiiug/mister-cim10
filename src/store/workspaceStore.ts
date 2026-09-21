@@ -40,11 +40,19 @@ interface WorkspaceState {
   rejectedIds: Set<string>;
   isAnalyzing: boolean;
   analyzeError: string | null;
+  /**
+   * Ce que l'analyse a d'AUTRE à dire qu'une erreur : le dictionnaire local a
+   * répondu seul, et pourquoi. Canal distinct parce que ce n'en est PAS une :
+   * l'IHM le rend en `role="status"`, là où `analyzeError` est une `role="alert"`.
+   * Confondre les deux ferait crier un lecteur d'écran sur un repli normal.
+   */
+  analyzeNotice: string | null;
   setCrText: (text: string) => void;
   appendCrText: (text: string) => void;
   setSuggestions: (results: AnalysisResult[]) => void;
   setIsAnalyzing: (value: boolean) => void;
   setAnalyzeError: (msg: string | null) => void;
+  setAnalyzeNotice: (msg: string | null) => void;
   setFilterText: (text: string) => void;
   validateSuggestion: (s: AnalysisResult) => void;
   rejectSuggestion: (id: string) => void;
@@ -72,6 +80,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   rejectedIds: new Set(),
   isAnalyzing: false,
   analyzeError: null,
+  analyzeNotice: null,
 
   setCrText: text => {
     updateSnapshot({ crText: text });
@@ -86,6 +95,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({ suggestions: results, rejectedIds: new Set() }),
   setIsAnalyzing: value => set({ isAnalyzing: value }),
   setAnalyzeError: msg => set({ analyzeError: msg }),
+  setAnalyzeNotice: msg => set({ analyzeNotice: msg }),
   setFilterText: text => set({ filterText: text }),
 
   validateSuggestion: s => {
@@ -128,6 +138,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       rejectedIds: new Set(),
       filterText: '',
       analyzeError: null,
+      analyzeNotice: null,
     });
   },
   validateAll: results => {
@@ -221,6 +232,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       rejectedIds: new Set(),
       filterText: '',
       analyzeError: null,
+      analyzeNotice: null,
     });
     return true;
   },

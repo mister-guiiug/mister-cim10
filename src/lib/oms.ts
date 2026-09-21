@@ -16,6 +16,14 @@ import type { AnalysisResult, WhoSettings } from '../types/index';
 export type OmsErrorCode =
   | 'proxyUnreachable'
   | 'credentialsRejected'
+  /**
+   * Refus d'authentification alors que l'application n'a envoyé AUCUN
+   * identifiant : c'est le compte de la PASSERELLE qui manque ou qui est refusé.
+   * Sans ce code, l'utilisateur lisait « Identifiants OMS refusés » et partait
+   * chercher des identifiants qu'on venait de lui dire qu'il n'avait pas besoin
+   * d'avoir.
+   */
+  | 'gatewayAccountMissing'
   | 'corsForbidden'
   | 'authFailed'
   | 'authInvalid'
@@ -79,7 +87,13 @@ async function getToken(who: WhoSettings): Promise<string> {
   }
   if (!res.ok) {
     if (res.status === 400 || res.status === 401) {
-      throw new OmsError('credentialsRejected');
+      // À QUI EST LE COMPTE REFUSÉ ? Si le corps était vide, l'utilisateur n'a
+      // rien fourni : le refus porte sur le compte de la passerelle, et lui
+      // parler de « ses » identifiants serait l'envoyer sur une fausse piste.
+      const aEnvoyeUnCompte = Object.keys(identifiants).length > 0;
+      throw new OmsError(
+        aEnvoyeUnCompte ? 'credentialsRejected' : 'gatewayAccountMissing'
+      );
     }
     if (res.status === 403) {
       throw new OmsError('corsForbidden');

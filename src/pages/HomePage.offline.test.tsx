@@ -18,12 +18,15 @@ import { HomePage } from './HomePage';
 
 /**
  * CE QUE CE FICHIER TIENT. L'OMS est le SEUL appel réseau de mister-cim10 ; le
- * dictionnaire CIM-10, lui, est embarqué. Hors connexion, l'app doit donc dire
- * l'indisponibilité de l'OMS À CET ENDROIT — et nulle part ailleurs.
+ * dictionnaire CIM-10, lui, est embarqué. L'analyse interroge les deux, et le
+ * dictionnaire porte seul le résultat quand la passerelle est hors d'atteinte —
+ * hors connexion, ou pas configurée. Ces tests éprouvent que le repli SE FAIT
+ * et SE DIT.
  *
- * Ce que ces tests éprouvent, c'est l'USAGE, pas le câblage : le bouton
- * porte-t-il son motif ? le mode mixte rend-il quand même ses codes locaux ?
- * l'app se tait-elle quand rien ne dépend du réseau ?
+ * LE SÉLECTEUR DE MODE A DISPARU, et avec lui les trois cas d'hier (`local`,
+ * `api`, `both`) et le garde qui désactivait « Analyser ». L'invariant neuf, et
+ * c'est le plus important : **« Analyser » n'est JAMAIS désactivé**. Il y a
+ * toujours un référentiel pour répondre.
  */
 
 const WHO: WhoSettings = {
@@ -90,7 +93,7 @@ beforeEach(() => {
   resetOmsToken();
   useWorkspaceStore.getState().resetSession();
   useWorkspaceStore.getState().setCrText('Hypertension artérielle sévère.');
-  useSettingsStore.setState({ mode: 'local', who: WHO });
+  useSettingsStore.setState({ who: WHO });
   setOnline(true);
 });
 
@@ -108,54 +111,48 @@ afterEach(() => {
 const appelsMetier = (spy: ReturnType<typeof vi.fn>) =>
   spy.mock.calls.filter(([entree]) => !String(entree).endsWith('version.json'));
 
-describe('HomePage hors connexion', () => {
-  it('mode OMS seul : le bouton est bloqué ET dit pourquoi, sans appel réseau', async () => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal('fetch', fetchSpy);
-    useSettingsStore.setState({ mode: 'api' });
-    renderHome();
-
-    setOnline(false);
-    expect(analyzeButton()).toHaveAttribute('aria-disabled', 'true');
-    // Le motif est AFFICHÉ : un bouton grisé muet n'apprend rien.
-    expect(screen.getByText('Indisponible hors ligne')).toBeInTheDocument();
-
-    await act(async () => {
-      fireEvent.click(analyzeButton());
+/** La passerelle qui répond : un jeton, puis un code CIM-11. */
+const passerelleQuiRepond = () =>
+  vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    const corps = url.endsWith('/token')
+      ? { access_token: 'jeton', expires_in: 3600 }
+      : {
+          theCode: 'BA00',
+          matchingText: 'Hypertension essentielle',
+          matchScore: 0.9,
+        };
+    return new Response(JSON.stringify(corps), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
     });
-    expect(appelsMetier(fetchSpy)).toHaveLength(0);
-    expect(useWorkspaceStore.getState().suggestions).toHaveLength(0);
   });
 
-  it('mode mixte : le bouton reste actif, les codes locaux sortent, l’OMS s’annonce ignorée', async () => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal('fetch', fetchSpy);
-    useSettingsStore.setState({ mode: 'both' });
+describe('HomePage — repli sur le dictionnaire', () => {
+  it('« Analyser » n’est JAMAIS désactivé, même hors connexion', async () => {
     renderHome();
-
     setOnline(false);
     expect(analyzeButton()).not.toHaveAttribute('aria-disabled');
-    // AVANT DE CLIQUER, exiger le témoin que la bascule est rendue. Ici se
-    // cachait la course : un `waitFor` sur l'absence d'`aria-disabled` passait
-    // au premier essai — en mode mixte le bouton ne la porte JAMAIS — et
-    // n'attendait donc rien du tout. L'échec, lui, tombait mille millisecondes
-    // plus loin sur des suggestions vides, à l'autre bout du test.
-    expect(
-      screen.getByText(/la recherche OMS a été ignorée/)
-    ).toBeInTheDocument();
+    expect(analyzeButton()).not.toBeDisabled();
+  });
+
+  it('hors connexion : les codes locaux sortent, l’OMS s’annonce ignorée, zéro appel', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    renderHome();
+    setOnline(false);
 
     await act(async () => {
       fireEvent.click(analyzeButton());
     });
     // `waitFor` parce que `handleAnalyze` est une fonction ASYNCHRONE, pas
-    // parce que le dictionnaire serait lent : il rend ses codes en ~2 ms. Le
-    // défaut de 1 s est donc large — l'allonger ne rendrait pas ce test plus
-    // sûr, il rendrait seulement ses échecs plus lents à venir.
+    // parce que le dictionnaire serait lent : il rend ses codes en ~2 ms.
     await waitFor(() =>
       expect(
         useWorkspaceStore.getState().suggestions.length
       ).toBeGreaterThanOrEqual(1)
     );
+
     // Le dictionnaire local a répondu (I10 = hypertension essentielle)…
     expect(
       useWorkspaceStore.getState().suggestions.some(s => s.code === 'I10')
@@ -165,57 +162,80 @@ describe('HomePage hors connexion', () => {
       screen.getByText(/la recherche OMS a été ignorée/)
     ).toBeInTheDocument();
     expect(appelsMetier(fetchSpy)).toHaveLength(0);
+    // UN REPLI N'EST PAS UNE ERREUR : le canal `analyzeError` (role="alert")
+    // doit rester vide, sinon un lecteur d'écran crie sur un cas normal.
     expect(useWorkspaceStore.getState().analyzeError).toBeNull();
   });
 
-  it('mode local : pas un mot — rien ne dépend du réseau', async () => {
+  it('sans passerelle configurée : même repli, et il dit comment le corriger', async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    useSettingsStore.setState({ who: { ...WHO, proxyUrl: '' } });
     renderHome();
-    setOnline(false);
+
     await act(async () => {
       fireEvent.click(analyzeButton());
     });
-
-    expect(analyzeButton()).not.toHaveAttribute('aria-disabled');
-    expect(screen.queryByText('Indisponible hors ligne')).toBeNull();
-    expect(screen.queryByText(/recherche OMS/)).toBeNull();
+    await waitFor(() =>
+      expect(
+        useWorkspaceStore.getState().suggestions.some(s => s.code === 'I10')
+      ).toBe(true)
+    );
     expect(
-      useWorkspaceStore.getState().suggestions.some(s => s.code === 'I10')
-    ).toBe(true);
+      screen.getByText(/Aucune passerelle OMS configurée/)
+    ).toBeInTheDocument();
+    // En ligne, mais rien à appeler : la passerelle n'a pas d'adresse.
+    expect(appelsMetier(fetchSpy)).toHaveLength(0);
+    expect(useWorkspaceStore.getState().analyzeError).toBeNull();
   });
 
-  it('en ligne, le mode OMS interroge la passerelle comme avant', async () => {
-    const fetchSpy = vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.endsWith('/token')) {
-        return new Response(
-          JSON.stringify({ access_token: 'jeton', expires_in: 3600 }),
-          { status: 200, headers: { 'content-type': 'application/json' } }
-        );
-      }
-      return new Response(
-        JSON.stringify({
-          theCode: 'BA00',
-          matchingText: 'Hypertension essentielle',
-          matchScore: 0.9,
-        }),
-        { status: 200, headers: { 'content-type': 'application/json' } }
-      );
-    });
+  it('en ligne : les DEUX référentiels répondent dans la même liste', async () => {
+    const fetchSpy = passerelleQuiRepond();
     vi.stubGlobal('fetch', fetchSpy);
-    useSettingsStore.setState({ mode: 'api' });
     renderHome();
 
-    expect(analyzeButton()).not.toHaveAttribute('aria-disabled');
     await act(async () => {
       fireEvent.click(analyzeButton());
     });
-
     await waitFor(() =>
       expect(
         useWorkspaceStore.getState().suggestions.some(s => s.code === 'BA00')
       ).toBe(true)
     );
-    expect(fetchSpy).toHaveBeenCalled();
-    expect(screen.queryByText('Indisponible hors ligne')).toBeNull();
+
+    const codes = useWorkspaceStore.getState().suggestions;
+    // C'EST LE CŒUR DU CHANGEMENT : plus de choix à faire, les deux arrivent.
+    expect(codes.some(s => s.code === 'I10' && s.source === 'local')).toBe(
+      true
+    );
+    expect(codes.some(s => s.code === 'BA00' && s.source === 'api')).toBe(true);
+    // Aucun message : tout a fonctionné.
+    expect(useWorkspaceStore.getState().analyzeNotice).toBeNull();
+    expect(useWorkspaceStore.getState().analyzeError).toBeNull();
+  });
+
+  it('le message de repli disparaît quand la passerelle redevient joignable', async () => {
+    vi.stubGlobal('fetch', vi.fn());
+    renderHome();
+    setOnline(false);
+    await act(async () => {
+      fireEvent.click(analyzeButton());
+    });
+    await waitFor(() =>
+      expect(
+        screen.getByText(/la recherche OMS a été ignorée/)
+      ).toBeInTheDocument()
+    );
+
+    // Un message de repli qui SURVIT à la reprise ferait croire à une panne.
+    vi.stubGlobal('fetch', passerelleQuiRepond());
+    setOnline(true);
+    await act(async () => {
+      fireEvent.click(analyzeButton());
+    });
+    await waitFor(() =>
+      expect(useWorkspaceStore.getState().analyzeNotice).toBeNull()
+    );
+    expect(screen.queryByText(/la recherche OMS a été ignorée/)).toBeNull();
   });
 });
