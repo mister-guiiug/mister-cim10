@@ -10,6 +10,7 @@ import {
 } from '../lib/settings';
 import { resetOmsToken } from '../lib/oms';
 import { readSnapshot, updateSnapshot } from '../lib/app-store';
+import { passerelleFournieParLeBuild } from '../lib/who-defaults';
 
 interface SettingsState {
   mode: AnalyzeMode;
@@ -63,6 +64,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   isReady: () => {
     const { mode, who } = get();
     if (mode === 'local') return true;
-    return Boolean(who.clientId && who.clientSecret && who.proxyUrl);
+    if (!who.proxyUrl) return false;
+    // La passerelle du parc porte le compte OMS en secrets, côté serveur : il
+    // n'y a rien à saisir, et exiger des identifiants ici rendrait
+    // l'application inutilisable alors que tout est en place.
+    if (passerelleFournieParLeBuild(who.proxyUrl)) return true;
+    return Boolean(who.clientId && who.clientSecret);
   },
 }));

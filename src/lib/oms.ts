@@ -2,7 +2,8 @@
  * Client de l'API OMS (ICD-11 MMS) via la passerelle CORS (cf. workers/).
  *
  * Contrat de la passerelle (`workers/who-icd-proxy.js`) :
- *   - POST {proxyUrl}/token   body { clientId, clientSecret }  → { access_token, expires_in }
+ *   - POST {proxyUrl}/token   body { clientId?, clientSecret? } → { access_token, expires_in }
+ *           corps vide = la passerelle met SES identifiants (secrets du worker)
  *   - GET  {proxyUrl}/autocode?searchText&releaseId&lang  + en-tête Authorization: Bearer
  *           → résultat « autocode » OMS (un seul meilleur code par texte).
  *
@@ -58,15 +59,20 @@ async function getToken(who: WhoSettings): Promise<string> {
   if (tokenCache && tokenCache.expiresAt > now + 30_000)
     return tokenCache.token;
 
+  // UN CHAMP VIDE N'EST PAS ENVOYÉ. La passerelle retombe sur ses propres
+  // identifiants quand le corps n'en porte pas ; lui envoyer `clientId: ''` la
+  // ferait répondre 400 — l'application serait inutilisable sur une passerelle
+  // pourtant configurée.
+  const identifiants: Record<string, string> = {};
+  if (who.clientId) identifiants.clientId = who.clientId;
+  if (who.clientSecret) identifiants.clientSecret = who.clientSecret;
+
   let res: Response;
   try {
     res = await fetch(`${base(who)}/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clientId: who.clientId,
-        clientSecret: who.clientSecret,
-      }),
+      body: JSON.stringify(identifiants),
     });
   } catch {
     throw new OmsError('proxyUnreachable');

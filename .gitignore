@@ -10,6 +10,10 @@ dist/
 .env.*
 !.env.example
 
+# Contrôle de bundling de la passerelle (`wrangler deploy --dry-run`). Le
+# dossier est régénéré à chaque exécution et ne décrit rien qu'on veuille suivre.
+workers/.wrangler-dryrun/
+
 # Playwright
 test-results/
 playwright-report/

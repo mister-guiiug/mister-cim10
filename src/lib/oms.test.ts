@@ -94,6 +94,50 @@ describe('suggestFromOms', () => {
     expect(res[0]?.code).toBe('5A11');
   });
 
+  // Un champ vide envoyé ferait répondre 400 à la passerelle (« clientId et
+  // clientSecret requis »), alors qu'elle porte les siens en secrets : corps
+  // SANS les clés, et elle met son compte.
+  it('sans identifiants : le corps ne porte AUCUNE clé, la passerelle mettra les siennes', async () => {
+    let corpsRecu: unknown;
+    stubFetch((url, init) => {
+      if (url.endsWith('/token')) {
+        corpsRecu = JSON.parse(String(init?.body ?? 'null'));
+        return json({ access_token: 'tok', expires_in: 3600 });
+      }
+      return json({
+        theCode: '5A11',
+        matchingText: 'Diabète',
+        matchScore: 0.8,
+      });
+    });
+
+    const res = await suggestFromOms('Diabète type 2.', {
+      ...who,
+      clientId: '',
+      clientSecret: '',
+    });
+    expect(corpsRecu).toEqual({});
+    expect(res[0]?.code).toBe('5A11');
+  });
+
+  it('identifiant seul, sans mot secret : seul le champ renseigné part', async () => {
+    let corpsRecu: unknown;
+    stubFetch((url, init) => {
+      if (url.endsWith('/token')) {
+        corpsRecu = JSON.parse(String(init?.body ?? 'null'));
+        return json({ access_token: 'tok', expires_in: 3600 });
+      }
+      return json({
+        theCode: '5A11',
+        matchingText: 'Diabète',
+        matchScore: 0.8,
+      });
+    });
+
+    await suggestFromOms('Diabète type 2.', { ...who, clientSecret: '' });
+    expect(corpsRecu).toEqual({ clientId: 'cid' });
+  });
+
   it('identifiants refusés (401 sur /token) → OmsError', async () => {
     stubFetch(url =>
       url.endsWith('/token') ? json({ error: 'unauthorized' }, 401) : json(null)

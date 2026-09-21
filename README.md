@@ -98,10 +98,10 @@ retirées en silence :
 
 La protection des données est une priorité pour un outil traitant des informations médicales.
 
-| Mode                    | Données transmises                                                                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement.                                                                        |
-| **Avec option API OMS** | Des fragments du compte-rendu transitent vers votre proxy personnel, puis vers les serveurs de l'OMS (`id.who.int`). Vous contrôlez votre proxy. |
+| Mode                    | Données transmises                                                                                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sans option API OMS** | **Aucune donnée ne quitte votre navigateur.** Tout est traité localement.                                                                                                                                             |
+| **Avec option API OMS** | Des fragments du compte-rendu transitent vers la passerelle du site (ou la vôtre, si vous en configurez une), puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
 
 - Aucun compte utilisateur requis.
 - Aucun stockage serveur.
@@ -186,11 +186,16 @@ F5 → choisir une configuration :
 
 ### API OMS (ICD-11) et proxy CORS
 
-L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par CORS. Un proxy Cloudflare Worker est fourni dans [`workers/`](workers/README.md) :
+L'accès direct à l'[ICD API OMS](https://icd.who.int/icdapi) est bloqué par CORS. Une passerelle Cloudflare Worker est fournie dans [`workers/`](workers/README.md), et **elle porte le compte OMS** : l'application arrive donc connectée, sans rien à saisir.
 
-1. Copier `workers/wrangler.toml.example` → `workers/wrangler.toml`.
-2. `wrangler deploy` (compte Cloudflare gratuit).
-3. Configurer `ALLOWED_ORIGINS`, puis renseigner l'URL dans les paramètres de l'application.
+C'est la seule place possible pour ce compte. Une PWA est un bundle public : une variable `VITE_*` y est recopiée en clair, lisible par quiconque ouvre l'onglet Réseau. Le partage est donc :
+
+| Valeur                                                       | Où                                      |
+| ------------------------------------------------------------ | --------------------------------------- |
+| `VITE_WHO_PROXY_URL`, `VITE_WHO_RELEASE_ID`, `VITE_WHO_LANG` | variables de dépôt (`vars`) — publiques |
+| `WHO_CLIENT_ID`, `WHO_CLIENT_SECRET`                         | secrets **du worker**                   |
+
+Qui préfère son propre compte OMS le saisit dans **Paramètres › Source des suggestions** : il l'emporte alors sur celui de la passerelle. Détails et déploiement : [`workers/README.md`](workers/README.md).
 
 ### Déploiement sur GitHub Pages
 
@@ -216,6 +221,7 @@ src/
 │   ├── icd-hierarchy.ts          getFamily — code parent et codes apparentés
 │   ├── oms.ts                    client OAuth2 + autocodage CIM-11 via la passerelle
 │   ├── settings.ts               lecture/écriture des réglages (façade sur app-store)
+│   ├── who-defaults.ts           réglages OMS fournis par le build (VITE_WHO_*)
 │   ├── storage.ts                sauvegarde/restauration .json (module `backup` du socle)
 │   └── storage-migration.ts      passage des clés historiques sous le préfixe cim10_
 ├── types/index.ts                AnalyzeMode, AnalysisResult, ValidatedDiagnostic, SavedSession, WhoSettings
@@ -223,7 +229,7 @@ src/
 ├── icd10-data.ts                 Échantillon de codes / synonymes FR
 ├── style.css                     Styles legacy (classes réutilisées par les composants React)
 └── tailwind.css                  @import 'tailwindcss'
-workers/                          Proxy CORS Cloudflare Worker (optionnel)
+workers/                          Passerelle CORS Cloudflare Worker — porte le compte OMS en secrets
 public/                           Manifest PWA, icônes
 scripts/                          Génération d'icônes
 docs/context.md                   Contexte produit détaillé

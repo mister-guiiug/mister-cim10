@@ -1,0 +1,92 @@
+name: Deploy WHO Worker
+
+# Déploie la passerelle OMS (`workers/`) sur Cloudflare Workers, et y pose le
+# compte OMS en secrets.
+#
+# C'EST LE SEUL CHEMIN PAR LEQUEL LE MOT SECRET OMS ATTEINT LA PRODUCTION.
+# L'application est un bundle public : tout ce qu'on lui donne au build est
+# lisible. La passerelle, elle, exécute côté serveur — et c'est `wrangler secret
+# put` qui y dépose la valeur, sans jamais l'écrire sur le disque ni la passer
+# sur une ligne de commande.
+#
+# Secrets requis (Settings → Secrets and variables → Actions) :
+#   CLOUDFLARE_API_TOKEN   — jeton avec la permission « Workers Scripts: Edit »
+#   CLOUDFLARE_ACCOUNT_ID  — identifiant du compte Cloudflare
+#   WHO_CLIENT_ID          — compte OMS, obtenu sur https://icd.who.int/icdapi
+#   WHO_CLIENT_SECRET      —
+#
+# AUCUN N'EST PRÉFIXÉ `VITE_`, et ce n'est pas un détail de nommage : une `VITE_*`
+# serait recopiée dans le bundle par Vite. Ces quatre-là ne franchissent jamais
+# la frontière du navigateur.
+#
+# Sans les secrets Cloudflare, le job se termine en SUCCÈS, déploiement ignoré :
+# la passerelle est un complément, et une CI rouge qu'on ne peut pas réparer
+# finit désactivée.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/**'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: workers/package-lock.json
+
+      - name: Install worker dependencies
+        working-directory: workers
+        run: npm ci --no-audit --no-fund
+
+      # Le bundling se valide SANS aucune authentification : c'est le contrôle
+      # qui attrape une erreur de syntaxe ou de configuration avant qu'elle ne
+      # demande la moindre clé.
+      - name: Dry-run build
+        working-directory: workers
+        run: npm run dry-run
+
+      - name: Deploy (si secrets Cloudflare présents)
+        working-directory: workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::Secrets Cloudflare absents — déploiement de la passerelle ignoré. Ajoutez CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID pour l'activer."
+            exit 0
+          fi
+          npx wrangler deploy
+
+      # `wrangler secret put` LIT L'ENTRÉE STANDARD : la valeur ne paraît ni dans
+      # la ligne de commande, ni dans le journal, ni dans un fichier temporaire.
+      # `printf '%s'` plutôt que `echo` — pas de saut de ligne ajouté au secret.
+      - name: Poser le compte OMS en secrets de la passerelle
+        working-directory: workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WHO_CLIENT_ID: ${{ secrets.WHO_CLIENT_ID }}
+          WHO_CLIENT_SECRET: ${{ secrets.WHO_CLIENT_SECRET }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::warning::Secrets Cloudflare absents — compte OMS non posé."
+            exit 0
+          fi
+          if [ -z "$WHO_CLIENT_ID" ] || [ -z "$WHO_CLIENT_SECRET" ]; then
+            echo "::warning::WHO_CLIENT_ID / WHO_CLIENT_SECRET absents — la passerelle exigera que chacun apporte son propre compte OMS."
+            exit 0
+          fi
+          printf '%s' "$WHO_CLIENT_ID" | npx wrangler secret put WHO_CLIENT_ID
+          printf '%s' "$WHO_CLIENT_SECRET" | npx wrangler secret put WHO_CLIENT_SECRET

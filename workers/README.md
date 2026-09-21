@@ -6,6 +6,41 @@ Référence OMS : [ICD API](https://icd.who.int/icdapi).
 
 ---
 
+## Où vit le compte OMS — et pourquoi pas ailleurs
+
+La passerelle peut porter **son propre compte OMS**, en secrets. Posés, l’application n’a plus rien à demander : elle appelle `/token` sans identifiants, et la passerelle ajoute les siens côté serveur.
+
+C’est **le seul endroit possible**. Une PWA est un bundle public : tout ce qu’on lui donne au build — variable `VITE_*` comprise — est recopié en clair dans le JavaScript servi, lisible par quiconque ouvre l’onglet Réseau. Un mot secret publié n’en est plus un.
+
+| Valeur                                         | Où                                            | Pourquoi                                          |
+| ---------------------------------------------- | --------------------------------------------- | ------------------------------------------------- |
+| `VITE_WHO_PROXY_URL`, `…_RELEASE_ID`, `…_LANG` | Variables de dépôt GitHub (`vars`)            | Publiques : déjà visibles dans le trafic réseau   |
+| `WHO_CLIENT_ID`, `WHO_CLIENT_SECRET`           | Secrets **du worker** (`wrangler secret put`) | Ne franchissent jamais la frontière du navigateur |
+| `CLOUDFLARE_API_TOKEN`, `…_ACCOUNT_ID`         | Secrets de dépôt GitHub                       | Ne servent qu’au déploiement, en CI               |
+
+Le compte de l’utilisateur, s’il en saisit un dans les Réglages, **l’emporte** sur celui de la passerelle : ce sont alors ses identifiants qui portent les requêtes.
+
+Sans secrets sur la passerelle, rien ne casse — elle répond 400 et chacun doit apporter son compte, comme avant.
+
+---
+
+## Méthode automatique — le workflow du dépôt
+
+`.github/workflows/deploy-worker.yml` déploie la passerelle et y pose le compte OMS, à chaque poussée sur `main` qui touche `workers/`, ou à la main (**Actions → Deploy WHO Worker → Run workflow**).
+
+Quatre secrets de dépôt (Settings → Secrets and variables → Actions) :
+
+| Secret                  | Obtenir                                                                    |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare → My Profile → API Tokens, permission **Workers Scripts: Edit** |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare → Workers & Pages (colonne de droite)                           |
+| `WHO_CLIENT_ID`         | [icd.who.int/icdapi](https://icd.who.int/icdapi)                           |
+| `WHO_CLIENT_SECRET`     | idem                                                                       |
+
+Sans les deux secrets Cloudflare, le job se termine **en succès** avec un avertissement : le déploiement est simplement ignoré.
+
+---
+
 ## Étape 0 — Prérequis
 
 - Un compte **Cloudflare** (gratuit) : [https://dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up).
@@ -48,13 +83,20 @@ Référence OMS : [ICD API](https://icd.who.int/icdapi).
   (le sous-domaine dépend du nom que Cloudflare a attribué au worker).
 - Copiez cette URL **sans slash à la fin**.
 
-### 5. Brancher l’application
+### 5. Configurer le compte OMS de la passerelle (facultatif)
 
-Dans la PWA, panneau **API OMS** :
+**Settings** → **Variables and Secrets** → onglet **Secrets** → **Add** :
 
-- Collez l’URL dans **URL du proxy CORS**.
-- Renseignez **Client ID** et **Client secret** obtenus sur [icd.who.int/icdapi](https://icd.who.int/icdapi).
-- Cochez **Activer les requêtes OMS**, puis **Analyser**.
+- `WHO_CLIENT_ID` et `WHO_CLIENT_SECRET`, obtenus sur [icd.who.int/icdapi](https://icd.who.int/icdapi).
+
+Posés, l’application n’a plus rien à demander à ses utilisateurs. Omis, chacun devra apporter son propre compte dans les Réglages.
+
+### 6. Brancher l’application
+
+Deux voies, selon qu’on déploie ou qu’on essaie :
+
+- **Déploiement** — posez l’URL du worker dans la variable de dépôt **`VITE_WHO_PROXY_URL`** (Settings → Secrets and variables → Actions → Variables). L’application arrive alors connectée : il ne reste qu’à choisir un mode d’analyse avec OMS dans **Paramètres › Source des suggestions**.
+- **Essai ponctuel** — collez l’URL dans **Adresse de la passerelle** des Réglages. Attention : une adresse saisie à la main **n’est pas couverte par la CSP** du site, qui est figée au build. Elle ne marche donc qu’en développement local, ou sur un déploiement dont `VITE_WHO_PROXY_URL` la déclare.
 
 ---
 
@@ -81,19 +123,33 @@ Le navigateur s’ouvre pour autoriser Wrangler.
 
 ### 3. Configurer `ALLOWED_ORIGINS`
 
-Éditez **`wrangler.toml`** à la racine du dossier `workers/` :
+**`wrangler.toml` existe déjà** dans `workers/` : il vise le worker `mister-cim10` et autorise `https://mister-guiiug.github.io` + `http://localhost:5173`. Pour votre propre déploiement, partez de `wrangler.toml.example` et adaptez :
 
-- Vérifiez **`name`** (nom du worker).
-- Décommentez / ajoutez dans **`[vars]`** :
+- **`name`** (nom du worker) ;
+- **`[vars] ALLOWED_ORIGINS`** — vos origines, séparées par des virgules :
 
 ```toml
 [vars]
 ALLOWED_ORIGINS = "https://VOTRE_COMPTE.github.io,http://localhost:5173"
 ```
 
-Remplacez par **votre** origine GitHub Pages et gardez `localhost` si vous développez en local.
+> ⚠️ **`wrangler deploy` REMPLACE les variables du worker.** Une liste incomplète coupe l’application au premier déploiement. Pour relever celles d’un worker en service sans accès au tableau de bord, interrogez-le origine par origine : `204` = autorisée, `403` = refusée.
+>
+> ```bash
+> curl -s -o /dev/null -w '%{http_code}\n' -X OPTIONS "https://VOTRE_WORKER.workers.dev/token" \
+>   -H "Origin: https://VOTRE_COMPTE.github.io" -H "Access-Control-Request-Method: POST"
+> ```
 
-### 4. Déployer
+### 4. Poser le compte OMS (facultatif, mais c’est là tout l’intérêt)
+
+```bash
+wrangler secret put WHO_CLIENT_ID
+wrangler secret put WHO_CLIENT_SECRET
+```
+
+La commande **lit l’entrée standard** : la valeur ne paraît ni dans la ligne de commande, ni dans l’historique du shell, ni dans un fichier. Ne la passez jamais en argument.
+
+### 5. Déployer
 
 Toujours dans le dossier **`workers/`** :
 
@@ -101,9 +157,9 @@ Toujours dans le dossier **`workers/`** :
 wrangler deploy
 ```
 
-La sortie affiche l’URL du worker (`*.workers.dev`).
+La sortie affiche l’URL du worker (`*.workers.dev`). C’est elle qui va dans la variable de dépôt **`VITE_WHO_PROXY_URL`** — sans slash final.
 
-### 5. Mettre à jour le code plus tard
+### 6. Mettre à jour le code plus tard
 
 Après modification de `who-icd-proxy.js` :
 
@@ -120,11 +176,22 @@ wrangler deploy
 
 ### Test du jeton (exemple avec curl)
 
-Remplacez l’URL, le client et le secret :
+Si la passerelle porte ses propres secrets, un corps vide suffit — c’est aussi la façon de vérifier qu’ils sont bien posés :
 
 ```bash
-curl -s -X POST "https://VOTRE_WORKER.workers.dev/token" ^
-  -H "Content-Type: application/json" ^
+curl -s -X POST "https://VOTRE_WORKER.workers.dev/token" \
+  -H "Origin: https://VOTRE_COMPTE.github.io" \
+  -H "Content-Type: application/json" -d "{}"
+```
+
+L’en-tête **`Origin` est obligatoire** dès que `ALLOWED_ORIGINS` est renseignée : sans lui, la réponse est un `403` qui ne dit rien sur les identifiants.
+
+Avec un compte à soi :
+
+```bash
+curl -s -X POST "https://VOTRE_WORKER.workers.dev/token" \
+  -H "Origin: https://VOTRE_COMPTE.github.io" \
+  -H "Content-Type: application/json" \
   -d "{\"clientId\":\"VOTRE_ID\",\"clientSecret\":\"VOTRE_SECRET\"}"
 ```
 
@@ -136,12 +203,14 @@ Une réponse JSON contenant `access_token` indique que le proxy et les identifia
 
 ## Dépannage
 
-| Problème                     | Piste                                                                                                                                                                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **403 Origin non autorisée** | Corriger `ALLOWED_ORIGINS` : elle doit **égaler** l’en-tête `Origin` du navigateur (souvent `https://VOTRE_COMPTE.github.io`, y compris pour un site **projet** sous `/nom-du-repo/` — le chemin ne fait pas partie de l’origine). |
-| **404 sur /token**           | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`.                                                                                           |
-| **401 OMS**                  | Client ID / secret invalides sur le portail ICD API.                                                                                                                                                                               |
-| **502**                      | Problème réseau entre Cloudflare et les serveurs OMS (rare).                                                                                                                                                                       |
+| Problème                                    | Piste                                                                                                                                                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **403 Origin non autorisée**                | Corriger `ALLOWED_ORIGINS` : elle doit **égaler** l’en-tête `Origin` du navigateur (souvent `https://VOTRE_COMPTE.github.io`, y compris pour un site **projet** sous `/nom-du-repo/` — le chemin ne fait pas partie de l’origine). |
+| **404 sur /token**                          | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`.                                                                                           |
+| **400 « clientId et clientSecret requis »** | Ni compte apporté par l’appelant, ni secrets `WHO_CLIENT_ID` / `WHO_CLIENT_SECRET` sur la passerelle. Posez-les (`wrangler secret put`) ou saisissez un compte dans les Réglages.                                                  |
+| **401 OMS**                                 | Client ID / secret invalides sur le portail ICD API.                                                                                                                                                                               |
+| **Appel bloqué par la CSP**                 | L’adresse de la passerelle doit figurer dans `VITE_WHO_PROXY_URL` **au build** : la politique est figée à ce moment-là. Une adresse saisie ensuite dans les Réglages n’y est pas.                                                  |
+| **502**                                     | Problème réseau entre Cloudflare et les serveurs OMS (rare).                                                                                                                                                                       |
 
 ---
 

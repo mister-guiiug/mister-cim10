@@ -68,6 +68,25 @@ function analyticsPlugin(): Plugin {
 
 // Production : site projet GitHub Pages — https://<user>.github.io/mister-cim10/
 // `VITE_BASE_PATH` (Lighthouse CI avec « / », déploiement famille) prioritaire.
+/**
+ * L'ORIGINE de la passerelle OMS, pour la CSP.
+ *
+ * `VITE_WHO_PROXY_URL` porte une adresse complète (`https://hôte`, parfois avec
+ * un chemin) ; `connect-src` veut une SOURCE — schéma et hôte. On ne recopie
+ * donc pas la variable : on en extrait l'origine, et une valeur illisible est
+ * ignorée plutôt que de fabriquer une directive invalide qui ferait taire toute
+ * la politique.
+ */
+function origineDeLaPasserelle(): string[] {
+  const brut = (process.env.VITE_WHO_PROXY_URL ?? '').trim();
+  if (brut === '') return [];
+  try {
+    return [new URL(brut).origin];
+  } catch {
+    return [];
+  }
+}
+
 export default defineConfig(({ command }) => {
   const basePath =
     process.env.VITE_BASE_PATH ??
@@ -191,11 +210,20 @@ export default defineConfig(({ command }) => {
         // Ouvre les hôtes de PostHog — le nuage EUROPÉEN (ADR 0012).
         analytics: true,
         // `*.who.int` : l'API CIM de l'OMS, telle que la balise l'autorisait
-        // déjà. ATTENTION — la passerelle que l'utilisateur configure dans les
-        // réglages (`who_icd_proxy_url`) n'est PAS couverte : son adresse
-        // n'existe qu'à l'exécution, la politique est figée au build. C'est la
-        // limite connue, pas une régression de cette PR.
-        connectSrc: ["'self'", 'https://*.who.int'],
+        // déjà.
+        //
+        // LA PASSERELLE EST DÉSORMAIS COUVERTE — et c'est ce qui rend le mode
+        // OMS praticable. La limite notée ici valait tant que son adresse
+        // n'existait qu'à l'exécution : une politique figée au build ne peut
+        // pas autoriser un hôte qu'elle ne connaît pas, et le navigateur
+        // coupait l'appel avant qu'il ne parte. Maintenant que l'adresse vient
+        // de `VITE_WHO_PROXY_URL`, le build la connaît.
+        //
+        // Elle reste NON couverte pour une passerelle saisie à la main dans les
+        // Réglages : c'est la même limite, réduite au cas où l'utilisateur
+        // apporte son propre relais. Rien ne peut la lever sans ouvrir
+        // `connect-src` à tout, ce qui coûterait plus que ça ne rend.
+        connectSrc: ["'self'", 'https://*.who.int', ...origineDeLaPasserelle()],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
       }),

@@ -12,6 +12,21 @@ interface ImportMetaEnv {
    */
   readonly VITE_POSTHOG_KEY?: string;
   readonly VITE_SENTRY_DSN?: string;
+
+  /**
+   * Adresse de la passerelle OMS (le Worker de `workers/`), sans slash final.
+   * Posée, l'application arrive connectée : les champs de compte des Réglages
+   * deviennent optionnels, parce que la passerelle porte le compte en secrets
+   * côté serveur (cf. `src/lib/who-defaults.ts`).
+   *
+   * Publique par nature — elle figure dans chaque requête du navigateur. Donc
+   * `vars`, jamais `secrets`.
+   */
+  readonly VITE_WHO_PROXY_URL?: string;
+  /** Version de la classification CIM-11 demandée par défaut (ex. `2025-01`). */
+  readonly VITE_WHO_RELEASE_ID?: string;
+  /** Langue des libellés OMS par défaut (`fr` | `en`). */
+  readonly VITE_WHO_LANG?: string;
 }
 
 interface ImportMeta {
