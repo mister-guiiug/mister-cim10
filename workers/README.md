@@ -95,8 +95,8 @@ Posés, l’application n’a plus rien à demander à ses utilisateurs. Omis, c
 
 Deux voies, selon qu’on déploie ou qu’on essaie :
 
-- **Déploiement** — posez l’URL du worker dans la variable de dépôt **`VITE_WHO_PROXY_URL`** (Settings → Secrets and variables → Actions → Variables). L’application arrive alors connectée : il ne reste qu’à choisir un mode d’analyse avec OMS dans **Paramètres › Source des suggestions**.
-- **Essai ponctuel** — collez l’URL dans **Adresse de la passerelle** des Réglages. Attention : une adresse saisie à la main **n’est pas couverte par la CSP** du site, qui est figée au build. Elle ne marche donc qu’en développement local, ou sur un déploiement dont `VITE_WHO_PROXY_URL` la déclare.
+- **Déploiement** — posez l’URL du worker dans la variable de dépôt **`VITE_WHO_PROXY_URL`** (Settings → Secrets and variables → Actions → Variables). L’application arrive alors connectée, et il n’y a rien à régler : l’analyse interroge l’OMS dès que la passerelle répond.
+- **Essai ponctuel** — il n’y a **plus de champ** où coller une adresse, et ce n’est pas un oubli : la CSP du site est figée au build et n’autorise que l’origine de `VITE_WHO_PROXY_URL`, toute autre adresse étant coupée par le navigateur avant l’envoi. Pour essayer un worker, posez cette variable **dans l’environnement du processus** — `VITE_WHO_PROXY_URL=https://… npm run dev` — puis rechargez. ⚠️ Un `.env.local` **ne suffit pas** : Vite le donne à l’application (`import.meta.env`) mais [`vite.config.ts`](../vite.config.ts) lit `process.env` pour bâtir la CSP. L’application viserait la passerelle pendant que le navigateur coupe l’appel — sans un message, le symptôme même que ce champ supprimé produisait.
 
 ---
 
@@ -203,14 +203,14 @@ Une réponse JSON contenant `access_token` indique que le proxy et les identifia
 
 ## Dépannage
 
-| Problème                                    | Piste                                                                                                                                                                                                                              |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **403 Origin non autorisée**                | Corriger `ALLOWED_ORIGINS` : elle doit **égaler** l’en-tête `Origin` du navigateur (souvent `https://VOTRE_COMPTE.github.io`, y compris pour un site **projet** sous `/nom-du-repo/` — le chemin ne fait pas partie de l’origine). |
-| **404 sur /token**                          | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`.                                                                                           |
-| **400 « clientId et clientSecret requis »** | Ni compte apporté par l’appelant, ni secrets `WHO_CLIENT_ID` / `WHO_CLIENT_SECRET` sur la passerelle. Posez-les (`wrangler secret put`) ou saisissez un compte dans les Réglages.                                                  |
-| **401 OMS**                                 | Client ID / secret invalides sur le portail ICD API.                                                                                                                                                                               |
-| **Appel bloqué par la CSP**                 | L’adresse de la passerelle doit figurer dans `VITE_WHO_PROXY_URL` **au build** : la politique est figée à ce moment-là. Une adresse saisie ensuite dans les Réglages n’y est pas.                                                  |
-| **502**                                     | Problème réseau entre Cloudflare et les serveurs OMS (rare).                                                                                                                                                                       |
+| Problème                                    | Piste                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **403 Origin non autorisée**                | Corriger `ALLOWED_ORIGINS` : elle doit **égaler** l’en-tête `Origin` du navigateur (souvent `https://VOTRE_COMPTE.github.io`, y compris pour un site **projet** sous `/nom-du-repo/` — le chemin ne fait pas partie de l’origine).                    |
+| **404 sur /token**                          | URL du proxy mal saisie (trailing slash en trop sur le worker custom, ou mauvais chemin). L’app appelle `BASE/token` et `BASE/autocode`.                                                                                                              |
+| **400 « clientId et clientSecret requis »** | Ni compte apporté par l’appelant, ni secrets `WHO_CLIENT_ID` / `WHO_CLIENT_SECRET` sur la passerelle. Posez-les (`wrangler secret put`) ou saisissez un compte dans les Réglages.                                                                     |
+| **401 OMS**                                 | Client ID / secret invalides sur le portail ICD API.                                                                                                                                                                                                  |
+| **Appel bloqué par la CSP**                 | L’adresse de la passerelle doit figurer dans `VITE_WHO_PROXY_URL` **au build** : la politique est figée à ce moment-là. Il n’existe plus de champ pour en saisir une autre dans les Réglages — précisément parce qu’aucune autre ne serait joignable. |
+| **502**                                     | Problème réseau entre Cloudflare et les serveurs OMS (rare).                                                                                                                                                                                          |
 
 ---
 

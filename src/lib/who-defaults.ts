@@ -16,7 +16,15 @@
  * créer — ce que `docs/context.md`, § Confidentialité, assume : des segments du
  * compte-rendu partent chez un tiers dès que le réseau répond.
  */
-import type { WhoPublicSettings } from './app-store';
+import type { WhoSettings } from '../types/index';
+
+/**
+ * Ce que le build fournit. IL NE SE DÉDUIT PLUS DE L'INSTANTANÉ : celui-ci a
+ * perdu la passerelle (`./app-store.ts`, version 2) alors que le build, lui,
+ * la porte — c'est même devenu sa seule source. Le type se prend donc sur les
+ * réglages EFFECTIFS, les trois champs publics que le build sait remplir.
+ */
+export type DefautsWho = Pick<WhoSettings, 'proxyUrl' | 'releaseId' | 'lang'>;
 
 /** Version de la classification servie par défaut (cf. la liste des Réglages). */
 const RELEASE_DEFAUT = '2025-01';
@@ -34,7 +42,7 @@ const propre = (v: string | undefined, defaut: string): string => {
  * et lire à l'appel laisse les tests poser leur propre environnement
  * (`vi.stubEnv`) sans dépendre de l'ordre des imports.
  */
-export function defautsWho(): Omit<WhoPublicSettings, 'clientId'> {
+export function defautsWho(): DefautsWho {
   return {
     proxyUrl: propre(import.meta.env.VITE_WHO_PROXY_URL, ''),
     releaseId: propre(import.meta.env.VITE_WHO_RELEASE_ID, RELEASE_DEFAUT),
@@ -43,43 +51,23 @@ export function defautsWho(): Omit<WhoPublicSettings, 'clientId'> {
 }
 
 /**
- * La passerelle du build s'authentifie-t-elle seule ?
+ * Le build fournit-il une passerelle, et donc un compte OMS ?
  *
- * On ne le lui demande pas — ce serait un aller-retour réseau au démarrage pour
- * une réponse que le déploiement connaît déjà. LA RÈGLE EST DÉCLARATIVE : une
- * passerelle posée par `VITE_WHO_PROXY_URL` est, par contrat, celle du parc, et
- * celle-là porte ses secrets. Une passerelle saisie à la main dans les
- * Réglages, on n'en sait rien : elle exige un compte.
+ * LA QUESTION N'A PLUS QU'UNE FORME, parce que la passerelle n'a plus qu'une
+ * source. Elle prenait une adresse en argument, du temps où les Réglages en
+ * proposaient une autre : il fallait alors distinguer celle du parc, qui porte
+ * ses secrets, de celle qu'on avait tapée et dont on ne savait rien. Ce champ a
+ * disparu — la CSP le rendait inopérant — et `readWhoSettings` ne rend plus que
+ * l'adresse du build. Comparer cette adresse à elle-même serait une tautologie
+ * déguisée en vérification.
  *
- * Si le contrat n'est pas tenu (secrets absents du worker), l'échec est
- * lisible : la passerelle répond 400 et l'IHM affiche « identifiants refusés ».
+ * LA RÈGLE RESTE DÉCLARATIVE : une passerelle posée par `VITE_WHO_PROXY_URL`
+ * est, par contrat, celle du parc, et celle-là porte le compte en secrets côté
+ * serveur. On ne le lui demande pas — ce serait un aller-retour réseau au
+ * démarrage pour une réponse que le déploiement connaît déjà. Si le contrat
+ * n'est pas tenu (secrets absents du worker), l'échec est lisible : la
+ * passerelle répond 400 et l'IHM affiche « identifiants refusés ».
  */
-export function passerelleFournieParLeBuild(proxyUrl: string): boolean {
-  const defaut = defautsWho().proxyUrl;
-  return defaut !== '' && proxyUrl.trim() === defaut;
-}
-
-/**
- * Cette passerelle peut-elle seulement être appelée depuis le site ?
- *
- * LA CSP TRANCHE AVANT LE RÉSEAU. `connect-src` ne porte que `'self'`,
- * `https://*.who.int` et l'origine de `VITE_WHO_PROXY_URL` (cf.
- * `vite.config.ts`). Toute autre adresse est coupée par le navigateur AVANT
- * que la requête parte — et l'échec ne ressemble à rien : ni réponse, ni
- * message, juste une analyse qui ne rend que les codes locaux.
- *
- * On ne peut pas lever cette limite sans ouvrir `connect-src` à tout, ce qui
- * coûterait plus que ça ne rend. On la NOMME donc ici, et `readWhoSettings`
- * s'en sert pour ne pas laisser un appareil avec une adresse injoignable.
- */
-export function passerelleAutorisee(proxyUrl: string): boolean {
-  const adresse = proxyUrl.trim();
-  if (adresse === '') return false;
-  if (passerelleFournieParLeBuild(adresse)) return true;
-  try {
-    const { hostname, protocol } = new URL(adresse);
-    return protocol === 'https:' && /(^|\.)who\.int$/.test(hostname);
-  } catch {
-    return false;
-  }
+export function passerelleFournie(): boolean {
+  return defautsWho().proxyUrl !== '';
 }

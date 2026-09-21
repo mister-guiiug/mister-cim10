@@ -78,38 +78,46 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     expect(snapshot.disclaimerDismissed).toBe(true);
 
     // Connexion OMS (le mot secret garde sa clé propre, cf. test suivant).
+    // LA PASSERELLE N'EN FAIT PLUS PARTIE : elle vient du build, et sa clé
+    // d'hier est effacée comme `analyze_mode` (test suivant).
     expect(snapshot.who).toEqual({
       clientId: 'mon-identifiant',
-      proxyUrl: 'https://passerelle.test',
       releaseId: '2024-01',
       lang: 'en',
     });
 
-    // Et par les fonctions que l'application appelle réellement.
+    // Et par les fonctions que l'application appelle réellement. Aucune
+    // variable de build ici : la passerelle effective est donc vide.
     expect(readMinConfidenceThreshold()).toBe(0.65);
     expect(readWhoSettings()).toEqual({
       clientId: 'mon-identifiant',
       clientSecret: 'mot-secret-en-clair',
-      proxyUrl: 'https://passerelle.test',
+      proxyUrl: '',
       releaseId: '2024-01',
       lang: 'en',
     });
   });
 
   // LA CLÉ D'UN RÉGLAGE SUPPRIMÉ DOIT PARTIR, PAS ÊTRE IGNORÉE. `analyze_mode`
-  // ne se traduit plus — le sélecteur à trois modes a disparu — mais elle existe
-  // encore sur tous les appareils en service. Retirée de `CLES_EPARSES`, elle ne
-  // serait plus lue, donc plus effacée : elle traînerait indéfiniment dans le
+  // et `who_icd_proxy_url` ne se traduisent plus — le sélecteur à trois modes a
+  // disparu, la passerelle vient du build — mais elles existent encore sur tous
+  // les appareils en service. Retirées de `CLES_EPARSES`, elles ne seraient
+  // plus lues, donc plus effacées : elles traîneraient indéfiniment dans le
   // stockage ET dans chaque fichier de sauvegarde, que `buildAppBackup` produit
   // en énumérant tout le préfixe.
-  it('efface `analyze_mode` et son ancêtre `who_icd_enabled`, devenus sans objet', () => {
+  it('efface les clés des réglages supprimés : mode, passerelle, `who_icd_enabled`', () => {
     poserEtatDHier();
     localStorage.setItem('who_icd_enabled', '1');
 
     readSnapshot();
 
     expect(localStorage.getItem(`${APP_PREFIX}analyze_mode`)).toBeNull();
+    expect(localStorage.getItem(`${APP_PREFIX}who_icd_proxy_url`)).toBeNull();
     expect(localStorage.getItem('who_icd_enabled')).toBeNull();
+    // Et l'adresse ne s'est pas réfugiée dans l'instantané en chemin.
+    expect(localStorage.getItem(`${APP_PREFIX}${SNAPSHOT_KEY}`)).not.toContain(
+      'passerelle.test'
+    );
     // Le reste de l'état d'hier, lui, a bien été repris.
     expect(readSnapshot().crText).toBe(HIER.cr_text);
   });
@@ -190,6 +198,84 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     expect(snapshot.validated).toEqual([]);
     expect(snapshot.sessions).toEqual([]);
     expect(localStorage.getItem(`${APP_PREFIX}${SNAPSHOT_KEY}`)).toBeNull();
+  });
+});
+
+/**
+ * LE CAS QUE LA VERSION 2 EXISTE POUR RÉGLER : un appareil qui a DÉJÀ un
+ * instantané de version 1, avec une passerelle dedans. Ne plus la lire ne
+ * suffit pas — le socle ne réécrit l'instantané que lorsqu'il migre. Sans le
+ * cran de version, l'adresse resterait dans le JSON et dans chaque sauvegarde,
+ * réglage fantôme qu'aucun écran ne montre et qu'aucun code ne lit.
+ */
+describe('migration 1 → 2 : la passerelle enregistrée est effacée', () => {
+  /** Un instantané de version 1, celui d'avant, avec une passerelle à lui. */
+  function poserV1(): void {
+    localStorage.setItem(
+      `${APP_PREFIX}${SNAPSHOT_KEY}`,
+      JSON.stringify({
+        v: 1,
+        data: {
+          crText: 'compte-rendu en cours',
+          minConfidence: 0.65,
+          who: {
+            clientId: 'mon-identifiant',
+            proxyUrl: 'https://passerelle-a-moi.test',
+            releaseId: '2024-01',
+            lang: 'en',
+          },
+        },
+      })
+    );
+    refreshSnapshot();
+  }
+
+  it('la retire du stockage, et pas seulement de la lecture', () => {
+    poserV1();
+
+    const snapshot = readSnapshot();
+
+    expect(snapshot.who).toEqual({
+      clientId: 'mon-identifiant',
+      releaseId: '2024-01',
+      lang: 'en',
+    });
+    const brut = localStorage.getItem(`${APP_PREFIX}${SNAPSHOT_KEY}`) ?? '';
+    expect(JSON.parse(brut).v).toBe(SCHEMA_VERSION);
+    expect(brut).not.toContain('passerelle-a-moi.test');
+  });
+
+  // ET ELLE NE REVIENT PAS PAR LA SAUVEGARDE. La copie de côté, elle, garde
+  // l'adresse — c'est le filet, il ne servirait à rien vidé — et le fichier de
+  // sauvegarde l'emporte donc, puisqu'il énumère tout le préfixe. Ce qui
+  // compte est qu'une restauration ne la remette pas en service : l'instantané
+  // restauré est déjà en version 2, plus aucune migration ne le relit.
+  it('une restauration ne la ressuscite pas', () => {
+    poserV1();
+    readSnapshot();
+    const fichier = JSON.stringify(buildAppBackup());
+
+    localStorage.clear();
+    refreshSnapshot();
+    expect(restoreAppBackup(fichier).ok).toBe(true);
+    refreshSnapshot();
+
+    expect('proxyUrl' in readSnapshot().who).toBe(false);
+    expect(readWhoSettings().proxyUrl).toBe('');
+  });
+
+  it('ne touche à rien d’autre, et copie de côté avant de migrer', () => {
+    poserV1();
+
+    const snapshot = readSnapshot();
+
+    expect(snapshot.crText).toBe('compte-rendu en cours');
+    expect(snapshot.minConfidence).toBe(0.65);
+    // Le filet du socle : l'état de version 1 reste lisible tel quel,
+    // l'adresse comprise. C'est voulu — un filet vidé n'en est plus un.
+    expect(
+      localStorage.getItem(`${APP_PREFIX}${SNAPSHOT_KEY}.backup-v1`)
+    ).toContain('passerelle-a-moi.test');
   });
 });
 

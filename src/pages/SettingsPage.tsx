@@ -5,7 +5,7 @@ import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
-import { passerelleFournieParLeBuild } from '../lib/who-defaults';
+import { passerelleFournie } from '../lib/who-defaults';
 import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
@@ -65,7 +65,7 @@ export function SettingsPage() {
 
   // La passerelle du build s'authentifie seule : les champs de compte deviennent
   // des champs de REMPLACEMENT, plus des champs à remplir.
-  const preconfigure = passerelleFournieParLeBuild(who.proxyUrl);
+  const preconfigure = passerelleFournie();
 
   const handleExportAll = () => {
     downloadAppBackup();

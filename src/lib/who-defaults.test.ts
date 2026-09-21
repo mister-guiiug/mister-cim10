@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defautsWho, passerelleFournieParLeBuild } from './who-defaults';
+import { defautsWho, passerelleFournie } from './who-defaults';
 
 /** L'adresse réelle de la passerelle du parc, celle que le build injecte. */
 const PASSERELLE = 'https://mister-cim10.mister-guiiug.workers.dev';
@@ -40,22 +40,21 @@ describe('defautsWho', () => {
   });
 });
 
-describe('passerelleFournieParLeBuild', () => {
-  it('faux sans variable de build, même pour une adresse plausible', () => {
-    expect(passerelleFournieParLeBuild(PASSERELLE)).toBe(false);
+describe('passerelleFournie', () => {
+  it('faux sans variable de build : aucun compte n’est porté pour nous', () => {
+    expect(passerelleFournie()).toBe(false);
   });
 
-  it('vrai pour l’adresse du build, faux pour une autre', () => {
+  it('vrai dès que le build en pose une', () => {
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
-    expect(passerelleFournieParLeBuild(PASSERELLE)).toBe(true);
-    expect(passerelleFournieParLeBuild(`  ${PASSERELLE}  `)).toBe(true);
-    expect(passerelleFournieParLeBuild('https://passerelle-a-moi.test')).toBe(
-      false
-    );
+    expect(passerelleFournie()).toBe(true);
   });
 
-  it('une adresse vide n’est jamais la passerelle du build', () => {
-    vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
-    expect(passerelleFournieParLeBuild('')).toBe(false);
+  // Le workflow réutilisable écrit `VITE_WHO_PROXY_URL=` quand la variable de
+  // dépôt n'existe pas : sans ce repli, l'écran des Réglages annoncerait un
+  // compte préconfiguré qui n'existe pas.
+  it('une variable vide ne fournit rien', () => {
+    vi.stubEnv('VITE_WHO_PROXY_URL', '   ');
+    expect(passerelleFournie()).toBe(false);
   });
 });

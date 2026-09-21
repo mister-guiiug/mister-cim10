@@ -313,7 +313,8 @@ export const messages = {
     errors: {
       emptyReport: 'Saisissez un compte-rendu avant de lancer l’analyse.',
       oms: {
-        proxyUnreachable: 'Passerelle injoignable — vérifiez l’URL du proxy.',
+        proxyUnreachable:
+          'Passerelle injoignable — vérifiez votre connexion, puis réessayez.',
         credentialsRejected:
           'Identifiants OMS refusés (Client ID / mot secret).',
         gatewayAccountMissing:
@@ -332,7 +333,7 @@ export const messages = {
         // le dit parce que sur un outil de cotation, savoir QUELLE
         // classification a répondu fait partie du résultat.
         notConfigured:
-          'Aucune passerelle OMS configurée : seul le dictionnaire CIM-10 local a répondu. Renseignez une passerelle dans les Paramètres pour obtenir aussi la CIM-11.',
+          'Cette installation n’est pas reliée à l’OMS : seul le dictionnaire CIM-10 local a répondu. La passerelle se pose au déploiement, elle ne se règle pas depuis l’application.',
         // La passerelle a échoué, le dictionnaire local avait déjà répondu :
         // le message porte la raison exacte de l'échec ET dit que les codes
         // locaux sont toujours là, sinon l'alerte donne à croire que l'analyse
@@ -343,7 +344,7 @@ export const messages = {
     },
     footer: {
       privacy:
-        'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Rien n’est envoyé à nos serveurs tant que vous n’activez pas la connexion OMS ; seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
+        'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Quand la passerelle OMS répond, des segments du compte-rendu lui sont transmis pour obtenir la CIM-11 ; hors connexion, rien ne sort. Seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
       source: 'Code source sur GitHub',
       // L'émoji ☕ est retiré : le composant du socle rend déjà une icône tasse
       // devant le libellé, on affichait deux cafés côte à côte.
@@ -651,7 +652,8 @@ export const messages = {
     errors: {
       emptyReport: 'Enter a report before running the analysis.',
       oms: {
-        proxyUnreachable: 'Gateway unreachable — check the proxy URL.',
+        proxyUnreachable:
+          'Gateway unreachable — check your connection, then try again.',
         credentialsRejected: 'WHO credentials rejected (Client ID / secret).',
         gatewayAccountMissing:
           'The gateway has no usable WHO account: ICD-11 is unavailable. You can enter your own in Settings.',
@@ -665,14 +667,14 @@ export const messages = {
         offlineSkipped:
           'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
         notConfigured:
-          'No WHO gateway configured: only the local ICD-10 dictionary answered. Set a gateway in Settings to get ICD-11 as well.',
+          'This installation is not connected to the WHO: only the local ICD-10 dictionary answered. The gateway is set at deployment time, not from the application.',
         localKept:
           '{raison} The local ICD-10 dictionary codes are still shown.',
       },
     },
     footer: {
       privacy:
-        'No clinical data is stored on our servers: the report and analysis stay in your browser. Nothing is sent to our servers until you enable the WHO connection; only your settings may be saved locally on this device.',
+        'No clinical data is stored on our servers: the report and analysis stay in your browser. When the WHO gateway answers, segments of the report are sent to it to obtain ICD-11 codes; offline, nothing leaves. Only your settings may be saved locally on this device.',
       source: 'Source code on GitHub',
       coffee: 'Buy me a coffee',
     },
