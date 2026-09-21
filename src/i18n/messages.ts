@@ -191,14 +191,13 @@ export const messages = {
       omsApiDoc: 'Documentation API',
       clientId: 'Identifiant',
       clientSecret: 'Mot secret',
-      proxyUrl: 'Adresse de la passerelle',
       omsPreconfigured:
-        'Cette installation est déjà reliée à un compte OMS, côté passerelle : les deux champs ci-dessous sont facultatifs. Ne les remplissez que pour utiliser VOTRE compte — ce sont alors vos identifiants qui porteront les requêtes.',
+        'L’application est déjà reliée à un compte OMS, côté passerelle : laissez ces champs vides et tout fonctionne. Les remplir SUBSTITUE le vôtre — vos identifiants portent alors chaque requête, sous vos propres quotas OMS. Les deux vont ensemble : un identifiant sans mot secret est refusé. Videz-les pour revenir au compte fourni.',
       versionLangSummary: 'Version de la classification et langue',
       version: 'Version',
       labelLang: 'Langue des libellés',
       omsRisk:
-        'Un compte saisi ici est enregistré dans ce navigateur (éviter sur poste partagé). La passerelle doit autoriser ce site.',
+        'Un compte saisi ici est enregistré dans ce navigateur : à éviter sur un poste partagé. Le mot secret ne quitte jamais l’appareil — ni dans un lien partagé, ni dans une sauvegarde.',
       forgetSecret: 'Oublier mot secret et session OMS',
       appearanceTitle: 'Apparence',
       themeLabel: 'Thème',
@@ -212,7 +211,7 @@ export const messages = {
       dataSummaryHint: 'Partage du paramétrage, sauvegarde et restauration',
       shareTitle: 'Partager le paramétrage',
       shareHint:
-        'Génère un lien reprenant le mode d’analyse et la connexion OMS (identifiant, passerelle) — sans le mot secret, qui n’est jamais placé dans l’URL. Le destinataire saisit le sien.',
+        'Génère un lien reprenant votre identifiant OMS, la version de la classification et la langue des libellés. Ni le mot secret ni l’adresse de la passerelle n’y figurent : le premier ne doit jamais voyager, la seconde vient déjà de l’installation du destinataire.',
       shareButton: 'Partager ou copier le lien',
       backupTitle: 'Sauvegarde et Restauration',
       backupHint:
@@ -268,12 +267,11 @@ export const messages = {
       useSourceNoteAfter: '. Ce n’est pas nécessaire pour coter.',
       useNote:
         'Les suggestions sont indicatives : vous restez responsable du choix final des codes et du respect des règles de cotation en vigueur.',
-      advancedTitle: 'Aller plus loin : ajouter la source OMS',
-      advancedHint:
-        'Facultatif — compte développeur OMS et passerelle à déployer',
+      advancedTitle: 'Aller plus loin : utiliser votre propre compte OMS',
+      advancedHint: 'Facultatif — l’application est déjà reliée à un compte',
       accountTitle: 'Créer un compte pour utiliser l’API de l’OMS',
       accountIntro:
-        'Pour que l’application interroge le service officiel de classification ICD-11 (MMS), l’OMS exige une authentification OAuth2 avec un identifiant client et un mot secret. Voici le déroulement habituel.',
+        'L’application interroge déjà le service officiel de classification ICD-11 (MMS) avec un compte fourni : vous n’avez rien à créer pour vous en servir. Créez le vôtre seulement si vous préférez que vos requêtes partent sous vos identifiants et vos quotas. L’OMS demande alors une authentification OAuth2 — identifiant client et mot secret. Voici le déroulement habituel.',
       accountDetailsSummary:
         'Voir les étapes détaillées (compte, application client, identifiants)',
       accountStep1Title: '1. Créer un compte sur le portail ICD API',
@@ -294,23 +292,20 @@ export const messages = {
       accountStep3Title: '3. Renseigner l’application Mister CIM-10',
       goTo: 'Allez dans ',
       accountStep3aAfter:
-        ', activez un mode incluant l’OMS, puis collez l’identifiant et le mot secret fournis par le portail.',
-      accountStep3b:
-        'Renseignez aussi l’adresse de la passerelle (voir section suivante) : le navigateur ne peut pas appeler directement l’API OMS sans cette étape technique.',
+        ', section « Connexion OMS », puis collez l’identifiant et le mot secret fournis par le portail. Ils remplacent le compte fourni ; videz les deux champs pour y revenir.',
       accountNoteBefore:
         'Les écrans exacts du portail OMS peuvent évoluer ; en cas de doute, consultez la ',
       accountNoteLink: 'documentation officielle de l’API ICD',
       accountNoteAfter: ' et les FAQ du portail.',
       gatewayTitle: 'Pourquoi une passerelle ?',
       gatewayP1:
-        'Depuis une page web hébergée sur Internet, les navigateurs appliquent des règles de sécurité (CORS) qui empêchent en pratique d’appeler directement certains services distants, dont l’API de l’OMS. Une passerelle est un petit service intermédiaire (par ex. un Cloudflare Worker) que vous déployez vous-même : il reçoit les requêtes de cette application et les transmet à l’OMS de façon autorisée.',
-      gatewayP2a:
-        'Le dépôt du projet contient un exemple de passerelle et un guide dans le dossier ',
-      gatewayP2b: ' (fichier proxy et ',
+        'Depuis une page web, les navigateurs appliquent des règles de sécurité (CORS) qui empêchent d’appeler directement l’API de l’OMS. Une passerelle est un petit service intermédiaire qui reçoit les requêtes de cette application et les transmet à l’OMS. Celle-ci est déployée AVEC le projet : vous n’avez rien à installer, et c’est elle qui porte le compte OMS par défaut.',
+      gatewayP2a: 'Sa source et son guide sont dans le dossier ',
+      gatewayP2b: ' du dépôt (fichier proxy et ',
       gatewayP2c:
-        '). Vous devez y configurer l’origine exacte de ce site (URL de la page) pour que le navigateur puisse l’utiliser.',
+        ') — utiles seulement si vous déployez votre propre copie de l’application. Son adresse doit alors être posée au build : la politique de sécurité du site ne laisse joindre que celle-là.',
       gatewayNote:
-        'Tant que vous n’utilisez que le mode intégré, aucune donnée clinique n’est envoyée vers l’OMS ; l’activation de l’OMS envoie des extraits de texte au service de classification selon votre analyse.',
+        'Le dictionnaire CIM-10 embarqué répond dans la page, sans réseau. Les suggestions de l’OMS supposent en revanche que des segments du compte-rendu partent vers ses serveurs — c’est le prix de la CIM-11.',
       linkPortal: 'Portail ICD API (inscription / applications)',
       linkApiDoc: 'Documentation API ICD (version 2)',
       backHome: 'Retour à l’accueil',
@@ -536,14 +531,13 @@ export const messages = {
       omsApiDoc: 'API documentation',
       clientId: 'Client ID',
       clientSecret: 'Client secret',
-      proxyUrl: 'Gateway address',
       omsPreconfigured:
-        'This installation is already linked to a WHO account, on the gateway side: the two fields below are optional. Fill them in only to use YOUR own account — your credentials will then carry the requests.',
+        'The application is already linked to a WHO account, on the gateway side: leave these fields empty and everything works. Filling them SUBSTITUTES yours — your credentials then carry every request, under your own WHO quotas. Both go together: a client ID without a secret is rejected. Clear them to return to the provided account.',
       versionLangSummary: 'Classification version and language',
       version: 'Version',
       labelLang: 'Label language',
       omsRisk:
-        'An account entered here is saved in this browser (avoid on shared computers). The gateway must allow this site.',
+        'An account entered here is saved in this browser: avoid on shared computers. The client secret never leaves the device — not in a shared link, not in a backup.',
       forgetSecret: 'Forget client secret and WHO session',
       appearanceTitle: 'Appearance',
       themeLabel: 'Theme',
@@ -557,7 +551,7 @@ export const messages = {
       dataSummaryHint: 'Settings sharing, backup and restore',
       shareTitle: 'Share settings',
       shareHint:
-        'Generates a link with the analysis mode and WHO connection (client ID, gateway) — without the client secret, which is never placed in the URL. The recipient enters their own.',
+        'Generates a link carrying your WHO client ID, the classification version and the label language. Neither the client secret nor the gateway address is included: the first must never travel, the second already comes from the recipient’s own installation.',
       shareButton: 'Share or copy the link',
       backupTitle: 'Backup and restore',
       backupHint:
@@ -612,11 +606,11 @@ export const messages = {
       useSourceNoteAfter: ' page. It is not required for coding.',
       useNote:
         'Suggestions are indicative: you remain responsible for the final choice of codes and for complying with the applicable coding rules.',
-      advancedTitle: 'Going further: adding the WHO source',
-      advancedHint: 'Optional — WHO developer account and a gateway to deploy',
+      advancedTitle: 'Going further: using your own WHO account',
+      advancedHint: 'Optional — the app is already linked to an account',
       accountTitle: 'Create an account to use the WHO API',
       accountIntro:
-        'For the app to query the official ICD-11 (MMS) classification service, the WHO requires OAuth2 authentication with a client ID and a client secret. Here is the usual process.',
+        'The app already queries the official ICD-11 (MMS) classification service with a provided account: you need not create anything to use it. Create your own only if you would rather your requests went under your credentials and quotas. The WHO then requires OAuth2 authentication — a client ID and a client secret. Here is the usual process.',
       accountDetailsSummary:
         'See the detailed steps (account, client application, credentials)',
       accountStep1Title: '1. Create an account on the ICD API portal',
@@ -636,23 +630,20 @@ export const messages = {
       accountStep3Title: '3. Fill in the Mister CIM-10 app',
       goTo: 'Go to ',
       accountStep3aAfter:
-        ', enable a mode that includes WHO, then paste the client ID and client secret provided by the portal.',
-      accountStep3b:
-        'Also fill in the gateway address (see the next section): the browser cannot call the WHO API directly without this technical step.',
+        ', “WHO connection” section, then paste the client ID and client secret provided by the portal. They replace the provided account; clear both fields to return to it.',
       accountNoteBefore:
         'The exact WHO portal screens may change; when in doubt, see the ',
       accountNoteLink: 'official ICD API documentation',
       accountNoteAfter: ' and the portal FAQs.',
       gatewayTitle: 'Why a gateway?',
       gatewayP1:
-        'From a web page hosted on the Internet, browsers apply security rules (CORS) that in practice prevent calling certain remote services directly, including the WHO API. A gateway is a small intermediary service (e.g. a Cloudflare Worker) that you deploy yourself: it receives this app requests and forwards them to the WHO in an authorized way.',
-      gatewayP2a:
-        'The project repository contains an example gateway and a guide in the ',
-      gatewayP2b: ' folder (proxy file and ',
+        'From a web page, browsers apply security rules (CORS) that prevent calling the WHO API directly. A gateway is a small intermediary service that receives this app’s requests and forwards them to the WHO. This one is deployed WITH the project: nothing for you to install, and it is what carries the WHO account by default.',
+      gatewayP2a: 'Its source and guide live in the ',
+      gatewayP2b: ' folder of the repository (proxy file and ',
       gatewayP2c:
-        '). You must configure the exact origin of this site there (the page URL) so the browser can use it.',
+        ') — useful only if you deploy your own copy of the app. Its address must then be set at build time: the site’s security policy only lets that one through.',
       gatewayNote:
-        'As long as you use only the built-in mode, no clinical data is sent to the WHO; enabling WHO sends text excerpts to the classification service based on your analysis.',
+        'The built-in ICD-10 dictionary answers in the page, with no network. WHO suggestions, on the other hand, mean segments of the report are sent to its servers — that is the price of ICD-11.',
       linkPortal: 'ICD API portal (sign-up / applications)',
       linkApiDoc: 'ICD API documentation (version 2)',
       backHome: 'Back to home',

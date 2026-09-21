@@ -69,11 +69,12 @@ export function HelpPage() {
           </p>
         </article>
 
-        {/* ── Aller plus loin : la source OMS ──
-            REPLIÉ, parce que c'est facultatif et coûteux : compte développeur,
-            OAuth2 avec secret, et une passerelle Cloudflare à déployer
-            soi-même. Déplié d'office, ça donnait à croire qu'il fallait en
-            passer par là pour coter. Le sommaire y mène toujours. */}
+        {/* ── Aller plus loin : votre propre compte OMS ──
+            REPLIÉ, et plus encore qu'avant : l'application arrive reliée à un
+            compte, la passerelle est déployée avec le projet, et il n'y a donc
+            plus rien à faire pour coter. Ce qui reste ici ne sert qu'à qui veut
+            substituer SES identifiants. Déplié d'office, ça donnerait à croire
+            qu'il faut en passer par là. Le sommaire y mène toujours. */}
         <details className="help-avance" id="aide-avance">
           <summary className="help-avance-summary">
             <span className="help-h2">{t('help.advancedTitle')}</span>
@@ -120,7 +121,6 @@ export function HelpPage() {
                   <Link to="/parametres">{t('nav.settings')}</Link>
                   {t('help.accountStep3aAfter')}
                 </li>
-                <li>{t('help.accountStep3b')}</li>
               </ul>
             </details>
 
