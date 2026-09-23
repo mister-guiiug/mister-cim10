@@ -202,7 +202,7 @@ export default defineConfig(({ command }) => {
       pwaSeoPlugin({
         siteName: 'Mister CIM-10',
         basePath,
-        logoPath: '/icon-192.png',
+        logoPath: '/icon-512.png',
         // Script anti-FOUC engendré par le socle (theme-boot), injecté en tête
         // de <head>. Il interroge `(prefers-color-scheme: dark)` avec repli
         // clair — l'ancienne IIFE maison interrogeait `light` avec repli
