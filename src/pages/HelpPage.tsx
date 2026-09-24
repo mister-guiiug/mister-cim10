@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
-import { AppFooter } from '../components/AppFooter';
+import { PrivacyNotice } from '../components/PrivacyNotice';
 import { useI18n } from '../i18n';
 
 const PORTAL_URL = 'https://icd.who.int/icdapi';
@@ -167,7 +167,11 @@ export function HelpPage() {
           </ul>
         </article>
       </main>
-      <AppFooter />
+      {/* La mention de confidentialité, SANS les liens de la famille : la
+          règle du 06/09/2026 les réserve à l'accueil et aux Réglages. */}
+      <div className="app-footer">
+        <PrivacyNotice />
+      </div>
     </>
   );
 }

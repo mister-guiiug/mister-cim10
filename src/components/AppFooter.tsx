@@ -4,6 +4,7 @@ import {
   repoUrl,
 } from '@mister-guiiug/dev-pwa-config/apps-catalog';
 import { useI18n } from '../i18n';
+import { PrivacyNotice } from './PrivacyNotice';
 
 /**
  * Pied de page : les deux liens famille viennent du socle, la mention de
@@ -35,7 +36,7 @@ export function AppFooter() {
   const { t } = useI18n();
   return (
     <div className="app-footer">
-      <p className="footer-privacy">{t('footer.privacy')}</p>
+      <PrivacyNotice />
       {/* PAS DE PROP `version` : le numéro qu'elle affichait portait un lien
           vers `…/releases/tag/vX.Y.Z`, et aucune app du parc ne crée de tag
           git — 404 garanti. Le numéro part toujours dans le rapport de bug
