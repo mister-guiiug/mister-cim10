@@ -4,6 +4,15 @@ import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useDialog } from '../../hooks/useDialog';
 import { useI18n } from '../../i18n';
 
+interface SessionsPanelProps {
+  /**
+   * Appelé juste avant de rouvrir un dossier. `CrPanel` y coupe la dictée : la
+   * fin d'une phrase dictée pour un patient n'a rien à faire dans le
+   * compte-rendu du suivant.
+   */
+  onBeforeOpen?: () => void;
+}
+
 /**
  * Les dossiers enregistrés — « retrouver celui d'hier ».
  *
@@ -19,7 +28,7 @@ import { useI18n } from '../../i18n';
  * rangement. Un nom déjà pris remplace son entrée au lieu d'en manger une
  * seconde.
  */
-export function SessionsPanel() {
+export function SessionsPanel({ onBeforeOpen }: SessionsPanelProps = {}) {
   const sessions = useWorkspaceStore(s => s.sessions);
   const saveSession = useWorkspaceStore(s => s.saveSession);
   const openSession = useWorkspaceStore(s => s.openSession);
@@ -50,6 +59,7 @@ export function SessionsPanel() {
     if (
       await dialog.confirm(t('sessions.openConfirm', { name: sessionName }))
     ) {
+      onBeforeOpen?.();
       openSession(id);
       setFeedback(t('sessions.opened', { name: sessionName }));
     }

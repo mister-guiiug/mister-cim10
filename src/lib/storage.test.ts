@@ -5,8 +5,10 @@ import {
   migrateLegacyStorageKeys,
 } from './storage-migration';
 import { appStore, buildAppBackup, restoreAppBackup } from './storage';
+import { CLE_ACCORD_DICTEE } from './dictee';
 
 const SECRET = 'who_icd_client_secret';
+const ACCORD = CLE_ACCORD_DICTEE;
 
 beforeEach(() => {
   localStorage.clear();
@@ -90,6 +92,17 @@ describe('sauvegarde', () => {
     expect(Object.keys(buildAppBackup().data)).toEqual(['cr_text']);
   });
 
+  it('n’emporte pas l’accord pour la dictée en ligne : il vaut pour CE navigateur', () => {
+    appStore.setRaw(ACCORD, '1758000000000');
+    appStore.setRaw('cr_text', 'texte');
+
+    const backup = buildAppBackup();
+
+    expect(backup.data[ACCORD]).toBeUndefined();
+    expect(Object.keys(backup.data)).toEqual(['cr_text']);
+    expect(backup.entries).toBe(1);
+  });
+
   it('n’emporte JAMAIS le mot secret OMS', () => {
     appStore.setRaw(SECRET, 'secret-en-clair');
     appStore.setRaw('who_icd_client_id', 'mon-identifiant');
@@ -124,6 +137,39 @@ describe('restauration', () => {
 
     expect(restoreAppBackup(file).ok).toBe(true);
     expect(appStore.getRaw(SECRET)).toBe('saisi-sur-cet-appareil');
+  });
+
+  it('un fichier retouché ne donne pas d’accord à la place de l’utilisateur', () => {
+    const retouche = JSON.stringify({
+      format: 'dwc-backup',
+      v: 1,
+      app: 'mister-cim10',
+      prefix: APP_PREFIX,
+      data: {
+        cr_text: 'texte',
+        [ACCORD]: '1758000000000',
+        [SECRET]: 'secret-glisse-dans-le-fichier',
+      },
+    });
+
+    expect(restoreAppBackup(retouche).ok).toBe(true);
+    expect(appStore.getRaw('cr_text')).toBe('texte');
+    expect(appStore.getRaw(ACCORD)).toBeNull();
+    expect(appStore.getRaw(SECRET)).toBeNull();
+  });
+
+  it('et un accord déjà donné sur l’appareil survit à la restauration', () => {
+    appStore.setRaw(ACCORD, '1758000000000');
+    const file = JSON.stringify({
+      format: 'dwc-backup',
+      v: 1,
+      app: 'mister-cim10',
+      prefix: APP_PREFIX,
+      data: { cr_text: 'texte' },
+    });
+
+    expect(restoreAppBackup(file).ok).toBe(true);
+    expect(appStore.getRaw(ACCORD)).toBe('1758000000000');
   });
 
   it('REFUSE un fichier JSON quelconque — l’ancien code l’acceptait', () => {

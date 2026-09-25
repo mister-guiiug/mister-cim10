@@ -20,6 +20,7 @@ html[data-theme='dark'] {
   --conf-high-fg: #4ade80;
   --conf-med-fg: #facc15;
   --warn-fg: #fde68a;
+  --star-fg: #fbbf24;
   --backdrop: rgba(0, 0, 0, 0.42);
   --shadow-drawer: -12px 0 40px rgba(0, 0, 0, 0.28);
   --shadow-inset-key: rgba(0, 0, 0, 0.12);
@@ -50,6 +51,9 @@ html[data-theme='light'] {
   --conf-high-fg: #16a34a;
   --conf-med-fg: #a16207;
   --warn-fg: #92400e;
+  /* Ambre assez sombre pour tenir 3:1 sur les fonds de carte clairs, là
+     où `--warn` (#d97706) tombe à 3,0:1 — la limite, pas une marge. */
+  --star-fg: #b45309;
   --backdrop: rgba(15, 23, 42, 0.35);
   --shadow-drawer: -8px 0 32px rgba(15, 23, 42, 0.12);
   --shadow-inset-key: rgba(15, 23, 42, 0.08);
@@ -523,7 +527,12 @@ a.brand-link:hover .brand-mark {
   font-weight: 600;
 }
 
-.visually-hidden {
+/* `.dwc-sr-only` est la classe que la région d'annonce du socle
+   (`AnnouncerProvider`) pose sur ses deux emplacements. Elle vit dans
+   `tokens.css`, que cette app n'importe pas : sans cette ligne, chaque annonce
+   s'afficherait en clair au bas de la page. */
+.visually-hidden,
+.dwc-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1154,6 +1163,17 @@ a.brand-link:hover .brand-mark {
 @media (min-width: 1024px) {
   .retenus-rappel {
     display: none;
+  }
+}
+
+/* LE RAPPEL VIT DANS LE PANNEAU DES SUGGESTIONS, et ce panneau est atténué
+   tant qu'il n'a rien à proposer (`.is-pristine`). Retenir des codes sans
+   analyser — par la recherche, par les favoris — affichait donc le rappel
+   dans un panneau à 62 % : relevé par axe le 25/09/2026, « Voir » tombait à
+   2,78:1. Tant que le rappel paraît, le panneau n'est plus vide. */
+@media (max-width: 1023.98px) {
+  .panel.is-pristine:has(.retenus-rappel) {
+    opacity: 1;
   }
 }
 
@@ -1944,46 +1964,14 @@ button.ghost:hover {
   margin: 0;
 }
 
+/* Un bloc, et non plus une rangée `flex` : la note se lit SOUS la ligne du
+   diagnostic, pas à côté. */
 .validated-item {
   padding: 0.65rem 0.85rem;
   background: var(--surface);
   border-radius: 10px;
   margin-bottom: 0.45rem;
   border: 1px solid var(--surface2);
-  display: flex;
-  align-items: flex-start;
-  gap: 0.4rem 0.5rem;
-}
-
-.validated-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.validated-top {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-
-.validated-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  flex-shrink: 0;
-}
-
-.validated-reorder {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -2001,39 +1989,9 @@ button.ghost:hover {
   cursor: default;
 }
 
-.btn-text {
-  font-size: 0.8rem;
-}
-
 .validated-label {
   flex: 1;
   min-width: 0;
-}
-
-/* ── Mobile layout for validated items ── */
-@media (max-width: 540px) {
-  .validated-body {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.3rem;
-  }
-
-  .validated-top {
-    width: 100%;
-  }
-
-  .validated-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .btn-text {
-    display: none;
-  }
-
-  .validated-drag-handle {
-    display: none;
-  }
 }
 
 /* ── Recherche manuelle ──────────────────────────────────── */
@@ -2121,20 +2079,6 @@ button.ghost:hover {
   color: var(--muted);
   font-style: italic;
   padding: 0.3rem 0.1rem;
-}
-
-.validated-list .badge {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  background: var(--surface2);
-  color: var(--muted);
-}
-
-.validated-list .badge.modified {
-  background: color-mix(in srgb, var(--warn) 20%, transparent);
-  color: var(--warn);
 }
 
 .empty {
@@ -2509,86 +2453,6 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
   color: var(--text);
 }
 
-/* ── Favoris ───────────────────────────────────────────────── */
-.favorites-details {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: var(--surface2);
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-}
-.favorites-summary {
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.2rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-.fav-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-}
-.fav-item {
-  display: flex;
-  align-items: center;
-  background: var(--surface1);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.fav-item-btn {
-  background: none;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  color: var(--text);
-  font-size: 0.85rem;
-  text-align: left;
-}
-.fav-item-btn:hover {
-  background: var(--surface2);
-}
-.fav-del {
-  padding: 0.3rem 0.5rem;
-  font-size: 1rem;
-  border-left: 1px solid var(--border-subtle) !important;
-  border-radius: 0 !important;
-}
-.fav-toggle {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: var(--muted);
-  transition:
-    color 0.2s,
-    transform 0.1s;
-  padding: 4px;
-  line-height: 1;
-}
-.fav-toggle:hover {
-  color: #ffc107;
-  transform: scale(1.1);
-}
-.fav-toggle.is-fav {
-  color: #ffc107;
-}
-
-.manual-search-hit-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-}
-.manual-search-hit {
-  flex: 1;
-}
-
 /* ── Historique des textes analysés ─────────────────────────── */
 .cr-history-details {
   margin-top: 0.6rem;
@@ -2733,12 +2597,6 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
     border: none;
     padding: 0;
   }
-  .validated-reorder,
-  [data-rid],
-  [data-up],
-  [data-down] {
-    display: none !important;
-  }
   .validated-item {
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -2769,43 +2627,6 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
   background: color-mix(in srgb, var(--warn) 20%, transparent);
   color: var(--warn-fg);
   border: 1px solid var(--warn);
-}
-
-/* ── Annotation (note) on validated items ── */
-.validated-note {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-style: italic;
-  width: 100%;
-  margin-top: 0.25rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.validated-note-form {
-  width: 100%;
-  margin-top: 0.4rem;
-  display: none;
-}
-.validated-note-form.open {
-  display: block;
-}
-.validated-note-inp {
-  width: 100%;
-  font-family: inherit;
-  font-size: 0.82rem;
-  padding: 0.35rem;
-  border-radius: 6px;
-  border: 1px solid var(--surface2);
-  background: var(--surface);
-  color: var(--text);
-  resize: vertical;
-  min-height: 3rem;
-  box-sizing: border-box;
-}
-.validated-note-btns {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: 0.3rem;
 }
 
 /* ── Sessions panel ── */
@@ -3047,37 +2868,6 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
 
 .panel--validated:not(:has(.validated-item)) {
   border-top: 3px solid color-mix(in srgb, var(--surface2) 80%, var(--muted));
-}
-
-/* ── Drag-to-reorder handle ── */
-.validated-drag-handle {
-  cursor: grab;
-  color: var(--muted);
-  display: flex;
-  align-items: center;
-  padding: 0 0.2rem;
-  opacity: 0.4;
-  touch-action: none;
-  flex-shrink: 0;
-}
-
-.validated-drag-handle:hover {
-  opacity: 1;
-  color: var(--accent);
-}
-
-.validated-item[draggable='true'] {
-  cursor: default;
-}
-
-.validated-item.dragging {
-  opacity: 0.45;
-  box-shadow: none;
-}
-
-.validated-item.drag-over {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 /* ── Scrollbar thématique (WebKit) ── */
@@ -3387,4 +3177,353 @@ html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
 .help-lead {
   margin: 0 0 0.75rem;
   font-weight: 600;
+}
+
+/* ── Diagnostics retenus : rang, gestes, favoris ─────────────────
+   Une ligne en deux étages : ce qu'est le diagnostic (rang, code,
+   référentiel, libellé), puis ce qu'on en fait. Six gestes sur la même
+   ligne que le libellé ne tenaient pas dans la colonne de droite, qui fait
+   environ 500 px sur un écran de 1280.
+
+   Les règles de l'application vanilla pour la même chose — poignée de
+   glisser-déposer, flèches empilées, favoris en pastilles, formulaire de
+   note — n'avaient plus un seul lecteur dans `src/` : elles sont retirées
+   plutôt que laissées à faire croire qu'elles servent. */
+.validated-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+/* Le rang est une donnée : c'est l'ordre des exports et de l'impression. */
+.validated-pos {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.3rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.validated-row .validated-label {
+  flex: 1 1 10rem;
+}
+
+.validated-row .validated-actions {
+  flex: 1 1 100%;
+  justify-content: flex-end;
+  gap: 0.15rem 0.25rem;
+  margin-top: 0.1rem;
+}
+
+.validated-note-row textarea {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--surface2);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.validated-note-display {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.validated-row .icon-btn,
+.star-toggle {
+  display: inline-grid;
+  place-items: center;
+  padding: 0.35rem;
+  line-height: 0;
+  /* Une icône seule fait 30 px : la règle des 44 px vise la HAUTEUR des
+     boutons, il faut aussi leur donner de la largeur. */
+  min-width: 44px;
+}
+
+@media (pointer: fine) {
+  .validated-row .icon-btn,
+  .star-toggle {
+    min-width: 2rem;
+  }
+}
+
+.validated-row .icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.star-toggle {
+  color: var(--muted);
+}
+
+.star-toggle:hover,
+.star-toggle.is-favorite {
+  color: var(--star-fg);
+}
+
+/* L'étoile d'une carte de suggestion ferme l'en-tête, après le badge que
+   `.suggestion-card-head .source-badge` pousse déjà à droite. */
+.suggestion-card-head .star-toggle {
+  margin-right: -0.35rem;
+}
+
+/* `aria-disabled` : grisé à l'œil, mais focalisable — le bouton peut encore
+   dire pourquoi il ne fait rien, et le focus ne tombe pas sur la page quand
+   il se désactive sous le doigt. */
+button.ghost[aria-disabled='true'],
+button.secondary[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.ghost[aria-disabled='true']:hover {
+  color: var(--muted);
+}
+
+.validated-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.validated-order-hint {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+
+.validated-clear {
+  margin-left: auto;
+}
+
+.validated-clear:hover {
+  color: var(--danger);
+}
+
+/* Annuler / Rétablir, dans l'en-tête du panneau. Sur un téléphone le titre
+   prend la ligne et les deux boutons passent dessous, côte à côte — empilés,
+   ils doublaient la hauteur de l'en-tête. */
+.panel--validated .panel-head {
+  flex-wrap: wrap;
+}
+
+.history-actions {
+  margin-left: auto;
+  gap: 0.15rem;
+}
+
+/* Le formulaire de modification prend la place de la ligne, DANS la carte :
+   un second cadre pointillé dans le premier ne dirait rien de plus. */
+.validated-item .manual-entry-form {
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Étoile + « Ajouter » dans les lignes de la recherche et des favoris : un
+   seul élément de grille, pour garder les quatre colonnes de
+   `.suggestion-compare-row`. */
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  justify-self: end;
+}
+
+@media (max-width: 480px) {
+  .suggestion-compare-row .row-actions {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
+
+/* ── Favoris ─────────────────────────────────────────────────────
+   Même charpente que les dossiers enregistrés : un <details> replié, le
+   même sommaire. */
+.favorites-block {
+  margin-top: 0.9rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid var(--surface2);
+}
+
+.favorites-block[open] .sessions-summary::after {
+  transform: rotate(180deg);
+}
+
+.favorites-body {
+  padding-top: 0.8rem;
+}
+
+.favorites-body .hint {
+  margin-top: 0.4rem;
+}
+
+/* ── Saisie d'un code : forme, référentiel, voisins ─────────────── */
+.code-entry-status {
+  margin: 0;
+}
+
+/* La région est là dès le montage, vide : hors du flux tant qu'elle se tait,
+   sinon l'écart du formulaire en `flex` la compterait. Pas `display: none` —
+   une région retirée de l'arbre d'accessibilité n'est plus surveillée. */
+.code-entry-status:empty {
+  position: absolute;
+}
+
+.code-entry-take-label {
+  align-self: flex-start;
+}
+
+.code-entry-near-title {
+  margin: 0 0 0.3rem;
+}
+
+.code-entry-near-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.code-entry-near-btn {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  border: 1px solid var(--surface2);
+}
+
+.code-entry-near-btn:hover {
+  border-color: var(--accent);
+}
+
+/* ── Raccourci d'analyse ─────────────────────────────────────────
+   À côté du bouton, comme un raccourci de menu. Montré seulement avec un
+   pointeur fin — la souris d'un poste de travail, donc son clavier : un
+   téléphone n'a pas de touche Ctrl, et la ligne ne ferait que pousser les
+   autres boutons. C'est l'inverse de la règle des 44 px, et pour la même
+   raison : dans le doute, on sert le doigt. */
+.kbd-hint {
+  display: none;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: var(--text-2xs);
+  color: var(--muted);
+}
+
+.kbd-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--surface2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+@media (pointer: fine) {
+  .kbd-hint {
+    display: inline-flex;
+  }
+}
+
+/* ── Dictée ───────────────────────────────────────────────────── */
+.dictation-live {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--surface2));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+}
+
+.dictation-status {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+p.hint.dictation-status {
+  margin-top: 0.6rem;
+  color: var(--muted);
+}
+
+.dictation-dot {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--danger);
+}
+
+.dictation-interim {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dictation-dot {
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+}
+
+/* Le pouls du bouton en écoute est un mouvement comme un autre. */
+@media (prefers-reduced-motion: reduce) {
+  button.mic.listening {
+    animation: none;
+  }
+}
+
+/* ── Impression : la liste, dans son ordre, sans les gestes ─────── */
+@media print {
+  .validated-actions,
+  .history-actions,
+  .validated-footer,
+  .favorites-block,
+  .code-search,
+  .manual-add-toggle,
+  .manual-entry-form,
+  .validated-note-row,
+  .bottom-nav {
+    display: none !important;
+  }
+
+  .validated-pos {
+    border: 1px solid #aaa;
+    background: none;
+    color: #000;
+  }
 }

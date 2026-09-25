@@ -29,6 +29,20 @@ export interface ValidatedDiagnostic {
 }
 
 /**
+ * Un code mis en favori. Le libellé est gardé avec lui : c'est ce qui permet de
+ * l'ajouter aux diagnostics retenus en un geste, sans aller le rechercher — et
+ * un code CIM-11 n'a de toute façon pas de référentiel embarqué où le relire.
+ */
+export interface FavoriteCode {
+  code: string;
+  label: string;
+  /** Référentiel d'origine, comme pour un diagnostic retenu. */
+  source: 'local' | 'api';
+  /** Horodatage de la mise en favori (ms). */
+  addedAt: number;
+}
+
+/**
  * Un dossier enregistré sous un nom : le compte-rendu et les diagnostics
  * retenus, figés au moment de l'enregistrement. Rouvrir une session remplace
  * le plan de travail courant — elle n'est pas un journal d'actions.

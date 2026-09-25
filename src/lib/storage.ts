@@ -36,6 +36,12 @@
  * jamais le mettre dans une URL. Il est retiré de l'enveloppe avant écriture.
  * La restauration est en FUSION (jamais `replace`), donc restaurer une
  * sauvegarde ne détruit pas le mot secret déjà saisi sur l'appareil.
+ *
+ * L'ACCORD POUR LA DICTÉE EN LIGNE NE VOYAGE PAS NON PLUS. Il désigne le
+ * service de l'éditeur de CE navigateur (`./dictee.ts`) : restauré ailleurs,
+ * il autoriserait l'envoi de la voix à un autre éditeur, sans que l'utilisateur
+ * ait rien lu. Il est retiré à l'export ET à l'import — un fichier retouché ne
+ * doit pas pouvoir donner un accord à la place de la personne.
  */
 import {
   createBackup,
@@ -46,12 +52,23 @@ import {
 import { dateSlug, downloadJson } from '@mister-guiiug/dev-pwa-config/download';
 import { APP_PREFIX, LEGACY_KEY_MAP } from './storage-migration';
 import { appStore, refreshSnapshot } from './app-store';
+import { CLE_ACCORD_DICTEE } from './dictee';
 
 /** Identité de l'app dans le fichier de sauvegarde. */
 const APP_ID = 'mister-cim10';
 
 /** Nom court (sous le préfixe) du mot secret OMS, exclu des sauvegardes. */
 const SECRET_KEY = 'who_icd_client_secret';
+
+/**
+ * Ce qui appartient à l'APPAREIL et ne passe jamais par un fichier, ni dans un
+ * sens ni dans l'autre.
+ */
+const CLES_HORS_SAUVEGARDE = [SECRET_KEY, CLE_ACCORD_DICTEE] as const;
+
+function retirerClesHorsSauvegarde(data: Record<string, unknown>): void {
+  for (const cle of CLES_HORS_SAUVEGARDE) delete data[cle];
+}
 
 /**
  * Le magasin de l'app : tout `cim10_`, rien d'autre. Défini dans
@@ -62,10 +79,10 @@ export { appStore };
 
 type BackupFile = ReturnType<typeof createBackup>;
 
-/** L'enveloppe famille, mot secret OMS retiré. */
+/** L'enveloppe famille, mot secret OMS et accord de dictée retirés. */
 export function buildAppBackup(): BackupFile {
   const backup = createBackup(appStore, { app: APP_ID });
-  delete backup.data[SECRET_KEY];
+  retirerClesHorsSauvegarde(backup.data);
   backup.entries = Object.keys(backup.data).length;
   return backup;
 }
@@ -100,7 +117,7 @@ function adaptLegacyBackup(parsed: unknown): BackupFile | null {
     if (typeof value === 'string') data[short] = value;
   }
   if (Object.keys(data).length === 0) return null;
-  delete data[SECRET_KEY];
+  retirerClesHorsSauvegarde(data);
   return {
     format: BACKUP_FORMAT,
     v: BACKUP_VERSION,
@@ -131,6 +148,11 @@ export function restoreAppBackup(json: string): RestoreResult {
     return { ok: false, problems: ['le fichier n’est pas du JSON lisible'] };
   }
   const backup = adaptLegacyBackup(parsed) ?? parsed;
+  // Ce que l'export n'écrit jamais, l'import ne le prend pas non plus : un
+  // fichier retouché ne pose ni mot secret ni accord de dictée.
+  if (isRecord(backup) && isRecord(backup.data)) {
+    retirerClesHorsSauvegarde(backup.data);
+  }
   // Fusion volontaire (pas de `replace`) : les clés absentes du fichier
   // survivent, à commencer par le mot secret OMS que l'export ne contient plus.
   const result = restoreBackup(appStore, backup);

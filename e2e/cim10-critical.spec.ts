@@ -2,6 +2,7 @@
  * Tests E2E critiques pour mister-cim10
  */
 
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 
 test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
@@ -47,13 +48,17 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
     const ligneE11 = results.getByRole('listitem').filter({ hasText: 'E11.9' });
     await expect(ligneE11).toHaveCount(1);
 
-    await ligneE11.getByRole('button').click();
+    // La ligne porte DEUX boutons depuis les favoris — l'étoile et « Ajouter » :
+    // on nomme celui qu'on vise.
+    await ligneE11.getByRole('button', { name: /^(ajouter|add)$/i }).click();
 
     // Le code est passé dans les diagnostics retenus…
     const retenus = page.locator('.panel--validated');
     await expect(retenus.getByText('E11.9').first()).toBeVisible();
     // …et le bouton de la ligne de recherche dit qu'il y est déjà.
-    await expect(ligneE11.getByRole('button')).toBeDisabled();
+    await expect(
+      ligneE11.getByRole('button', { name: /^(validé|validated)$/i })
+    ).toBeDisabled();
 
     // …et l'export part avec lui.
     const downloadPromise = page.waitForEvent('download');
@@ -62,6 +67,69 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
       .click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/^cim10-.*\.txt$/);
+  });
+
+  /**
+   * L'ORDRE DES RETENUS EST CELUI DE L'EXPORT — c'est tout l'intérêt de
+   * pouvoir le régler. Deux codes, un déplacement, et le fichier texte doit les
+   * lister dans l'ordre de l'écran ; Ctrl+Z hors d'un champ défait le
+   * déplacement, et l'export suit encore.
+   */
+  test('réordonner les retenus, et l’export suit @critical', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const recherche = page.getByRole('searchbox', {
+      name: /chercher un code|search an icd-10 code/i,
+    });
+    const resultats = page.getByRole('list', {
+      name: /résultats de la recherche|code search results/i,
+    });
+    for (const [terme, code] of [
+      ['diabète', 'E11.9'],
+      ['hypertension', 'I10'],
+    ]) {
+      await recherche.fill(terme);
+      await resultats
+        .getByRole('listitem')
+        .filter({ hasText: code })
+        .getByRole('button', { name: /^(ajouter|add)$/i })
+        .click();
+    }
+    await recherche.fill('');
+
+    const retenus = page.locator('.panel--validated');
+    const codes = retenus.locator('.validated-item .validated-code');
+    // Le plus récent en tête.
+    await expect(codes).toHaveText(['I10', 'E11.9']);
+
+    const monter = page.getByRole('button', {
+      name: /^(monter|move up) E11\.9$/i,
+    });
+    await monter.click();
+    await expect(codes).toHaveText(['E11.9', 'I10']);
+    // Le focus reste sur l'élément déplacé, pas sur la page.
+    await expect(
+      page.getByRole('button', { name: /^(descendre|move down) E11\.9$/i })
+    ).toBeFocused();
+
+    const exporter = async () => {
+      const telechargement = page.waitForEvent('download');
+      await retenus
+        .getByRole('button', { name: /texte \(\.txt\)|text \(\.txt\)/i })
+        .click();
+      return readFile(await (await telechargement).path(), 'utf8');
+    };
+
+    const apres = await exporter();
+    expect(apres.indexOf('E11.9')).toBeLessThan(apres.indexOf('I10'));
+
+    // Ctrl+Z, focus hors de tout champ : le déplacement est défait.
+    await page.locator('#main-content').focus();
+    await page.keyboard.press('Control+z');
+    await expect(codes).toHaveText(['I10', 'E11.9']);
+    const annule = await exporter();
+    expect(annule.indexOf('I10')).toBeLessThan(annule.indexOf('E11.9'));
   });
 
   /**

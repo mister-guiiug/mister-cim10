@@ -147,6 +147,16 @@ export default defineConfig(({ command }) => {
             // téléchargée chez un visiteur qui refuse. C'est `preloadGzipKb`
             // qui le voit, jamais le total.
             if (norm.includes('/posthog-js/')) return 'posthog';
+            // LES PALETTES DE LA FAMILLE, TOMBÉES DANS `vendor` PAR LE MÊME
+            // CHEMIN. `ThemeProvider` ne les charge (`import('../themes.js')`,
+            // 22 ko brut) que s'il reçoit un `appId` — ce que `main.tsx` ne
+            // lui passe pas. Rangées dans `vendor`, elles étaient PRÉCHARGÉES
+            // à chaque visite pour n'être jamais lues : mesuré le 25/09/2026,
+            // 4,2 kB gzip. Sans nom de morceau, elles retrouvent le leur, à la
+            // demande — c'est-à-dire, ici, jamais.
+            if (norm.includes('/@mister-guiiug/dev-pwa-config/themes.js')) {
+              return;
+            }
 
             // React et écosystème
             if (

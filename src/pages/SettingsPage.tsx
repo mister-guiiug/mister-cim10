@@ -5,7 +5,9 @@ import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
+import { lireAccordDictee, retirerAccordDictee } from '../lib/dictee';
 import { passerelleFournie } from '../lib/who-defaults';
+import { useAnnouncer } from '@mister-guiiug/dev-pwa-config/react/a11y';
 import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
@@ -26,6 +28,11 @@ export function SettingsPage() {
 
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [resetFeedback, setResetFeedback] = useState(false);
+  // Lu au montage : l'accord se donne depuis l'accueil, au premier clic sur
+  // « Dictée », et cette page le relit en s'ouvrant.
+  const [accordDictee, setAccordDictee] = useState(() => lireAccordDictee());
+  const [accordRetire, setAccordRetire] = useState(false);
+  const annoncer = useAnnouncer();
 
   // Auto-clear feedback messages
   useEffect(() => {
@@ -366,6 +373,49 @@ export function SettingsPage() {
                   </button>
                 </div>
               </div>
+            </section>
+
+            {/* ── Dictée ──
+                L'ACCORD SE RETIRE D'ICI, et c'est ce qui le rend acceptable :
+                donné en un clic au premier usage, il doit pouvoir se reprendre
+                aussi simplement, sans vider les données du site. Le bouton
+                reste en place une fois l'accord retiré (`aria-disabled`) : il
+                disparaîtrait sous le doigt qui vient de l'actionner, et le
+                focus avec lui. */}
+            <section className="settings-section" aria-labelledby="sec-dictee">
+              <h2 className="settings-section-title" id="sec-dictee">
+                {t('settings.dictationTitle')}
+              </h2>
+              <p className="settings-hint">{t('settings.dictationHint')}</p>
+              <p className="settings-hint">
+                {accordDictee !== null
+                  ? t('settings.dictationConsentGiven', {
+                      date: new Date(accordDictee).toLocaleDateString(
+                        locale === 'fr' ? 'fr-FR' : 'en-GB'
+                      ),
+                    })
+                  : t('settings.dictationNoConsent')}
+              </p>
+              {(accordDictee !== null || accordRetire) && (
+                <div className="toolbar">
+                  <button
+                    type="button"
+                    className="secondary"
+                    aria-disabled={accordRetire || undefined}
+                    onClick={() => {
+                      if (accordRetire) return;
+                      retirerAccordDictee();
+                      setAccordDictee(null);
+                      setAccordRetire(true);
+                      annoncer(t('settings.dictationRevoked'));
+                    }}
+                  >
+                    {accordRetire
+                      ? t('settings.dictationRevoked')
+                      : t('settings.dictationRevoke')}
+                  </button>
+                </div>
+              )}
             </section>
 
             {/* ── Données (repliable) ── */}

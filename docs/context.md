@@ -15,34 +15,34 @@ Application web **PWA** pour faciliter la **cotation CIM-10** à partir de compt
 
 ## État d'implémentation
 
-| Besoin                                                 | Statut                                                                                                          |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| PWA (manifest, service worker)                         | Livré (`vite-plugin-pwa` Workbox `generateSW`)                                                                  |
-| Formulaire + analyse locale                            | Livré (composants React + [`src/lib/analyzer.ts`](../src/lib/analyzer.ts))                                      |
-| Suggestions CIM-10 + actions Valider / Rejeter         | Livré ([`SuggestionsPanel.tsx`](../src/features/workspace/SuggestionsPanel.tsx))                                |
-| Indicateur de pertinence (Élevée / Moyenne / Faible)   | Livré                                                                                                           |
-| Sauvegarde automatique de session (localStorage)       | Livré (Zustand `workspaceStore`)                                                                                |
-| Nouvelle session (réinitialisation complète)           | Livré ([`CrPanel.tsx`](../src/features/workspace/CrPanel.tsx))                                                  |
-| Export TXT / CSV / JSON                                | Livré ([`ExportBar.tsx`](../src/features/workspace/ExportBar.tsx))                                              |
-| Export e-mail / Web Share                              | Livré                                                                                                           |
-| Impression / PDF                                       | Livré (`window.print()`)                                                                                        |
-| Annotations par code validé                            | Livré (champ Note dans `ValidatedPanel`)                                                                        |
-| Sauvegarde/restauration globale .json                  | Livré ([`SettingsPage.tsx`](../src/pages/SettingsPage.tsx))                                                     |
-| Partage du paramétrage par lien                        | Livré (bouton Partager dans Paramètres)                                                                         |
-| Page Aide complète                                     | Livré ([`HelpPage.tsx`](../src/pages/HelpPage.tsx))                                                             |
-| Déploiement GitHub Pages                               | Livré via **GitHub Actions** (`.github/workflows/pages.yml`)                                                    |
-| Recherche manuelle d'un code (libellé, synonyme, code) | Livré ([`CodeSearch.tsx`](../src/features/workspace/CodeSearch.tsx))                                            |
-| Sessions nommées (cinq dossiers)                       | Livré ([`SessionsPanel.tsx`](../src/features/workspace/SessionsPanel.tsx))                                      |
-| Appel réel API OMS CIM-11 (autocodage)                 | Livré ([`src/lib/oms.ts`](../src/lib/oms.ts), appelé par `HomePage.handleAnalyze`)                              |
-| Sélection du terme repéré dans le compte-rendu         | Livré (`CrPanel`, `setSelectionRange` sur `highlightedMatchedTerm`)                                             |
-| Persistance versionnée + migration                     | Livré ([`src/lib/app-store.ts`](../src/lib/app-store.ts), `createVersionedStore` du socle)                      |
-| **À reprendre depuis l'ancienne version**              |                                                                                                                 |
-| Dictée (Web Speech API)                                | Reporté — aucun bouton « Dictée » dans l'écran ; le micro du clavier mobile, lui, marche dans la zone de saisie |
-| Contrôle du format d'un code saisi                     | Reporté — la saisie manuelle vérifie le vide et le doublon, pas la forme du code                                |
-| Favoris ⭐                                             | Reporté — aucune clé réservée dans le code                                                                      |
-| Annuler/Rétablir (Ctrl+Z)                              | Reporté — pile d'actions Zustand                                                                                |
-| Réordonnancement des diagnostics validés (↑ / ↓)       | Reporté — la liste affiche dans l'ordre de validation                                                           |
-| Raccourci clavier Ctrl+Entrée                          | Reporté — aucun gestionnaire de touche dans `src/`                                                              |
+| Besoin                                                 | Statut                                                                                                                                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PWA (manifest, service worker)                         | Livré (`vite-plugin-pwa` Workbox `generateSW`)                                                                                                                                         |
+| Formulaire + analyse locale                            | Livré (composants React + [`src/lib/analyzer.ts`](../src/lib/analyzer.ts))                                                                                                             |
+| Suggestions CIM-10 + actions Valider / Rejeter         | Livré ([`SuggestionsPanel.tsx`](../src/features/workspace/SuggestionsPanel.tsx))                                                                                                       |
+| Indicateur de pertinence (Élevée / Moyenne / Faible)   | Livré                                                                                                                                                                                  |
+| Sauvegarde automatique de session (localStorage)       | Livré (Zustand `workspaceStore`)                                                                                                                                                       |
+| Nouvelle session (réinitialisation complète)           | Livré ([`CrPanel.tsx`](../src/features/workspace/CrPanel.tsx))                                                                                                                         |
+| Export TXT / CSV / JSON                                | Livré ([`ExportBar.tsx`](../src/features/workspace/ExportBar.tsx))                                                                                                                     |
+| Export e-mail / Web Share                              | Livré                                                                                                                                                                                  |
+| Impression / PDF                                       | Livré (`window.print()`)                                                                                                                                                               |
+| Annotations par code validé                            | Livré (champ Note dans `ValidatedPanel`)                                                                                                                                               |
+| Sauvegarde/restauration globale .json                  | Livré ([`SettingsPage.tsx`](../src/pages/SettingsPage.tsx))                                                                                                                            |
+| Partage du paramétrage par lien                        | Livré (bouton Partager dans Paramètres)                                                                                                                                                |
+| Page Aide complète                                     | Livré ([`HelpPage.tsx`](../src/pages/HelpPage.tsx))                                                                                                                                    |
+| Déploiement GitHub Pages                               | Livré via **GitHub Actions** (`.github/workflows/pages.yml`)                                                                                                                           |
+| Recherche manuelle d'un code (libellé, synonyme, code) | Livré ([`CodeSearch.tsx`](../src/features/workspace/CodeSearch.tsx))                                                                                                                   |
+| Sessions nommées (cinq dossiers)                       | Livré ([`SessionsPanel.tsx`](../src/features/workspace/SessionsPanel.tsx))                                                                                                             |
+| Appel réel API OMS CIM-11 (autocodage)                 | Livré ([`src/lib/oms.ts`](../src/lib/oms.ts), appelé par `HomePage.handleAnalyze`)                                                                                                     |
+| Sélection du terme repéré dans le compte-rendu         | Livré (`CrPanel`, `setSelectionRange` sur `highlightedMatchedTerm`)                                                                                                                    |
+| Persistance versionnée + migration                     | Livré ([`src/lib/app-store.ts`](../src/lib/app-store.ts), `createVersionedStore` du socle)                                                                                             |
+| Dictée (Web Speech API)                                | Livré ([`useSpeechRecognition`](../src/hooks/useSpeechRecognition.ts) sur `CrPanel`) — sur l'appareil quand le navigateur le sait, sinon après accord explicite (voir Confidentialité) |
+| Contrôle du format d'un code saisi                     | Livré ([`src/lib/code-format.ts`](../src/lib/code-format.ts), dans `CodeEntryForm`) — forme refusée, code inconnu signalé avec ses voisins                                             |
+| Modifier un code retenu                                | Livré (`ValidatedPanel`, même contrôle de format, à sa place, Échap annule)                                                                                                            |
+| Favoris ⭐                                             | Livré ([`src/lib/favoris.ts`](../src/lib/favoris.ts), champ `favorites` de l'instantané, cent au plus)                                                                                 |
+| Annuler/Rétablir (Ctrl+Z)                              | Livré ([`src/lib/historique.ts`](../src/lib/historique.ts) dans `workspaceStore`, cinquante gestes, non persisté)                                                                      |
+| Réordonnancement des diagnostics validés (↑ / ↓)       | Livré (boutons Monter / Descendre ; l'ordre est celui des exports et de l'impression)                                                                                                  |
+| Raccourci clavier Ctrl+Entrée                          | Livré (`CrPanel`, `aria-keyshortcuts` sur « Analyser »)                                                                                                                                |
 
 ## Architecture technique (résumé)
 
@@ -50,7 +50,7 @@ Application web **PWA** pour faciliter la **cotation CIM-10** à partir de compt
 - **TypeScript** : strict, cible ES2025, configs partagées via [`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config).
 - **Données** : référentiel CIM-10 **d'exemple** embarqué ([`src/icd10-data.ts`](../src/icd10-data.ts)), enrichissable.
 - **Analyse** : correspondance textuelle normalisée (libellés et synonymes) en local avec correspondance **floue par trigrammes Jaccard** (tolère fautes de frappe/STT) — voir [`src/lib/analyzer.ts`](../src/lib/analyzer.ts).
-- **State** : deux stores Zustand : `settingsStore` (seuil de confiance, identifiants OMS, disclaimer) et `workspaceStore` (texte CR, suggestions, validés, dossiers enregistrés, filtre, rejets). Tous deux lisent et écrivent l'**instantané versionné** de [`src/lib/app-store.ts`](../src/lib/app-store.ts) (`{ v, data }` sous `cim10_data`), et non plus des clés `localStorage` séparées.
+- **State** : deux stores Zustand : `settingsStore` (seuil de confiance, identifiants OMS, disclaimer) et `workspaceStore` (texte CR, suggestions, validés, dossiers enregistrés, favoris, filtre, rejets, et l'historique annuler / rétablir des validés — en mémoire seulement). Tous deux lisent et écrivent l'**instantané versionné** de [`src/lib/app-store.ts`](../src/lib/app-store.ts) (`{ v, data }` sous `cim10_data`), et non plus des clés `localStorage` séparées.
 - **Confidentialité** : l'analyse interroge les deux référentiels, sans réglage à choisir. Hors connexion ou sans passerelle au build, **aucun envoi** du compte-rendu — le dictionnaire embarqué répond seul et l'IHM l'annonce (`analyzeNotice`, `role="status"`). Passerelle joignable, des **segments de texte** transitent vers elle puis vers les serveurs WHO. Le sélecteur à trois modes (`local` / `api` / `both`) a été RETIRÉ le 21/09/2026 : son défaut `local` faisait que l'OMS, pourtant livrée, ne servait à personne.
 - **Build** : sortie dans `dist/` ; en production, `base` Vite = `/mister-cim10/` (site projet `https://<utilisateur>.github.io/mister-cim10/`).
 
@@ -68,6 +68,13 @@ L'application a été entièrement réécrite en React. Les anciens fichiers (`w
 
 Traitement **100 % local** dans le navigateur pour l'analyse et l'export ; aucune persistance serveur dans cette version.
 
+La **dictée** fait exception quand le navigateur ne sait pas reconnaître la
+parole sur l'appareil : l'audio part alors au service de son éditeur (Google,
+Microsoft, Apple…). Elle ne démarre dans ce cas qu'après un accord explicite,
+mémorisé sur ce navigateur seulement, retiré de toute sauvegarde et révocable
+dans les Paramètres. Quand la reconnaissance sur l'appareil est disponible
+(`processLocally`, Chrome récent), rien n'est demandé : rien ne sort.
+
 ## API et référentiels publics (suggestions)
 
 - **OMS — ICD API** : l'OMS propose une **API REST** documentée pour parcourir les classifications, y compris **ICD-10** et surtout **ICD-11** (hébergement cloud, authentification selon les usages). Point d'entrée documentation : [https://icd.who.int/icdapi](https://icd.who.int/icdapi) et [documentation API v2](https://icd.who.int/docs/icd-api/APIDoc-Version2/). Utile pour **recherche / arborescence / libellés officiels**, pas pour un moteur de cotation française « clé en main ».
@@ -79,7 +86,6 @@ Pour intégrer une API dans cette PWA, il faudrait un **proxy** ou des appels av
 
 ## Évolutions possibles
 
-- **Reprise des fonctionnalités reportées** ci-dessus (dictée, favoris, undo/redo, réordonnancement, raccourci clavier, contrôle du format d'un code saisi).
 - **Import d'un référentiel complet** — glisser-déposer ou sélection d'un fichier JSON pour remplacer `icd10-data.ts` en mémoire sans rebuild.
 - **Analyse LLM** — brancher un service d'analyse (LLM ou API) avec consentement, clés et hébergement adaptés.
 - **Serveur FHIR** — interroger un serveur de terminologie (Ontoserver, Snowstorm) pour la recherche de codes.

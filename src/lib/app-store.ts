@@ -43,12 +43,22 @@
  *
  * `cim10_locale` reste également à part : elle appartient à l'i18n du socle,
  * qui la lit avant le premier rendu.
+ *
+ * LES FAVORIS SONT ENTRÉS SANS CRAN DE VERSION, et c'est voulu. Un champ
+ * AJOUTÉ, que `valider()` comble quand il manque, se lit sur n'importe quel
+ * instantané de version 2 : il n'y a rien à migrer. Le cran sert quand une
+ * donnée déjà stockée doit changer de forme ou partir (cf. 1 → 2). Monter la
+ * version aurait même un coût : une version antérieure de l'app, rouverte
+ * après coup, mettrait l'instantané de côté et repartirait d'un écran vide —
+ * là où elle se contente aujourd'hui d'ignorer un champ qu'elle ne connaît pas.
  */
 import { createStore } from '@mister-guiiug/dev-pwa-config/storage';
 import { createVersionedStore } from '@mister-guiiug/dev-pwa-config/versioned-store';
 import { readRaw, removeKey } from '@mister-guiiug/dev-pwa-config/storage';
 import { APP_PREFIX } from './storage-migration';
+import { favorisValides } from './favoris';
 import type {
+  FavoriteCode,
   SavedSession,
   ValidatedDiagnostic,
   WhoSettings,
@@ -84,6 +94,8 @@ export interface AppSnapshot {
   validated: ValidatedDiagnostic[];
   /** Dossiers enregistrés sous un nom, le plus récent en tête. */
   sessions: SavedSession[];
+  /** Codes mis en favori, dans l'ordre de la classification. */
+  favorites: FavoriteCode[];
   /** Confiance minimale d'affichage d'une suggestion. */
   minConfidence: number;
   /** L'avertissement d'accueil a été masqué. */
@@ -98,6 +110,7 @@ function etatInitial(): AppSnapshot {
     crText: '',
     validated: [],
     sessions: [],
+    favorites: [],
     minConfidence: DEFAULT_MIN_CONFIDENCE,
     disclaimerDismissed: false,
     who: {
@@ -172,6 +185,7 @@ function valider(data: unknown): AppSnapshot {
     crText: texte(data.crText, initial.crText),
     validated: diagnosticsValides(data.validated),
     sessions: sessionsValides(data.sessions),
+    favorites: favorisValides(data.favorites),
     minConfidence: borneSeuil(data.minConfidence),
     disclaimerDismissed: data.disclaimerDismissed === true,
     who: {

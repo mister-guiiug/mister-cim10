@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { searchIcdCodes } from '../../lib/analyzer';
 import { useI18n } from '../../i18n';
+import { FavoriteToggle } from './FavoriteToggle';
 
 /**
  * Chercher un code par son libellé — et l'ajouter aux diagnostics retenus.
@@ -93,19 +94,22 @@ export function CodeSearch({ onAdd, existingCodes }: CodeSearchProps) {
                       <span className="suggestion-compare-label">
                         {hit.label}
                       </span>
-                      <button
-                        type="button"
-                        className="ghost"
-                        disabled={already}
-                        onClick={() => onAdd(hit.code, hit.label)}
-                        title={
-                          already
-                            ? t('results.alreadyValidatedTitle')
-                            : t('results.validateCodeTitle')
-                        }
-                      >
-                        {already ? t('common.validated') : t('common.add')}
-                      </button>
+                      <span className="row-actions">
+                        <FavoriteToggle code={hit.code} label={hit.label} />
+                        <button
+                          type="button"
+                          className="ghost"
+                          disabled={already}
+                          onClick={() => onAdd(hit.code, hit.label)}
+                          title={
+                            already
+                              ? t('results.alreadyValidatedTitle')
+                              : t('results.validateCodeTitle')
+                          }
+                        >
+                          {already ? t('common.validated') : t('common.add')}
+                        </button>
+                      </span>
                     </div>
                   </li>
                 );
