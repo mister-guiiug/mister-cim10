@@ -9,6 +9,8 @@ interface ActiveDialog {
   /** `undefined` : le libellé par défaut du socle, qui suit déjà la langue. */
   okLabel?: string;
   cancelLabel?: string;
+  /** `undefined` : « Confirmation » ou « Information » selon le mode. */
+  title?: string;
   resolve: (result: boolean) => void;
 }
 
@@ -57,6 +59,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
             message,
             okLabel: options?.okLabel,
             cancelLabel: options?.cancelLabel,
+            title: options?.title,
             resolve,
           });
         }),
@@ -71,7 +74,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
       {children}
       <ConfirmDialog
         open={active !== null}
-        title={isAlert ? t('common.alertTitle') : t('common.confirmTitle')}
+        title={
+          active?.title ??
+          (isAlert ? t('common.alertTitle') : t('common.confirmTitle'))
+        }
         message={active?.message}
         confirmLabel={active?.okLabel}
         // `null` bascule en mono-action ; `undefined` laisserait « Annuler ».

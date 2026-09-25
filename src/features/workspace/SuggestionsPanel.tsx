@@ -3,6 +3,7 @@ import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getFamily } from '../../lib/icd-hierarchy';
 import { useI18n } from '../../i18n';
+import { FavoriteToggle } from './FavoriteToggle';
 import type { AnalysisResult, ICD10Code } from '../../types/index';
 
 type ConfidenceLevel = 'high' | 'medium' | 'low';
@@ -291,6 +292,7 @@ export function SuggestionsPanel() {
                 onValidateRelated={(code, label) =>
                   addManualDiagnostic(code, label)
                 }
+                onAnnounce={setAnnonce}
               />
             ))}
           </ul>
@@ -308,6 +310,8 @@ interface SuggestionCardProps {
   onReject: (s: AnalysisResult) => void;
   onHighlight: (s: AnalysisResult) => void;
   onValidateRelated: (code: string, label: string) => void;
+  /** La région d'annonce du panneau, que l'étoile partage. */
+  onAnnounce: (message: string) => void;
 }
 
 function SuggestionCard({
@@ -317,6 +321,7 @@ function SuggestionCard({
   onReject,
   onHighlight,
   onValidateRelated,
+  onAnnounce,
 }: SuggestionCardProps) {
   const { t } = useI18n();
   const suggestion = groupe[0]!;
@@ -356,6 +361,12 @@ function SuggestionCard({
             ? t('results.badgeIcd11')
             : t('results.badgeIcd10')}
         </span>
+        <FavoriteToggle
+          code={suggestion.code}
+          label={suggestion.label}
+          source={suggestion.source ?? 'local'}
+          onAnnounce={onAnnounce}
+        />
       </div>
       <p className="suggestion-label">{suggestion.label}</p>
       <div className={`confidence-meter is-${level}`}>

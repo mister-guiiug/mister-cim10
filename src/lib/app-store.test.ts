@@ -346,6 +346,69 @@ describe('l’instantané et la sauvegarde JSON', () => {
   });
 });
 
+/**
+ * LES FAVORIS, ENTRÉS SANS CRAN DE VERSION. Un instantané de version 2 écrit
+ * avant eux doit se lire tel quel, et les favoris doivent partir — et revenir
+ * — avec la sauvegarde, comme le reste de l'instantané.
+ */
+describe('favoris', () => {
+  const FAVORIS = [
+    { code: 'I10', label: 'Hypertension', source: 'local', addedAt: 1 },
+    { code: 'BA00', label: 'Hypertension (CIM-11)', source: 'api', addedAt: 2 },
+  ] as const;
+
+  it('un instantané d’avant les favoris se lit sans rien perdre', () => {
+    localStorage.setItem(
+      `${APP_PREFIX}${SNAPSHOT_KEY}`,
+      JSON.stringify({
+        v: SCHEMA_VERSION,
+        data: { crText: 'compte-rendu d’hier', validated: [] },
+      })
+    );
+    refreshSnapshot();
+
+    const snapshot = readSnapshot();
+
+    expect(snapshot.favorites).toEqual([]);
+    expect(snapshot.crText).toBe('compte-rendu d’hier');
+    // Rien n'a été migré, donc rien n'a été mis de côté.
+    expect(
+      localStorage.getItem(
+        `${APP_PREFIX}${SNAPSHOT_KEY}.backup-v${SCHEMA_VERSION}`
+      )
+    ).toBeNull();
+  });
+
+  it('font l’aller-retour par le fichier de sauvegarde', () => {
+    updateSnapshot({ favorites: [...FAVORIS] });
+    const fichier = JSON.stringify(buildAppBackup());
+
+    localStorage.clear();
+    refreshSnapshot();
+    expect(readSnapshot().favorites).toEqual([]);
+    expect(restoreAppBackup(fichier).ok).toBe(true);
+    refreshSnapshot();
+
+    // Relus dans l'ordre de la classification.
+    expect(readSnapshot().favorites.map(f => f.code)).toEqual(['BA00', 'I10']);
+    expect(readSnapshot().favorites[0]?.source).toBe('api');
+  });
+
+  it('un champ corrompu ne coûte que les favoris, pas le compte-rendu', () => {
+    localStorage.setItem(
+      `${APP_PREFIX}${SNAPSHOT_KEY}`,
+      JSON.stringify({
+        v: SCHEMA_VERSION,
+        data: { crText: 'intact', favorites: 'pas une liste' },
+      })
+    );
+    refreshSnapshot();
+
+    expect(readSnapshot().favorites).toEqual([]);
+    expect(readSnapshot().crText).toBe('intact');
+  });
+});
+
 describe('sessions nommées', () => {
   it('borne l’historique à cinq entrées, la plus récente en tête', () => {
     const sessions = Array.from({ length: MAX_SESSIONS + 2 }, (_, i) => ({

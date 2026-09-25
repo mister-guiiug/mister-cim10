@@ -1,14 +1,54 @@
-import { useRef, useEffect, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentType,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react';
+import { prefetchWhenIdle } from '@mister-guiiug/dev-pwa-config/prefetch';
+import { recordError } from '@mister-guiiug/dev-pwa-config/react/observability';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { SessionsPanel } from './SessionsPanel';
+import { BoutonDictee } from './BoutonDictee';
+import type {
+  ControleDictee,
+  DictationProps,
+  SelectionCompteRendu,
+} from './Dictation';
 import { useDialog } from '../../hooks/useDialog';
+import {
+  environnementDuNavigateur,
+  type EnvironnementDictee,
+} from '../../lib/dictee';
+import { estApple, estRaccourciAnalyse } from '../../lib/raccourcis';
 import { useI18n } from '../../i18n';
+
+/*
+ * LA DICTÉE EST CHARGÉE À LA DEMANDE. Le crochet, l'état affiché, la boîte
+ * d'accord et l'insertion au curseur ne servent qu'à qui dicte ; dans le
+ * morceau d'entrée, ils pesaient sur le premier affichage de tout le monde et
+ * tenaient le préchargé à 0,7 kB de `bundleBudget.preloadGzipKb`. Ils
+ * arrivent au repos, après le premier affichage — ou au premier clic, si
+ * celui-ci vient avant.
+ *
+ * `import()` ET NON `lazy()`, pour deux raisons. Un morceau qui ne se charge
+ * pas (déploiement entre-temps, réseau coupé avant le précache) ferait lever
+ * `lazy()` jusqu'à la frontière d'erreur de l'application : l'écran entier
+ * tomberait pour un bouton. Et le composant chargé, gardé dans l'état,
+ * remplace la doublure en un seul rendu, sans passage par un repli.
+ */
+const chargerDictee = () => import('./Dictation');
 
 interface CrPanelProps {
   onAnalyze: () => void;
+  /** Injectable pour les tests : la reconnaissance vocale du navigateur sinon. */
+  dictationEnvironment?: EnvironnementDictee;
 }
 
-export function CrPanel({ onAnalyze }: CrPanelProps) {
+export function CrPanel({ onAnalyze, dictationEnvironment }: CrPanelProps) {
   const crText = useWorkspaceStore(s => s.crText);
   const setCrText = useWorkspaceStore(s => s.setCrText);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
@@ -25,6 +65,8 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
   const dialog = useDialog();
   const { t } = useI18n();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const apple = useMemo(() => estApple(), []);
+  const touches = `${apple ? '⌘' : 'Ctrl'} + ${t('report.enterKey')}`;
 
   useEffect(() => {
     if (!highlightedMatchedTerm || !textareaRef.current) return;
@@ -37,13 +79,114 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
     ta.setSelectionRange(idx, idx + highlightedMatchedTerm.length);
   }, [highlightedMatchedTerm]);
 
+  // La dernière sélection de la zone de texte : cliquer « Dictée » en sort le
+  // focus, et c'est là que la dictée écrira (cf. `Dictation.tsx`).
+  const selectionRef = useRef<SelectionCompteRendu | null>(null);
+  const memoriserSelection = () => {
+    const ta = textareaRef.current;
+    if (ta === null) return;
+    selectionRef.current = {
+      debut: ta.selectionStart,
+      fin: ta.selectionEnd,
+      texte: ta.value,
+    };
+  };
+
+  /* ── La dictée : détectée ici, chargée à la demande ─────────────────── */
+
+  const environnement = useMemo(
+    () => dictationEnvironment ?? environnementDuNavigateur(),
+    [dictationEnvironment]
+  );
+  const dicteeProposee = environnement.Reconnaissance !== null;
+  const [Dictation, setDictation] =
+    useState<ComponentType<DictationProps> | null>(null);
+  // La doublure a été cliquée : on attend le module pour démarrer.
+  const [dicteeDemandee, setDicteeDemandee] = useState(false);
+  const [dicteeIndisponible, setDicteeIndisponible] = useState(false);
+  const [zoneStatut, setZoneStatut] = useState<HTMLDivElement | null>(null);
+  const doublureRef = useRef<HTMLButtonElement | null>(null);
+  const demarrerRef = useRef(false);
+  const focusRef = useRef(false);
+  const controleRef = useRef<ControleDictee | null>(null);
+
+  const monterDictee = useCallback(
+    (module: Awaited<ReturnType<typeof chargerDictee>>) => {
+      // La doublure va disparaître : si elle a le focus, le vrai bouton le
+      // reprendra au montage.
+      const doublure = doublureRef.current;
+      focusRef.current =
+        doublure !== null && document.activeElement === doublure;
+      setDictation(() => module.Dictation);
+    },
+    []
+  );
+
+  // Au repos, après le premier affichage : le vrai bouton remplace sa
+  // doublure avant qu'on ait besoin de lui. Un échec reste muet ici — le clic
+  // retentera, et le dira.
+  useEffect(() => {
+    if (!dicteeProposee) return;
+    let actif = true;
+    const annuler = prefetchWhenIdle(() =>
+      chargerDictee().then(module => {
+        if (actif) monterDictee(module);
+      })
+    );
+    return () => {
+      actif = false;
+      annuler();
+    };
+  }, [dicteeProposee, monterDictee]);
+
+  const cliquerDoublure = () => {
+    // Second clic pendant le chargement : on renonce, comme pendant la
+    // préparation d'une dictée chargée.
+    if (dicteeDemandee) {
+      demarrerRef.current = false;
+      setDicteeDemandee(false);
+      return;
+    }
+    demarrerRef.current = true;
+    setDicteeDemandee(true);
+    setDicteeIndisponible(false);
+    chargerDictee().then(monterDictee, (erreur: unknown) => {
+      demarrerRef.current = false;
+      setDicteeDemandee(false);
+      setDicteeIndisponible(true);
+      recordError(erreur, { source: 'dictee', etape: 'chargement' });
+    });
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onAnalyze();
   };
 
+  /*
+   * CTRL+ENTRÉE DANS LE COMPTE-RENDU. Le geste de qui vient de taper ou de
+   * dicter : pas de détour par la souris ni par six tabulations. Une analyse
+   * en cours ne se relance pas ; un texte vide, lui, passe — `onAnalyze` dit
+   * pourquoi il n'y a rien à faire, là où le bouton grisé se tait.
+   */
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!estRaccourciAnalyse(e.nativeEvent)) return;
+    e.preventDefault();
+    if (!isAnalyzing) onAnalyze();
+  };
+
+  // Le patient change : la dictée en cours s'arrête sans rien écrire de plus
+  // dans le dossier suivant — et une dictée demandée mais pas encore chargée
+  // ne démarre plus.
+  const couperDictee = () => {
+    demarrerRef.current = false;
+    setDicteeDemandee(false);
+    controleRef.current?.interrompre();
+  };
+
   const handleNewSession = async () => {
     if (await dialog.confirm(t('report.resetConfirm'))) {
+      couperDictee();
       resetSession();
     }
   };
@@ -71,17 +214,52 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
           name="cr"
           placeholder={t('report.placeholder')}
           aria-label={t('report.ariaLabel')}
+          aria-describedby="cr-raccourci"
           value={crText}
           onChange={e => setCrText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onSelect={memoriserSelection}
+          onBlur={memoriserSelection}
         />
+        {/* La phrase entière pour qui écoute ; l'œil, lui, a la touche à côté
+            du bouton. */}
+        <span id="cr-raccourci" className="visually-hidden">
+          {t('report.shortcutDescription', { touches })}
+        </span>
         <div className="toolbar">
           <button
             type="submit"
             className="primary"
             disabled={isAnalyzing || !crText.trim()}
+            aria-keyshortcuts={apple ? 'Meta+Enter' : 'Control+Enter'}
           >
             {isAnalyzing ? t('report.analyzing') : t('common.analyze')}
           </button>
+          <span className="kbd-hint" aria-hidden="true">
+            <kbd>{apple ? '⌘' : 'Ctrl'}</kbd>+<kbd>{t('report.enterKey')}</kbd>
+          </span>
+          {/* RIEN quand l'API manque (Firefox, par exemple) : un bouton qui ne
+              peut que répondre « indisponible » encombre la barre pour tout le
+              monde, et le micro du clavier mobile reste là. */}
+          {dicteeProposee &&
+            (Dictation !== null ? (
+              <Dictation
+                environnement={environnement}
+                textareaRef={textareaRef}
+                selectionRef={selectionRef}
+                zoneStatut={zoneStatut}
+                controleRef={controleRef}
+                demarrerRef={demarrerRef}
+                focusRef={focusRef}
+              />
+            ) : (
+              <BoutonDictee
+                ref={doublureRef}
+                actif={dicteeDemandee}
+                ecoute={false}
+                onClick={cliquerDoublure}
+              />
+            ))}
           <button
             type="button"
             className="secondary"
@@ -95,6 +273,22 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
           </button>
         </div>
       </form>
+      {dicteeProposee && (
+        <>
+          {Dictation === null && dicteeDemandee && (
+            <p className="hint dictation-status">{t('dictation.preparing')}</p>
+          )}
+          {dicteeIndisponible && (
+            <p className="hint error" role="alert">
+              {t('common.moduleUnavailable')}
+            </p>
+          )}
+          {/* L'état de la dictée chargée s'affiche ICI, sous le formulaire, par
+              un portail : là où il était quand la dictée faisait partie du
+              morceau d'entrée. */}
+          <div ref={setZoneStatut} />
+        </>
+      )}
       <p className="hint">{t('report.dictationHint')}</p>
       {analyzeNotice && (
         <p className="hint offline" role="status">
@@ -110,7 +304,7 @@ export function CrPanel({ onAnalyze }: CrPanelProps) {
           texte-là qu'on met de côté et qu'on rouvre. Repliés par défaut — la
           journée type n'en ouvre aucun, et « Analyser » ne doit pas descendre
           d'un écran pour autant. */}
-      <SessionsPanel />
+      <SessionsPanel onBeforeOpen={couperDictee} />
     </section>
   );
 }

@@ -60,7 +60,9 @@ export function HelpPage() {
             <li>{t('help.use3')}</li>
             <li>{t('help.use4')}</li>
             <li>{t('help.use5')}</li>
+            <li>{t('help.use6')}</li>
           </ol>
+          <p className="help-note">{t('help.shortcuts')}</p>
           <p className="help-note">{t('help.useNote')}</p>
           <p className="help-note">
             {t('help.useSourceNoteBefore')}

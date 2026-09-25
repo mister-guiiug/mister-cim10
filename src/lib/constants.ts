@@ -23,6 +23,11 @@ import { APP_PREFIX } from './storage-migration';
  *     DE CLÉ ; fondu dans l'instantané, il repartirait en clair dans le fichier.
  *   - `THEME` : `dwc_theme` appartient au socle, qui la lit depuis le script
  *     anti-FOUC avant l'exécution du bundle.
+ *
+ * Une troisième vit hors de l'instantané sans figurer ici : l'accord pour la
+ * dictée en ligne (`cim10_dictation_consent`), lu par `./dictee.ts` à travers
+ * le magasin préfixé. Il vaut pour CE navigateur, et la sauvegarde l'écarte
+ * dans les deux sens (`./storage.ts`) — dans l'instantané, il voyagerait.
  */
 export const LS_KEYS = {
   WHO_CLIENT_SECRET: `${APP_PREFIX}who_icd_client_secret`,

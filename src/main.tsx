@@ -11,6 +11,7 @@ import {
   recordError,
 } from '@mister-guiiug/dev-pwa-config/react/observability';
 import { initWebVitals } from '@mister-guiiug/dev-pwa-config/web-vitals';
+import { AnnouncerProvider } from '@mister-guiiug/dev-pwa-config/react/a11y';
 import { App } from './App';
 import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';
@@ -100,11 +101,18 @@ if (rootEl) {
                   sous I18nProvider (langue du contexte) et sous
                   SocleLabelsBridge (libellés secondaires du socle). */}
               <PwaUpdates>
-                <HashRouter>
-                  <DialogProvider>
-                    <App />
-                  </DialogProvider>
-                </HashRouter>
+                {/* UNE région d'annonce pour toute l'app, montée avant le
+                    premier message : une région insérée au moment où elle
+                    parle n'est souvent pas lue. Déplacer un diagnostic,
+                    annuler, mettre en favori ne changent rien de visible pour
+                    un lecteur d'écran — c'est elle qui le dit. */}
+                <AnnouncerProvider>
+                  <HashRouter>
+                    <DialogProvider>
+                      <App />
+                    </DialogProvider>
+                  </HashRouter>
+                </AnnouncerProvider>
               </PwaUpdates>
             </SocleLabelsBridge>
           </I18nProvider>

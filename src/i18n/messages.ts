@@ -26,6 +26,8 @@ export const messages = {
       analyze: 'Analyser',
       share: 'Partager',
       email: 'E-mail',
+      moduleUnavailable:
+        'Cette fonction n’a pas pu se charger. Rechargez la page, puis réessayez.',
     },
     language: {
       fr: 'Français',
@@ -63,6 +65,44 @@ export const messages = {
         'Vous pouvez dicter : micro du clavier sur mobile ou bouton Dictée si proposé.',
       resetConfirm:
         'Réinitialiser la session ? Le compte-rendu et les diagnostics validés seront effacés.',
+      enterKey: 'Entrée',
+      shortcutDescription:
+        '{touches} lance l’analyse sans quitter le compte-rendu.',
+    },
+    dictation: {
+      button: 'Dictée',
+      titleStart: 'Dicter dans le compte-rendu, au curseur',
+      titleStop: 'Arrêter la dictée',
+      preparing: 'Préparation de la dictée…',
+      listeningDevice:
+        'Écoute en cours — reconnaissance sur l’appareil : l’audio ne quitte pas votre navigateur.',
+      listeningOnline:
+        'Écoute en cours — service en ligne de votre navigateur. Pas de données identifiantes.',
+      interim: 'Entendu : « {texte} »',
+      stopped: 'Dictée arrêtée.',
+      declined: 'Dictée annulée : aucun accord enregistré.',
+      consentTitle: 'Dictée en ligne : où part votre voix',
+      consentMessage:
+        'Ce navigateur ne sait pas reconnaître la parole sur l’appareil. Pour dicter, il envoie l’enregistrement de votre voix au service de reconnaissance de son éditeur (Google pour Chrome, Microsoft pour Edge, Apple pour Safari…), hors de tout contrôle de Mister CIM-10.\n\nNe dictez aucune donnée identifiante : nom, date de naissance, numéro de sécurité sociale, adresse, numéro de dossier…\n\nVotre accord sera mémorisé sur ce navigateur seulement ; vous pourrez le retirer dans les Paramètres. Sans accord, rien n’est enregistré ni envoyé.',
+      consentAccept: 'Accepter et dicter',
+      consentDecline: 'Ne pas dicter',
+      errors: {
+        'micro-refuse':
+          'Micro refusé : autorisez l’accès au micro pour ce site dans les réglages du navigateur, puis relancez la dictée.',
+        'service-refuse':
+          'Le navigateur bloque son service de reconnaissance vocale (réglage ou politique de l’établissement).',
+        'rien-entendu':
+          'Rien entendu : rapprochez-vous du micro, puis relancez la dictée.',
+        'pas-de-micro':
+          'Aucun micro utilisable : branchez-en un ou vérifiez qu’aucune autre application ne l’occupe.',
+        reseau:
+          'Le service de reconnaissance ne répond pas : vérifiez votre connexion, puis relancez la dictée.',
+        'hors-ligne':
+          'Hors connexion : la dictée passe ici par le service en ligne du navigateur, elle reprendra avec le réseau.',
+        langue:
+          'La reconnaissance vocale n’est pas disponible dans cette langue sur ce navigateur.',
+        inconnue: 'La dictée s’est interrompue. Relancez-la.',
+      },
     },
     sessions: {
       title: 'Dossiers enregistrés',
@@ -98,6 +138,61 @@ export const messages = {
       resultsMany: '{count} codes trouvés',
       resultsAria: 'Résultats de la recherche de codes',
       empty: 'Aucun code du référentiel embarqué ne correspond à « {query} ».',
+    },
+    favorites: {
+      title: 'Favoris',
+      countOne: '{count} code',
+      countMany: '{count} codes',
+      empty:
+        'Aucun favori. L’étoile d’un code — retenu, suggéré ou trouvé par la recherche — le range ici.',
+      listAria: 'Codes favoris',
+      toggleAria: 'Favori {code}',
+      add: 'Mettre en favori',
+      remove: 'Retirer des favoris',
+      added: '{code} ajouté aux favoris.',
+      removed: '{code} retiré des favoris.',
+      full: '{max} favoris au maximum : retirez-en un pour en ajouter un autre.',
+      addTitle: 'Ajouter aux diagnostics retenus',
+      addedToValidated: '{code} ajouté aux diagnostics retenus.',
+      alreadyValidated: '{code} est déjà dans les diagnostics retenus.',
+    },
+    history: {
+      groupAria: 'Annuler ou rétablir un geste sur les diagnostics retenus',
+      undo: 'Annuler',
+      redo: 'Rétablir',
+      undoTitle: 'Annuler : {operation} ({touches})',
+      redoTitle: 'Rétablir : {operation} ({touches})',
+      nothingToUndo: 'Rien à annuler.',
+      nothingToRedo: 'Rien à rétablir.',
+      undone: 'Annulé : {operation}.',
+      redone: 'Rétabli : {operation}.',
+      op: {
+        addOne: 'ajout de {code}',
+        addMany: 'ajout de {count} codes',
+        remove: 'retrait de {code}',
+        edit: 'modification de {code}',
+        replace: 'remplacement de {ancien} par {nouveau}',
+        note: 'note de {code}',
+        move: 'déplacement de {code}',
+        clear: 'vidage de la liste ({count})',
+      },
+    },
+    codeEntry: {
+      errorEmpty: 'Saisissez un code.',
+      errorFormat:
+        'Ce n’est pas la forme d’un code CIM-10 : une lettre, deux chiffres, puis une précision facultative après le point (ex. I10, E11.9, K80.20). Pour trouver un code par son libellé, passez par la recherche de codes.',
+      errorFormatIcd11:
+        'Ce n’est pas la forme d’un code CIM-11 (ex. BA00, 5A11, CA40.Z).',
+      labelRequired:
+        'Saisissez un libellé : ce code n’est pas dans le référentiel embarqué.',
+      known: 'Dans le référentiel embarqué : « {label} ».',
+      useReferenceLabel: 'Reprendre ce libellé',
+      unknown:
+        'Absent du référentiel embarqué — un échantillon, pas la CIM-10 entière. Vérifiez ce code dans le référentiel officiel ; il peut être ajouté quand même.',
+      nearTitle: 'Codes de la même catégorie :',
+      nearAria: 'Codes de la même catégorie dans le référentiel embarqué',
+      codePlaceholderIcd11: 'Code (ex. BA00)',
+      codeAriaIcd11: 'Code CIM-11',
     },
     results: {
       title: 'Suggestions',
@@ -149,6 +244,27 @@ export const messages = {
       labelPlaceholder: 'Libellé libre',
       labelAria: 'Libellé du diagnostic',
       duplicate: 'Ce code est déjà dans les diagnostics retenus.',
+      edit: 'Modifier',
+      editAria: 'Modifier {code}',
+      save: 'Enregistrer',
+      moveUp: 'Monter',
+      moveDown: 'Descendre',
+      moveUpAria: 'Monter {code}',
+      moveDownAria: 'Descendre {code}',
+      moved: '{code} déplacé en position {position}',
+      removed: '{code} retiré.',
+      edited: '{code} modifié.',
+      replaced: '{ancien} remplacé par {nouveau}.',
+      added: '{code} ajouté aux diagnostics retenus.',
+      addedUnknown:
+        '{code} ajouté aux diagnostics retenus — absent du référentiel embarqué, à vérifier.',
+      clear: 'Vider la liste',
+      clearedOne:
+        'Liste vidée : {count} diagnostic retiré. « Annuler » le rétablit.',
+      clearedMany:
+        'Liste vidée : {count} diagnostics retirés. « Annuler » les rétablit.',
+      orderHint:
+        'L’ordre de cette liste est celui des exports, de la copie et de l’impression.',
     },
     export: {
       clipboard: 'Presse-papiers',
@@ -215,7 +331,17 @@ export const messages = {
       shareButton: 'Partager ou copier le lien',
       backupTitle: 'Sauvegarde et Restauration',
       backupHint:
-        'Téléchargez vos données (compte-rendu en cours, diagnostics retenus, paramètres) dans un fichier pour les sauvegarder ou les transférer. Le mot secret OMS n’y figure pas : saisissez-le à nouveau sur l’appareil restauré.',
+        'Téléchargez vos données (compte-rendu en cours, diagnostics retenus, dossiers enregistrés, favoris, paramètres) dans un fichier pour les sauvegarder ou les transférer. Le mot secret OMS n’y figure pas : saisissez-le à nouveau sur l’appareil restauré. L’accord pour la dictée en ligne non plus : il ne vaut que pour ce navigateur.',
+      dictationTitle: 'Dictée',
+      dictationHint:
+        'Quand le navigateur sait reconnaître la parole sur l’appareil, la dictée s’en sert et rien ne sort. Sinon, elle passe par le service en ligne de l’éditeur du navigateur (Google, Microsoft, Apple…), et seulement après votre accord.',
+      dictationConsentGiven:
+        'Accord donné le {date} pour la dictée en ligne, sur ce navigateur.',
+      dictationNoConsent:
+        'Aucun accord enregistré : la dictée en ligne vous le demandera avant de démarrer.',
+      dictationRevoke: 'Retirer mon accord',
+      dictationRevoked:
+        'Accord retiré ✓ — la dictée en ligne le demandera de nouveau.',
       backupExport: 'Sauvegarder tout (.json)',
       backupImport: 'Restaurer tout…',
       appTitle: 'Application',
@@ -262,6 +388,9 @@ export const messages = {
       use3: 'Cliquer sur Analyser pour obtenir des propositions de codes.',
       use4: 'Retenir ou écarter chaque proposition. Le focus suit la liste : on peut enchaîner au clavier sans quitter les boutons.',
       use5: 'Les diagnostics retenus s’affichent à côté des suggestions sur grand écran, et sous elles sinon ; vous pouvez les exporter en texte (.txt) ou tableur (.csv), et les envoyer par e-mail ou via le partage du système.',
+      use6: 'Réglez l’ordre des diagnostics retenus avec Monter / Descendre : c’est celui des exports et de l’impression. Modifier corrige un code à sa place ; l’étoile range un code dans vos favoris, d’où il s’ajoute en un geste.',
+      shortcuts:
+        'Raccourcis : Ctrl + Entrée dans le compte-rendu lance l’analyse. Hors d’un champ de saisie, Ctrl + Z annule le dernier geste sur les diagnostics retenus, Ctrl + Maj + Z ou Ctrl + Y le rétablit (⌘ au lieu de Ctrl sur Mac).',
       useSourceNoteBefore:
         'Pour ajouter la classification CIM-11 de l’OMS aux suggestions, voir « Aller plus loin » ci-dessous, puis la page ',
       useSourceNoteAfter: '. Ce n’est pas nécessaire pour coter.',
@@ -344,7 +473,7 @@ export const messages = {
     },
     footer: {
       privacy:
-        'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Quand la passerelle OMS répond, des segments du compte-rendu lui sont transmis pour obtenir la CIM-11 ; hors connexion, rien ne sort. Seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
+        'Aucune donnée clinique n’est stockée sur nos serveurs : compte-rendu et analyse restent dans votre navigateur. Quand la passerelle OMS répond, des segments du compte-rendu lui sont transmis pour obtenir la CIM-11 ; hors connexion, rien ne sort. La dictée en ligne, si vous l’acceptez, envoie votre voix au service de votre navigateur. Seuls vos réglages peuvent être mémorisés localement sur cet appareil.',
       source: 'Code source sur GitHub',
       // L'émoji ☕ est retiré : le composant du socle rend déjà une icône tasse
       // devant le libellé, on affichait deux cafés côte à côte.
@@ -366,6 +495,8 @@ export const messages = {
       analyze: 'Analyze',
       share: 'Share',
       email: 'Email',
+      moduleUnavailable:
+        'This feature could not load. Reload the page, then try again.',
     },
     language: {
       fr: 'Français',
@@ -404,6 +535,44 @@ export const messages = {
         'You can dictate: use your keyboard microphone on mobile, or a Dictation button if available.',
       resetConfirm:
         'Reset the session? The report and validated diagnoses will be cleared.',
+      enterKey: 'Enter',
+      shortcutDescription:
+        '{touches} runs the analysis without leaving the report.',
+    },
+    dictation: {
+      button: 'Dictation',
+      titleStart: 'Dictate into the report, at the cursor',
+      titleStop: 'Stop dictation',
+      preparing: 'Preparing dictation…',
+      listeningDevice:
+        'Listening — on-device recognition: the audio does not leave your browser.',
+      listeningOnline:
+        'Listening — your browser’s online service. No identifying data.',
+      interim: 'Heard: “{texte}”',
+      stopped: 'Dictation stopped.',
+      declined: 'Dictation cancelled: no consent recorded.',
+      consentTitle: 'Online dictation: where your voice goes',
+      consentMessage:
+        'This browser cannot recognize speech on the device. To dictate, it sends the recording of your voice to its vendor’s recognition service (Google for Chrome, Microsoft for Edge, Apple for Safari…), beyond any control of Mister CIM-10.\n\nDo not dictate any identifying data: name, date of birth, social security number, address, record number…\n\nYour consent will be remembered in this browser only; you can withdraw it in Settings. Without consent, nothing is recorded or sent.',
+      consentAccept: 'Accept and dictate',
+      consentDecline: 'Do not dictate',
+      errors: {
+        'micro-refuse':
+          'Microphone blocked: allow microphone access for this site in the browser settings, then start dictation again.',
+        'service-refuse':
+          'The browser blocks its speech recognition service (setting or organization policy).',
+        'rien-entendu':
+          'Nothing heard: move closer to the microphone, then start dictation again.',
+        'pas-de-micro':
+          'No usable microphone: plug one in or check that no other application is using it.',
+        reseau:
+          'The recognition service is not answering: check your connection, then start dictation again.',
+        'hors-ligne':
+          'Offline: dictation goes through the browser’s online service here, it will work again once connected.',
+        langue:
+          'Speech recognition is not available in this language on this browser.',
+        inconnue: 'Dictation stopped unexpectedly. Start it again.',
+      },
     },
     sessions: {
       title: 'Saved cases',
@@ -439,6 +608,61 @@ export const messages = {
       resultsMany: '{count} codes found',
       resultsAria: 'Code search results',
       empty: 'No code in the built-in reference matches “{query}”.',
+    },
+    favorites: {
+      title: 'Favorites',
+      countOne: '{count} code',
+      countMany: '{count} codes',
+      empty:
+        'No favorites yet. The star on a code — kept, suggested or found by the search — puts it here.',
+      listAria: 'Favorite codes',
+      toggleAria: 'Favorite {code}',
+      add: 'Add to favorites',
+      remove: 'Remove from favorites',
+      added: '{code} added to favorites.',
+      removed: '{code} removed from favorites.',
+      full: '{max} favorites at most: remove one to add another.',
+      addTitle: 'Add to the kept diagnoses',
+      addedToValidated: '{code} added to the kept diagnoses.',
+      alreadyValidated: '{code} is already in the kept diagnoses.',
+    },
+    history: {
+      groupAria: 'Undo or redo an action on the kept diagnoses',
+      undo: 'Undo',
+      redo: 'Redo',
+      undoTitle: 'Undo: {operation} ({touches})',
+      redoTitle: 'Redo: {operation} ({touches})',
+      nothingToUndo: 'Nothing to undo.',
+      nothingToRedo: 'Nothing to redo.',
+      undone: 'Undone: {operation}.',
+      redone: 'Redone: {operation}.',
+      op: {
+        addOne: 'adding {code}',
+        addMany: 'adding {count} codes',
+        remove: 'removing {code}',
+        edit: 'editing {code}',
+        replace: 'replacing {ancien} with {nouveau}',
+        note: 'note on {code}',
+        move: 'moving {code}',
+        clear: 'clearing the list ({count})',
+      },
+    },
+    codeEntry: {
+      errorEmpty: 'Enter a code.',
+      errorFormat:
+        'This is not the shape of an ICD-10 code: a letter, two digits, then an optional refinement after the dot (e.g. I10, E11.9, K80.20). To find a code by its label, use the code search.',
+      errorFormatIcd11:
+        'This is not the shape of an ICD-11 code (e.g. BA00, 5A11, CA40.Z).',
+      labelRequired:
+        'Enter a label: this code is not in the built-in reference.',
+      known: 'In the built-in reference: “{label}”.',
+      useReferenceLabel: 'Use this label',
+      unknown:
+        'Not in the built-in reference — a sample, not the whole ICD-10. Check this code against the official reference; it can still be added.',
+      nearTitle: 'Codes from the same category:',
+      nearAria: 'Codes from the same category in the built-in reference',
+      codePlaceholderIcd11: 'Code (e.g. BA00)',
+      codeAriaIcd11: 'ICD-11 code',
     },
     results: {
       title: 'Suggestions',
@@ -490,6 +714,27 @@ export const messages = {
       labelPlaceholder: 'Free label',
       labelAria: 'Diagnosis label',
       duplicate: 'This code is already in the kept diagnoses.',
+      edit: 'Edit',
+      editAria: 'Edit {code}',
+      save: 'Save',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      moveUpAria: 'Move up {code}',
+      moveDownAria: 'Move down {code}',
+      moved: '{code} moved to position {position}',
+      removed: '{code} removed.',
+      edited: '{code} edited.',
+      replaced: '{ancien} replaced with {nouveau}.',
+      added: '{code} added to the kept diagnoses.',
+      addedUnknown:
+        '{code} added to the kept diagnoses — not in the built-in reference, to be checked.',
+      clear: 'Clear the list',
+      clearedOne:
+        'List cleared: {count} diagnosis removed. “Undo” brings it back.',
+      clearedMany:
+        'List cleared: {count} diagnoses removed. “Undo” brings them back.',
+      orderHint:
+        'The order of this list is the order of the exports, the copy and the print-out.',
     },
     export: {
       clipboard: 'Clipboard',
@@ -556,7 +801,17 @@ export const messages = {
       shareButton: 'Share or copy the link',
       backupTitle: 'Backup and restore',
       backupHint:
-        'Download your data (current report, kept diagnoses, settings) to a file to back it up or transfer it. The WHO client secret is not included: enter it again on the restored device.',
+        'Download your data (current report, kept diagnoses, saved cases, favorites, settings) to a file to back it up or transfer it. The WHO client secret is not included: enter it again on the restored device. Nor is the consent for online dictation: it only applies to this browser.',
+      dictationTitle: 'Dictation',
+      dictationHint:
+        'When the browser can recognize speech on the device, dictation uses it and nothing leaves. Otherwise it goes through the browser vendor’s online service (Google, Microsoft, Apple…), and only after your consent.',
+      dictationConsentGiven:
+        'Consent given on {date} for online dictation, in this browser.',
+      dictationNoConsent:
+        'No consent recorded: online dictation will ask for it before starting.',
+      dictationRevoke: 'Withdraw my consent',
+      dictationRevoked:
+        'Consent withdrawn ✓ — online dictation will ask for it again.',
       backupExport: 'Back up everything (.json)',
       backupImport: 'Restore everything…',
       appTitle: 'Application',
@@ -602,6 +857,9 @@ export const messages = {
       use3: 'Click Analyze to get code suggestions.',
       use4: 'Keep or dismiss each suggestion. Focus follows the list: you can work through it from the keyboard without leaving the buttons.',
       use5: 'Kept diagnoses appear next to the suggestions on a wide screen, and below them otherwise; you can export them as text (.txt) or spreadsheet (.csv), and send them by email or via the system share.',
+      use6: 'Set the order of the kept diagnoses with Move up / Move down: it is the order of the exports and of the print-out. Edit corrects a code in place; the star puts a code in your favorites, from which it is added in one gesture.',
+      shortcuts:
+        'Shortcuts: Ctrl + Enter in the report runs the analysis. Outside a text field, Ctrl + Z undoes the last action on the kept diagnoses, Ctrl + Shift + Z or Ctrl + Y redoes it (⌘ instead of Ctrl on a Mac).',
       useSourceNoteBefore:
         'To add the WHO ICD-11 classification to the suggestions, see “Going further” below, then the ',
       useSourceNoteAfter: ' page. It is not required for coding.',
@@ -674,7 +932,7 @@ export const messages = {
     },
     footer: {
       privacy:
-        'No clinical data is stored on our servers: the report and analysis stay in your browser. When the WHO gateway answers, segments of the report are sent to it to obtain ICD-11 codes; offline, nothing leaves. Only your settings may be saved locally on this device.',
+        'No clinical data is stored on our servers: the report and analysis stay in your browser. When the WHO gateway answers, segments of the report are sent to it to obtain ICD-11 codes; offline, nothing leaves. Online dictation, if you accept it, sends your voice to your browser’s service. Only your settings may be saved locally on this device.',
       source: 'Source code on GitHub',
       coffee: 'Buy me a coffee',
     },
