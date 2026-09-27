@@ -44,9 +44,9 @@ Trois codes en une phrase, mais chacun demande de vérifier le libellé officiel
 - **Se contenter d'un code approchant.** Un libellé proche n'est pas un libellé exact : la table analytique tranche.
 - **Oublier la mise à jour.** Les référentiels évoluent : un code valide une année peut changer de libellé ou d'usage.
 
-## Comment Mister CIM-10 vous aide
+## Comment Mister CIM10 vous aide
 
-Mister CIM-10 est une application web gratuite, utilisable sans compte, qui aide à proposer et à organiser des codes.
+[Mister CIM10](https://mister-guiiug.github.io/mister-cim10/) est une application web gratuite, utilisable sans compte, qui aide à proposer et à organiser des codes.
 
 - **Suggestions à partir du texte.** Collez ou dictez un compte rendu, lancez l'analyse (Ctrl + Entrée) : chaque suggestion affiche sa pertinence (élevée, moyenne ou faible) et le terme repéré, qu'un clic retrouve dans le texte.
 - **Deux sources, clairement distinguées.** Un dictionnaire CIM-10 embarqué répond dans la page ; en ligne, l'application interroge aussi l'OMS par une passerelle, et ces suggestions portent le badge CIM-11. Le dictionnaire embarqué est un échantillon, pas la classification entière.
