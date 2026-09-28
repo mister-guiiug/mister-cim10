@@ -118,7 +118,7 @@ de SON éditeur — et **se retire dans Paramètres › Dictée**. Il ne part pa
 le fichier de sauvegarde, et un fichier restauré ne peut pas en donner un.
 
 - Aucun compte utilisateur requis.
-- Aucune donnée clinique stockée sur nos serveurs. Deux services reçoivent d'autres données : Sentry (rapports d'erreurs techniques, région européenne) et, seulement si vous l'acceptez dans le bandeau de consentement, PostHog (mesure d'audience, nuage européen : pages vues et gestes comme une analyse lancée ou un export, sans le compte-rendu).
+- Aucune donnée clinique stockée sur nos serveurs. Deux services reçoivent d'autres données : Sentry (région européenne, sans demande de consentement : un signal à chaque ouverture, et un rapport technique à chaque erreur) et, seulement si vous l'acceptez dans le bandeau de consentement, PostHog (mesure d'audience, nuage européen : pages vues et gestes comme une analyse lancée ou un export, sans le compte-rendu).
 - Les données de session restent dans le **stockage local de votre navigateur**. Vider le cache ne les efface pas : seul l'effacement des données du site les retire toutes, copies de côté comprises.
 
 ---
