@@ -1,13 +1,13 @@
 # Mister CIM-10
 
-[![Application en ligne](https://img.shields.io/badge/Application-En%20ligne-brightgreen?style=for-the-badge)](https://mister-guiiug.github.io/mister-CIM10/)
+[![Application en ligne](https://img.shields.io/badge/Application-En%20ligne-brightgreen?style=for-the-badge)](https://mister-guiiug.github.io/mister-cim10/)
 [![License](https://img.shields.io/badge/Licence-MIT-blue?style=for-the-badge)](https://github.com/mister-guiiug/mister-cim10/blob/main/LICENSE)
 [![Buy Me A Coffee](https://img.shields.io/badge/Soutenir-%E2%98%95-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mister.guiiug)
 
 > **Aide à la cotation CIM-10 dans votre navigateur.**
-> Saisissez un compte-rendu médical, obtenez des suggestions de codes — ou cherchez un code par son libellé —, validez-les et exportez-les. Sans installation, sans compte, sans envoi de données.
+> Saisissez un compte-rendu médical, obtenez des suggestions de codes (ou cherchez un code par son libellé), validez-les et exportez-les. Sans installation, sans compte. En ligne, les phrases du compte-rendu partent vers l'OMS pour les suggestions CIM-11 : voir [Confidentialité et données](#confidentialité-et-données).
 
-**[▶ Accéder à l'application](https://mister-guiiug.github.io/mister-CIM10/)**
+**[▶ Accéder à l'application](https://mister-guiiug.github.io/mister-cim10/)**
 
 ---
 
@@ -17,7 +17,7 @@ Mister CIM-10 s'adresse aux **professionnels de santé** (médecins, DIM, techni
 
 > ⚠️ **Cet outil est une aide à la décision, pas une référence clinique officielle.**
 > Il ne remplace pas le guide méthodologique de l'ATIH ni le jugement professionnel.
-> Le jeu de codes embarqué est un échantillon — vérifiez toujours avec les référentiels officiels.
+> Le jeu de codes embarqué est un échantillon de 147 codes : ni la CIM-10 de l'OMS, ni la CIM-10 FR de l'ATIH. Quelques codes suivent la variante américaine ICD-10-CM (`E11.65`, par exemple). Vérifiez toujours avec les référentiels officiels.
 
 ---
 
@@ -25,14 +25,14 @@ Mister CIM-10 s'adresse aux **professionnels de santé** (médecins, DIM, techni
 
 1. **Ouvrez l'application** — aucune installation requise, fonctionne dans Chrome, Edge, Firefox ou Safari.
 2. **Saisissez** votre compte-rendu dans la zone de texte, ou **dictez-le** avec le bouton **Dictée** quand le navigateur le propose (sur mobile, le micro du clavier fonctionne aussi, comme dans n'importe quel champ de saisie).
-3. **Lancez l'analyse** avec le bouton **Analyser**, ou **Ctrl + Entrée** (⌘ + Entrée sur Mac) depuis le texte — les codes CIM-10 suggérés apparaissent aussitôt.
+3. **Lancez l'analyse** avec le bouton **Analyser**, ou **Ctrl + Entrée** (⌘ + Entrée sur Mac) depuis le texte : les codes suggérés apparaissent, ceux du dictionnaire embarqué (CIM-10) et ceux de l'OMS (CIM-11), chacun marqué de sa classification. En ligne, la liste attend la réponse de l'OMS.
 4. **Validez ou rejetez** chaque suggestion en un clic ; ajoutez une note libre sur un code retenu, **corrigez-le** avec **Modifier**, **réordonnez** la liste avec **Monter** / **Descendre**. Un faux pas s'**annule** (bouton **Annuler**, ou Ctrl + Z hors d'un champ de saisie).
 5. **Cherchez un code** par son libellé pour coter un terme qui n'est pas dans le compte-rendu, ou reprenez-le dans vos **favoris** (l'étoile), et ajoutez-le aux diagnostics retenus.
-6. **Exportez** la liste finale — dans l'ordre que vous lui avez donné — en fichier texte (`.txt`), tableur (`.csv`) ou JSON, ou imprimez-la directement.
+6. **Exportez** la liste finale, dans l'ordre que vous lui avez donné, en fichier texte (`.txt`), tableur (`.csv`) ou JSON, ou imprimez-la directement. Le texte et le JSON reprennent aussi le compte-rendu entier.
 
 Vous pouvez **enregistrer le dossier en cours sous un nom** (jusqu'à cinq) et le rouvrir plus tard : le compte-rendu et les diagnostics retenus reviennent tels quels.
 
-L'application peut être **installée sur votre appareil** (bouton d'installation du navigateur) et fonctionne **hors connexion** une fois installée.
+L'application peut être **installée sur votre appareil** (bouton d'installation du navigateur ; sur iOS, **Partager** puis **Sur l'écran d'accueil**) et fonctionne **hors connexion** une fois installée, sauf les suggestions de l'OMS.
 
 ---
 
@@ -40,14 +40,15 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Analyse
 
-| Fonctionnalité               | Ce que ça fait                                                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Analyse du texte libre**   | Propose des codes à partir de votre compte-rendu : le dictionnaire CIM-10 intégré **et** l'API OMS (CIM-11), sans réglage  |
-| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible, avec son pourcentage                                          |
-| **Seuil de confiance**       | Réglable dans les paramètres : les suggestions en dessous du seuil ne s'affichent pas                                      |
-| **Filtre des suggestions**   | Restreignez la liste affichée par code, libellé ou terme repéré                                                            |
-| **Terme repéré**             | Un clic sur le terme qui a déclenché la suggestion le sélectionne dans le compte-rendu                                     |
-| **Comparer** (terme parent)  | Pour un sous-code (ex. `E11.65`), affiche la rubrique parente (`E11`) et les codes apparentés, chacun ajoutable en un clic |
+| Fonctionnalité               | Ce que ça fait                                                                                                                                                                                                                                                        |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Analyse du texte libre**   | Propose des codes à partir de votre compte-rendu : le dictionnaire embarqué (147 codes de forme CIM-10) **et** l'API de l'OMS, qui répond en CIM-11, sans réglage. Chaque suggestion porte sa classification                                                          |
+| **Limites de l'analyse**     | Elle repère des mots : un terme nié (« pas de diabète »), un antécédent ou une hypothèse sont proposés comme les autres. Relisez chaque suggestion dans son contexte                                                                                                  |
+| **Indicateur de pertinence** | Chaque suggestion est qualifiée : Élevée / Moyenne / Faible, avec son pourcentage                                                                                                                                                                                     |
+| **Seuil de confiance**       | Réglable dans les paramètres : les suggestions en dessous du seuil ne s'affichent pas                                                                                                                                                                                 |
+| **Filtre des suggestions**   | Restreignez la liste affichée par code, libellé ou terme repéré                                                                                                                                                                                                       |
+| **Terme repéré**             | Un clic sur le terme qui a déclenché la suggestion le sélectionne dans le compte-rendu quand il y figure tel quel ; un terme accentué, ou reconnu de façon approchée, n'est pas retrouvé                                                                              |
+| **Comparer** (codes voisins) | Pour un code dont la catégorie compte d'autres codes dans le dictionnaire embarqué (ex. `J44.1` et `J44.9`), affiche ces codes voisins, chacun ajoutable en un clic. La rubrique parente n'y figure pas : le dictionnaire n'en contient aucune qui ait des sous-codes |
 
 ### Recherche et saisie d'un code
 
@@ -74,17 +75,17 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 | **Annuler / rétablir**        | Ajout, retrait, modification, déplacement, note, **Vider la liste** : tout geste sur les diagnostics retenus s'annule (cinquante pas en arrière), au bouton ou par Ctrl + Z / Ctrl + Maj + Z / Ctrl + Y hors d'un champ de saisie. Changer de dossier referme l'historique |
 | **Raccourci clavier**         | Ctrl + Entrée (⌘ + Entrée sur Mac) dans le compte-rendu lance l'analyse                                                                                                                                                                                                    |
 | **Thème et langue**           | Clair / sombre / système, interface en français ou en anglais                                                                                                                                                                                                              |
-| **Hors connexion**            | Une fois chargée ou installée, l'application fonctionne sans réseau (sauf l'option OMS et la dictée en ligne)                                                                                                                                                              |
+| **Hors connexion**            | Une fois chargée ou installée, l'application fonctionne sans réseau (sauf les suggestions CIM-11 de l'OMS et la dictée en ligne)                                                                                                                                           |
 
 ### Export et partage
 
-| Fonctionnalité              | Ce que ça fait                                                                                |
-| --------------------------- | --------------------------------------------------------------------------------------------- |
-| **Export TXT / CSV / JSON** | Téléchargez la liste de codes validés en texte brut, tableur ou JSON, dans l'ordre de l'écran |
-| **Copier la liste**         | Les codes retenus dans le presse-papiers, prêts à coller dans votre logiciel                  |
-| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface)             |
-| **Partage**                 | Partagez par e-mail ou via l'API Web Share (selon le navigateur)                              |
-| **Partage du paramétrage**  | Un lien qui reprend le paramétrage OMS (identifiant, version, langue) — jamais le mot secret  |
+| Fonctionnalité              | Ce que ça fait                                                                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Export TXT / CSV / JSON** | Téléchargez la liste des codes retenus, dans l'ordre de l'écran. Le CSV ne contient que codes, libellés, notes et dates ; le texte brut et le JSON reprennent aussi **le compte-rendu entier**    |
+| **Copier la liste**         | Les codes retenus dans le presse-papiers, un par ligne avec leur libellé. La classification (CIM-10 ou CIM-11) n'y figure pas, pas plus que dans les exports texte et CSV : seul le JSON la garde |
+| **Impression / PDF**        | Imprimez ou enregistrez en PDF en un clic (mise en page propre, sans l'interface)                                                                                                                 |
+| **Partage**                 | Envoyez par e-mail ou par l'API Web Share (selon le navigateur) le contenu de l'export texte, **compte-rendu compris**                                                                            |
+| **Partage du paramétrage**  | Un lien qui reprend le paramétrage OMS (identifiant, version, langue) — jamais le mot secret                                                                                                      |
 
 ---
 
@@ -94,10 +95,10 @@ La protection des données est une priorité pour un outil traitant des informat
 
 L'analyse interroge **deux référentiels** : le dictionnaire CIM-10 embarqué, qui répond dans la page, et l'OMS (CIM-11) par la passerelle. Il n'y a pas de réglage à choisir — et donc pas de mode « tout local » à sélectionner.
 
-| Situation                              | Données transmises                                                                                                                                                           |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hors connexion, ou sans passerelle** | **Aucune donnée ne quitte votre navigateur** : le dictionnaire embarqué répond seul, et l'application vous le dit à l'écran.                                                 |
-| **En ligne, passerelle joignable**     | Des fragments du compte-rendu transitent vers la passerelle du site, puis vers les serveurs de l'OMS (`id.who.int`). La passerelle ne conserve rien : elle relaie et oublie. |
+| Situation                              | Données transmises                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hors connexion, ou sans passerelle** | **Rien du compte-rendu ne quitte votre navigateur** : le dictionnaire embarqué répond seul, et l'application vous le dit à l'écran.                                                                                                                                                                                                                                                            |
+| **En ligne, passerelle joignable**     | Le compte-rendu, découpé en phrases ou en lignes (quinze au plus), part vers la passerelle du site (un Worker Cloudflare) puis vers les serveurs de l'OMS (`id.who.int`) : pour un compte-rendu court, c'est le texte entier. Chaque phrase voyage dans l'adresse de la requête. Le code de la passerelle n'enregistre rien ; ce que journalisent Cloudflare et l'OMS échappe à l'application. |
 
 ### La dictée
 
@@ -117,24 +118,24 @@ de SON éditeur — et **se retire dans Paramètres › Dictée**. Il ne part pa
 le fichier de sauvegarde, et un fichier restauré ne peut pas en donner un.
 
 - Aucun compte utilisateur requis.
-- Aucun stockage serveur.
-- Les données de session restent dans le **stockage local de votre navigateur** (effacées en vidant le cache).
+- Aucune donnée clinique stockée sur nos serveurs. Deux services reçoivent d'autres données : Sentry (rapports d'erreurs techniques, région européenne) et, seulement si vous l'acceptez dans le bandeau de consentement, PostHog (mesure d'audience, nuage européen : pages vues et gestes comme une analyse lancée ou un export, sans le compte-rendu).
+- Les données de session restent dans le **stockage local de votre navigateur**. Vider le cache ne les efface pas : seul l'effacement des données du site les retire toutes, copies de côté comprises.
 
 ---
 
 ## Questions fréquentes
 
 **L'application fonctionne-t-elle sans connexion ?**
-Oui, une fois chargée (ou installée), elle est disponible hors ligne. L'option API OMS nécessite une connexion, comme la dictée quand le navigateur ne reconnaît pas la parole sur l'appareil.
+Oui, une fois chargée (ou installée), elle est disponible hors ligne : le dictionnaire embarqué répond seul. Les suggestions de l'OMS demandent une connexion, et partent d'office dès qu'il y en a une ; la dictée aussi, quand le navigateur ne reconnaît pas la parole sur l'appareil.
 
 **La dictée envoie-t-elle ma voix quelque part ?**
 Cela dépend du navigateur, et l'application vous le dit avant. Sur l'appareil, rien ne sort ; sinon, votre voix part au service de l'éditeur du navigateur, et seulement après votre accord — révocable dans les Paramètres. Voir [La dictée](#la-dictée).
 
 **Les codes proposés sont-ils fiables ?**
-Le dictionnaire embarqué est un échantillon à titre d'exemple. Les suggestions sont indicatives — vérifiez toujours avec le guide méthodologique officiel (ATIH).
+Le dictionnaire embarqué est un échantillon de 147 codes, à titre d'exemple, et les suggestions de l'OMS sont en CIM-11, pas en CIM-10. L'analyse repère des mots : elle ne distingue ni un terme nié, ni un antécédent, ni une hypothèse. Les suggestions sont indicatives : vérifiez toujours avec le guide méthodologique officiel (ATIH).
 
 **Puis-je l'utiliser sur téléphone ou tablette ?**
-Oui. L'application est responsive et installable sur iOS et Android via le bouton d'installation du navigateur.
+Oui. L'application est responsive ; elle s'installe sur Android par le bouton d'installation du navigateur, et sur iOS par **Partager** puis **Sur l'écran d'accueil** (l'application rappelle la marche à suivre).
 
 **Y a-t-il des frais ?**
 Non, l'application est gratuite et open source (licence MIT).
@@ -154,27 +155,27 @@ Si l'outil vous est utile, vous pouvez soutenir son développement :
 
 ### Stack
 
-| Couche       | Technologie                                                                                                                                                                                                 |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework UI | [React 19](https://react.dev/) (depuis la migration de mai 2026)                                                                                                                                            |
-| Routing      | [react-router-dom 7](https://reactrouter.com/) (HashRouter)                                                                                                                                                 |
-| Build        | [Vite 8](https://vitejs.dev/) (Rolldown, cible ES2025)                                                                                                                                                      |
-| Style        | [Tailwind CSS 4](https://tailwindcss.com/) + classes legacy de [`style.css`](src/style.css)                                                                                                                 |
-| State        | [Zustand 5](https://zustand-demo.pmnd.rs/) — `settingsStore`, `workspaceStore`                                                                                                                              |
-| Tests        | [Vitest 4](https://vitest.dev/) (jsdom) + [Testing Library React](https://testing-library.com/) + [Playwright](https://playwright.dev/) + [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) |
-| Qualité      | TypeScript ~6.0 strict + ESLint 9 flat + Prettier 3, mutualisés via [`@mister-guiiug/dev-pwa-config`](../dev-pwa-config/README.md)                                                                          |
-| Monitoring   | [web-vitals 4](https://web.dev/vitals/)                                                                                                                                                                     |
-| PWA          | [`vite-plugin-pwa 1.3`](https://vite-pwa-org.netlify.app/) (Workbox `generateSW`)                                                                                                                           |
-| Proxy CORS   | [Cloudflare Workers](workers/README.md) (optionnel)                                                                                                                                                         |
-| CI/CD        | GitHub Actions → GitHub Pages                                                                                                                                                                               |
+| Couche       | Technologie                                                                                                                                                                                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework UI | [React 19](https://react.dev/) (depuis la migration de mai 2026)                                                                                                                                                                  |
+| Routing      | [react-router-dom 7](https://reactrouter.com/) (HashRouter)                                                                                                                                                                       |
+| Build        | [Vite 8](https://vitejs.dev/) (Rolldown)                                                                                                                                                                                          |
+| Style        | [Tailwind CSS 4](https://tailwindcss.com/) + classes legacy de [`style.css`](src/style.css)                                                                                                                                       |
+| State        | [Zustand 5](https://zustand-demo.pmnd.rs/) — `settingsStore`, `workspaceStore`                                                                                                                                                    |
+| Tests        | [Vitest 5](https://vitest.dev/) (jsdom) + [Testing Library React](https://testing-library.com/) + [Playwright](https://playwright.dev/) + [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm)                       |
+| Qualité      | TypeScript ~6.0 strict (ES2025) + ESLint 10 (flat config) + Prettier 3, mutualisés via [`@mister-guiiug/dev-pwa-config`](https://github.com/mister-guiiug/dev-pwa-config)                                                         |
+| Monitoring   | [web-vitals 6](https://web.dev/vitals/) (module du socle), [Sentry 11](https://docs.sentry.io/platforms/javascript/guides/react/) (rapports d'erreurs) ; mesure d'audience : [PostHog](https://posthog.com/), chargé après accord |
+| PWA          | [`vite-plugin-pwa 1.3`](https://vite-pwa-org.netlify.app/) (Workbox `generateSW`)                                                                                                                                                 |
+| Proxy CORS   | [Cloudflare Workers](workers/README.md) (utilisé en production ; facultatif pour une instance à soi)                                                                                                                              |
+| CI/CD        | GitHub Actions → GitHub Pages                                                                                                                                                                                                     |
 
 ### Démarrage local
 
-**Pré-requis** : [Node.js](https://nodejs.org/) ≥ 20.
+**Pré-requis** : [Node.js](https://nodejs.org/) 22.22 ou plus récent (version de référence : celle de `.nvmrc`).
 
 ```bash
-git clone https://github.com/mister-guiiug/mister-CIM10.git
-cd mister-CIM10
+git clone https://github.com/mister-guiiug/mister-cim10.git
+cd mister-cim10
 npm install
 npm run dev      # → http://localhost:5173
 npm run build    # → dist/
@@ -191,14 +192,14 @@ npm run type-check   # TypeScript strict (tsc -b ; noEmit hérité du socle)
 npm run lint         # ESLint flat config
 ```
 
-Setup partagé : [`src/test/setup.ts`](src/test/setup.ts) charge `@testing-library/jest-dom/vitest`. Les options Vitest viennent de [`@mister-guiiug/dev-pwa-config/vitest-base`](../dev-pwa-config/vitest-base.js) (jsdom + globals + passWithNoTests).
+Setup partagé : [`src/test/setup.ts`](src/test/setup.ts) charge `@testing-library/jest-dom/vitest`. Les options Vitest viennent de [`@mister-guiiug/dev-pwa-config/vitest-base`](https://github.com/mister-guiiug/dev-pwa-config/blob/main/vitest-base.js) (jsdom + globals + passWithNoTests).
 
 ### Débogage VS Code / Cursor
 
-F5 → choisir une configuration :
+F5 → choisir une configuration de `.vscode/launch.json` :
 
-- **Déboguer : Chrome + Vite** — démarre le serveur et ouvre le navigateur avec le débogueur.
-- **Déboguer : Chrome (serveur déjà lancé)** — si `npm run dev` tourne déjà.
+- `Chrome — launch (npm run dev)` ou `Edge — launch (npm run dev)` : démarre le serveur et ouvre le navigateur avec le débogueur.
+- `Chrome — attach (serveur déjà lancé)` ou `Edge — attach (serveur déjà lancé)` : si `npm run dev` tourne déjà.
 
 ### API OMS (ICD-11) et proxy CORS
 
@@ -217,15 +218,15 @@ Qui préfère son propre compte OMS le saisit dans **Paramètres › Connexion O
 
 1. Nommer le dépôt `mister-cim10` (ou adapter `base` dans [`vite.config.ts`](vite.config.ts)).
 2. **Settings → Pages** : source → **GitHub Actions**.
-3. Pousser sur `main` : le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) exécute `npm ci && npm run build` et publie `dist/`.
+3. Pousser sur `main` : le workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) délègue au workflow réutilisable `pwa-deploy.yml` du socle, qui construit l'application et publie `dist/`.
 
 ### Structure du dépôt
 
 ```
 src/
-├── App.tsx                       Router (HashRouter) + 3 routes (home / parametres / aide)
-├── main.tsx                      Entry React + DialogProvider + bootstrap (theme, SW, web vitals)
-├── components/                   AppHeader, AppFooter, BrandMark, DialogProvider, PwaUpdates, SocleLabelsBridge
+├── App.tsx                       3 routes (home / parametres / aide), bandeau de consentement, barre de navigation
+├── main.tsx                      Entrée React : HashRouter, DialogProvider, bootstrap (Sentry, thème, SW, Web Vitals)
+├── components/                   AppHeader, AppFooter, BrandMark, DialogProvider, PrivacyNotice, PwaUpdates, SocleLabelsBridge
 ├── pages/                        HomePage, SettingsPage, HelpPage
 ├── features/workspace/           CrPanel, SessionsPanel, SuggestionsPanel, ValidatedPanel, CodeSearch, ExportBar,
 │                                 CodeEntryForm (saisie contrôlée), FavoritesPanel, FavoriteToggle,
@@ -249,7 +250,7 @@ src/
 │   ├── who-defaults.ts           réglages OMS fournis par le build (VITE_WHO_*)
 │   ├── storage.ts                sauvegarde/restauration .json (module `backup` du socle)
 │   └── storage-migration.ts      passage des clés historiques sous le préfixe cim10_
-├── types/index.ts                AnalyzeMode, AnalysisResult, ValidatedDiagnostic, SavedSession, WhoSettings
+├── types/index.ts                ICD10Code, AnalysisResult, ValidatedDiagnostic, FavoriteCode, SavedSession, WhoSettings, AppRoute
 ├── i18n/                         catalogue FR + EN (chrome applicatif uniquement)
 ├── icd10-data.ts                 Échantillon de codes / synonymes FR
 ├── style.css                     Styles legacy (classes réutilisées par les composants React)
