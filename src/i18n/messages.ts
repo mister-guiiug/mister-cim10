@@ -41,7 +41,9 @@ export const messages = {
       brandHome: 'Accueil — Mister CIM-10',
     },
     doc: {
-      home: 'Mister CIM-10',
+      // Titre de l'accueil = titre du HTML servi : Google et Bing indexent le
+      // titre après rendu, et un titre court y est classé « trop court ».
+      home: 'Mister CIM10 - aide au codage CIM-10 dans le navigateur',
       settings: 'Paramètres — Mister CIM-10',
       help: 'Aide — Mister CIM-10',
     },
@@ -510,7 +512,7 @@ export const messages = {
       brandHome: 'Home — Mister CIM-10',
     },
     doc: {
-      home: 'Mister CIM-10',
+      home: 'Mister CIM10 - ICD-10 coding assistant in your browser',
       settings: 'Settings — Mister CIM-10',
       help: 'Help — Mister CIM-10',
     },
