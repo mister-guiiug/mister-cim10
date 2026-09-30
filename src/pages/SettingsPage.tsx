@@ -11,6 +11,7 @@ import { useAnnouncer } from '@mister-guiiug/dev-pwa-config/react/a11y';
 import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
+import { ConsentSection } from '@mister-guiiug/dev-pwa-config/react/consent-section';
 import { useI18n } from '../i18n';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react';
 
@@ -417,6 +418,18 @@ export function SettingsPage() {
                 </div>
               )}
             </section>
+
+            {/* ── Mesure d’audience ──
+                Revenir sur son choix de mesure d’audience : le retrait se fait
+                ici, en un clic (RGPD, art. 7.3), sous celui de la dictée et
+                avec le même bouton. Mêmes clé et chargeur que le bandeau. */}
+            <ConsentSection
+              posthogKey={import.meta.env.VITE_POSTHOG_KEY}
+              loader={() => import('posthog-js/dist/module.slim.js')}
+              className="settings-section"
+              titleClassName="settings-section-title"
+              actionClassName="secondary"
+            />
 
             {/* ── Données (repliable) ── */}
             <details className="settings-section settings-section--collapsible">
