@@ -12,20 +12,20 @@ export function BrandMark() {
       >
         <defs>
           <linearGradient id="bmBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style={{ stopColor: '#1e3a5f' }} />
+            <stop offset="0%" style={{ stopColor: '#0b1f33' }} />
             <stop offset="100%" style={{ stopColor: '#0c1222' }} />
           </linearGradient>
           <linearGradient id="bmAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style={{ stopColor: '#38bdf8' }} />
-            <stop offset="100%" style={{ stopColor: '#0ea5e9' }} />
+            <stop offset="0%" style={{ stopColor: '#14b8a6' }} />
+            <stop offset="100%" style={{ stopColor: '#0b6e6a' }} />
           </linearGradient>
         </defs>
-        <rect width={64} height={64} rx={14} fill="url(#bmBgGrad)" />
+        <rect width={64} height={64} rx={8} fill="url(#bmBgGrad)" />
         <g fill="url(#bmAccentGrad)">
           <rect x={26} y={14} width={12} height={36} rx={2} />
           <rect x={14} y={26} width={36} height={12} rx={2} />
         </g>
-        <g fill="#38bdf8" opacity={0.9}>
+        <g fill="#2dd4bf" opacity={0.9}>
           <circle cx={48} cy={20} r={4} />
           <circle cx={48} cy={44} r={4} />
         </g>

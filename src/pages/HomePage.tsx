@@ -153,13 +153,15 @@ export function HomePage() {
        * panneau des suggestions prend le relais.
        */}
       <main id="main-content" className="workspace" tabIndex={-1}>
-        <div className="workspace-col workspace-col--travail">
-          {/* PLUS DE GARDE `useActionGuard` : il désactivait « Analyser » hors
-              connexion en mode OMS seul. Ce mode n'existe plus, le dictionnaire
-              embarqué répond toujours, et un bouton d'analyse qu'on ne peut pas
-              presser sur un outil de cotation était le pire des deux mondes. Le
-              motif du repli passe par `analyzeNotice`, que `CrPanel` lit. */}
+        {/*
+         * Clinical Console (≥1280) : trois colonnes — CR | suggestions |
+         * retenus. Entre 1024 et 1279 : travail à gauche (CR puis suggestions),
+         * retenus sticky à droite. Sous 1024 : une colonne + rappel retenus.
+         */}
+        <div className="workspace-col workspace-col--cr">
           <CrPanel onAnalyze={handleAnalyze} />
+        </div>
+        <div className="workspace-col workspace-col--suggestions">
           <SuggestionsPanel />
         </div>
         <div className="workspace-col workspace-col--retenus">

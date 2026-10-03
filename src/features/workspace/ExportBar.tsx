@@ -164,12 +164,12 @@ export function ExportBar({ disabled }: ExportBarProps) {
 
   return (
     <div className="export-blocks">
-      <div className="export-block">
+      <div className="export-block export-block--primary">
         <span className="export-block-label">{t('export.clipboard')}</span>
         <div className="toolbar export-row export-row--panel">
           <button
             type="button"
-            className={copied ? 'primary' : 'secondary'}
+            className="primary export-dpi"
             onClick={copyList}
             disabled={disabled}
             aria-live="polite"
