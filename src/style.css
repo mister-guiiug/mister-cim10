@@ -22,6 +22,7 @@ html[data-theme='dark'] {
   /* Semantic tokens */
   --conf-high-fg: #4ade80;
   --conf-med-fg: #facc15;
+  --muted-fg: #b4c0cf;
   --warn-fg: #fde68a;
   --star-fg: #fbbf24;
   --backdrop: rgba(0, 0, 0, 0.42);
@@ -56,6 +57,11 @@ html[data-theme='light'] {
   /* Semantic tokens */
   --conf-high-fg: #16a34a;
   --conf-med-fg: #a16207;
+  /* Texte des badges « grisés » (CIM-10 locale, confiance faible), posés
+     sur un fond teinté de `--muted` : `--muted` lui-même y tombe à 3,2:1
+     au pire (4,0 et 4,4:1 mesurés par axe). Celui-ci tient 5:1 sur toute
+     teinte de 15 à 20 % posée sur les trois surfaces. */
+  --muted-fg: #3f4d5c;
   --warn-fg: #92400e;
   /* Ambre assez sombre pour tenir 3:1 sur les fonds de carte clairs, là
      où `--warn` (#d97706) tombe à 3,0:1 — la limite, pas une marge. */
@@ -762,7 +768,7 @@ a.brand-link:hover .brand-mark {
 
 .source-badge--local {
   background: color-mix(in srgb, var(--muted) 16%, transparent);
-  color: var(--muted);
+  color: var(--muted-fg);
   border-color: color-mix(in srgb, var(--muted) 30%, transparent);
 }
 
@@ -2001,7 +2007,7 @@ button.ghost:hover {
 
 .badge.local {
   background: color-mix(in srgb, var(--muted) 20%, transparent);
-  color: var(--muted);
+  color: var(--muted-fg);
 }
 
 .badge.who11 {
@@ -2025,7 +2031,7 @@ button.ghost:hover {
 
 .badge.conf-low {
   background: color-mix(in srgb, var(--muted) 15%, transparent);
-  color: var(--muted);
+  color: var(--muted-fg);
 }
 
 .code {
