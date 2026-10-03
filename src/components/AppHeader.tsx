@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { BrandMark } from './BrandMark';
+import { TrustBar } from './TrustBar';
 import { useSettingsStore } from '../store/settingsStore';
 import { useI18n } from '../i18n';
 import type { AppRoute } from '../types/index';
@@ -16,14 +17,8 @@ function pathToRoute(pathname: string): AppRoute {
 }
 
 /**
- * IL N'Y A PLUS D'ÉTAT « À CONFIGURER », donc plus de guide de démarrage.
- *
- * L'en-tête montrait un `SetupGuide` en trois étapes tant que `isReady()` était
- * faux, et sa première étape était « choisir la source des suggestions ». Le
- * sélecteur de mode a disparu, la passerelle OMS vient du build et le
- * dictionnaire embarqué répond toujours : « pas prêt » est devenu inatteignable.
- * Garder une branche qui ne peut plus être vraie, c'est promettre une
- * configuration qui n'existe pas.
+ * Chrome Clinical Console : marque + nav desktop + trust bar (accueil).
+ * La barre basse du socle reste pour le mobile ; ici, les liens métier.
  */
 export function AppHeader({ subTagline }: AppHeaderProps) {
   const location = useLocation();
@@ -64,6 +59,41 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
                 <p className="app-tagline">{taglineText}</p>
               </div>
             </Link>
+            <nav className="app-top-nav" aria-label={t('nav.primary')}>
+              <Link
+                to="/"
+                className={
+                  route === 'home'
+                    ? 'app-top-nav-link is-current'
+                    : 'app-top-nav-link'
+                }
+                aria-current={route === 'home' ? 'page' : undefined}
+              >
+                {t('nav.home')}
+              </Link>
+              <Link
+                to="/parametres"
+                className={
+                  route === 'parametres'
+                    ? 'app-top-nav-link is-current'
+                    : 'app-top-nav-link'
+                }
+                aria-current={route === 'parametres' ? 'page' : undefined}
+              >
+                {t('nav.settings')}
+              </Link>
+              <Link
+                to="/aide"
+                className={
+                  route === 'aide'
+                    ? 'app-top-nav-link is-current'
+                    : 'app-top-nav-link'
+                }
+                aria-current={route === 'aide' ? 'page' : undefined}
+              >
+                {t('nav.help')}
+              </Link>
+            </nav>
           </div>
           {isHome && (
             <>
@@ -84,6 +114,7 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
             </>
           )}
         </div>
+        {isHome && <TrustBar />}
       </div>
     </header>
   );

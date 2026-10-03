@@ -189,9 +189,8 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
   });
 
   test('navigation responsive', async ({ page }) => {
-    // `body` est visible par construction : l'assertion précédente
-    // (`body, main, #app`) passait sur n'importe quelle page, y compris une
-    // page blanche. On interroge le plan de travail et la barre basse.
+    // Mobile : barre basse. Desktop Clinical Console : nav haute, barre basse
+    // masquée (display:none) — ne pas exiger qu'elle soit « visible ».
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await expect(page.locator('main#main-content')).toBeVisible();
@@ -199,7 +198,8 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
 
     await page.setViewportSize({ width: 1920, height: 1080 });
     await expect(page.locator('main#main-content')).toBeVisible();
-    await expect(page.locator('[data-dwc="bottom-nav"]')).toBeVisible();
+    await expect(page.locator('.app-top-nav')).toBeVisible();
+    await expect(page.locator('[data-dwc="bottom-nav"]')).toBeHidden();
   });
 
   test('accessibilité - navigation clavier', async ({ page }) => {

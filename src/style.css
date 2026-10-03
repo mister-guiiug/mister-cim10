@@ -12,10 +12,13 @@ html[data-theme='dark'] {
   --danger: #f87171;
   --btn-primary-fg: #0c1222;
   --hint-box-bg: rgba(15, 23, 42, 0.55);
-  --radius: 12px;
-  --shadow-panel: 0 4px 24px -8px rgba(0, 0, 0, 0.45);
-  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
-  --font: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radius: 8px;
+  --shadow-panel:
+    0 1px 0 rgba(0, 0, 0, 0.2), 0 8px 24px -10px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+  --font: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --nav: #0b1f33;
+  --nav-ink: #e8eef5;
   /* Semantic tokens */
   --conf-high-fg: #4ade80;
   --conf-med-fg: #facc15;
@@ -30,23 +33,26 @@ html[data-theme='dark'] {
 
 html[data-theme='light'] {
   color-scheme: light;
-  --bg: #eef2f7;
+  --bg: #e8eef5;
   --surface: #ffffff;
-  --surface2: #e2e8f0;
+  --surface2: #d5dee9;
   --text: #0f172a;
-  --muted: #556175;
-  --accent: #0f766e;
-  --accent-dim: #115e59;
-  --ok: #059669;
-  --warn: #d97706;
-  --danger: #dc2626;
+  --muted: #5b6b7c;
+  --accent: #0b6e6a;
+  --accent-dim: #0a5c59;
+  --ok: #157a4b;
+  --warn: #9a6700;
+  --danger: #b42318;
   --btn-primary-fg: #f8fafc;
-  --hint-box-bg: #e8edf3;
-  --radius: 12px;
-  --shadow-panel: 0 4px 28px -10px rgba(15, 23, 42, 0.12);
+  --hint-box-bg: #e2eaf3;
+  --radius: 8px;
+  --shadow-panel:
+    0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
   --shadow-glow: 0 0 0 1px
-    color-mix(in srgb, var(--accent) 15%, var(--surface2));
-  --font: 'DM Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color-mix(in srgb, var(--accent) 12%, var(--surface2));
+  --font: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --nav: #0b1f33;
+  --nav-ink: #e8eef5;
   /* Semantic tokens */
   --conf-high-fg: #16a34a;
   --conf-med-fg: #a16207;
@@ -81,10 +87,10 @@ html {
   --safe-b: env(safe-area-inset-bottom, 0px);
   /* ── Design tokens : échelles partagées, indépendantes du thème ── */
   --font-mono:
-    ui-monospace, 'JetBrains Mono', 'SFMono-Regular', 'Cascadia Mono',
+    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono',
     'Segoe UI Mono', monospace;
-  --radius-sm: 8px;
-  --radius-lg: 18px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
   --radius-pill: 999px;
   --ring-width: 2px;
   --ring-offset: 2px;
@@ -121,21 +127,24 @@ body {
   margin: 0;
   min-height: 100dvh;
   font-family: var(--font);
-  background:
-    radial-gradient(
-      1200px 600px at 10% -10%,
-      color-mix(in srgb, var(--accent) 14%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      900px 500px at 100% 0%,
-      color-mix(in srgb, var(--accent-dim) 10%, transparent),
-      transparent 50%
-    ),
-    var(--bg);
+  background: linear-gradient(
+    180deg,
+    #dfe8f3 0%,
+    var(--bg) 42%,
+    var(--bg) 100%
+  );
   color: var(--text);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme='dark'] body {
+  background: linear-gradient(
+    180deg,
+    #0a101c 0%,
+    var(--bg) 40%,
+    var(--bg) 100%
+  );
 }
 
 #app {
@@ -156,10 +165,28 @@ body {
   }
 }
 
-/* Réserve la place de la barre de navigation inférieure (fixed) sous le
-   contenu, quel que soit l'écran. */
+@media (min-width: 1024px) {
+  #app {
+    max-width: 1120px;
+  }
+}
+
+@media (min-width: 1280px) {
+  #app {
+    max-width: 1400px;
+  }
+}
+
+/* Réserve la place de la barre basse sur mobile uniquement.
+   Desktop Clinical Console : nav haute, pas de barre collée. */
 #react-root {
   padding-bottom: calc(4.25rem + var(--safe-b));
+}
+
+@media (min-width: 1024px) {
+  #react-root {
+    padding-bottom: 0;
+  }
 }
 
 /* ── Barre de navigation inférieure (mobile-first, principe miss-supaboss).
@@ -186,6 +213,12 @@ body {
   border-top: 1px solid var(--surface2);
   padding-bottom: var(--safe-b);
   box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.18);
+}
+
+@media (min-width: 1024px) {
+  .bottom-nav {
+    display: none;
+  }
 }
 
 .bottom-nav [data-dwc='bottom-nav-item'] {
@@ -430,7 +463,7 @@ a.brand-link:focus-visible {
   flex-shrink: 0;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 10px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
   transition: filter 0.15s ease;
@@ -443,8 +476,93 @@ a.brand-link:hover .brand-mark {
 .brand-mark-svg {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 10px;
+  border-radius: 8px;
   display: block;
+}
+
+/* Nav haute desktop — Clinical Console */
+.app-top-nav {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.app-top-nav-link {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0.45rem 0.7rem;
+  border-radius: var(--radius);
+}
+
+.app-top-nav-link:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
+}
+
+.app-top-nav-link.is-current {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+@media (min-width: 1024px) {
+  .app-top-nav {
+    display: flex;
+  }
+}
+
+/* Trust bar — statut référentiel permanent */
+.trust-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  padding: 0.45rem 0.75rem 0.55rem;
+  border-top: 1px solid var(--surface2);
+  background: color-mix(in srgb, var(--surface2) 45%, var(--surface));
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--surface2);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.trust-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trust-dot--ok {
+  background: var(--ok);
+}
+
+.trust-dot--warn {
+  background: var(--warn);
+}
+
+.trust-meta--end {
+  margin-left: auto;
+}
+
+@media (max-width: 639.98px) {
+  .trust-meta--end {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 .brand-text {
@@ -1099,33 +1217,64 @@ a.brand-link:hover .brand-mark {
   }
 }
 
-/* ── Le parcours tient dans un écran ────────────────────────────
-   Relevé en production le 17/09/2026, en 1280 × 900 : page de 3 475 px,
-   « Diagnostics retenus » à 2 582 px, soit 1 834 px — DEUX ÉCRANS — sous le
-   « Valider » qui l'alimente. Valider un code n'avait aucun effet visible.
-   La place existait : les cartes s'étiraient sur 1 234 px pour un code et
-   quatre mots.
+/* ── Clinical Console : le parcours tient dans un écran ─────────
+   ≥1280 : 3 colonnes (CR | suggestions | retenus).
+   1024–1279 : CR + suggestions à gauche, retenus sticky à droite.
+   Sous 1024 : colonne unique + rappel `.retenus-rappel`. */
+.workspace-col {
+  min-width: 0;
+}
 
-   Le travail à gauche, le résultat à droite et COLLANT, pour qu'il reste sous
-   les yeux pendant qu'on tranche. Sous 1024 px, colonne unique : c'est le
-   rappel `.retenus-rappel` qui prend le relais. */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (max-width: 1279.98px) {
   .workspace {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-areas:
+      'cr ret'
+      'sug ret';
     align-items: start;
     gap: 0.75rem;
   }
 
-  .workspace-col {
-    min-width: 0;
+  .workspace-col--cr {
+    grid-area: cr;
+  }
+
+  .workspace-col--suggestions {
+    grid-area: sug;
   }
 
   .workspace-col--retenus {
+    grid-area: ret;
     position: sticky;
     top: 0.75rem;
-    /* Il défile pour lui-même quand la liste s'allonge, sans entraîner la
-       page : la colonne de gauche reste maîtresse du défilement. */
+    max-height: calc(100dvh - 1.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 1280px) {
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 0.95fr);
+    grid-template-areas: 'cr sug ret';
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .workspace-col--cr {
+    grid-area: cr;
+  }
+
+  .workspace-col--suggestions {
+    grid-area: sug;
+  }
+
+  .workspace-col--retenus {
+    grid-area: ret;
+    position: sticky;
+    top: 0.75rem;
     max-height: calc(100dvh - 1.5rem);
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1361,6 +1510,11 @@ section.panel {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+}
+
+.export-block--primary .export-dpi {
+  min-width: min(100%, 12rem);
+  font-weight: 700;
 }
 
 .export-block-label {
