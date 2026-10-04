@@ -41,6 +41,7 @@ jobs:
       build-env: |
         VITE_POSTHOG_KEY=${{ vars.VITE_POSTHOG_KEY }}
         VITE_SENTRY_DSN=${{ vars.VITE_SENTRY_DSN }}
+        VITE_SENTRY_ENVIRONMENT=${{ vars.VITE_SENTRY_ENVIRONMENT }}
+        VITE_WHO_LANG=${{ vars.VITE_WHO_LANG }}
         VITE_WHO_PROXY_URL=${{ vars.VITE_WHO_PROXY_URL }}
         VITE_WHO_RELEASE_ID=${{ vars.VITE_WHO_RELEASE_ID }}
-        VITE_WHO_LANG=${{ vars.VITE_WHO_LANG }}
