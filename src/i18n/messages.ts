@@ -38,7 +38,6 @@ export const messages = {
       settings: 'Paramètres',
       help: 'Aide',
       primary: 'Navigation principale',
-      brandHome: 'Cotation — Mister CIM-10',
     },
     doc: {
       // Titre de l'accueil = titre du HTML servi : Google et Bing indexent le
@@ -517,7 +516,6 @@ export const messages = {
       settings: 'Settings',
       help: 'Help',
       primary: 'Main navigation',
-      brandHome: 'Coding — Mister CIM-10',
     },
     doc: {
       home: 'Mister CIM10 - ICD-10 coding assistant in your browser',
