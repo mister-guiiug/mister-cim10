@@ -47,7 +47,10 @@ export function AppHeader({ subTagline }: AppHeaderProps) {
             <Link
               to="/"
               className="brand-block brand-link"
-              aria-label={t('nav.brandHome')}
+              // Pas d'aria-label : le nom vient de ce que le lien montre
+              // (« Mister CIM-10 » et l'accroche). Un nom à part,
+              // « Cotation — Mister CIM-10 », laissait l'accroche visible hors
+              // du nom accessible (WCAG 2.5.3 ; axe 4.14, le 29/10/2026).
             >
               <BrandMark />
               <div className="brand-text">
