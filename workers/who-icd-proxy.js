@@ -166,7 +166,10 @@ export default {
         { status: 404, headers: { ...ch, 'Content-Type': 'application/json' } }
       );
     } catch (e) {
-      return new Response(JSON.stringify({ error: String(e) }), {
+      // Le détail reste dans les journaux du Worker : renvoyé au client,
+      // String(e) exposait l'erreur interne (CodeQL js/stack-trace-exposure).
+      console.error('who-icd-proxy', e);
+      return new Response(JSON.stringify({ error: 'Erreur du relais OMS.' }), {
         status: 502,
         headers: { ...ch, 'Content-Type': 'application/json' },
       });
