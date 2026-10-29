@@ -89,9 +89,11 @@ describe('reprise des clés cim10_ d’aujourd’hui (migration 0 → 1)', () =>
     // Et par les fonctions que l'application appelle réellement. Aucune
     // variable de build ici : la passerelle effective est donc vide.
     expect(readMinConfidenceThreshold()).toBe(0.65);
+    // Le mot secret d'hier n'est PAS repris : il dormait en clair dans le
+    // navigateur, et la lecture l'efface (29/10/2026).
     expect(readWhoSettings()).toEqual({
       clientId: 'mon-identifiant',
-      clientSecret: 'mot-secret-en-clair',
+      clientSecret: '',
       proxyUrl: '',
       releaseId: '2024-01',
       lang: 'en',
