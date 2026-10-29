@@ -268,6 +268,9 @@ export function SettingsPage() {
                     />
                   </label>
                 </div>
+                <p className="settings-hint">
+                  {t('settings.clientSecretSession')}
+                </p>
 
                 <details className="settings-sub">
                   <summary className="settings-sub-summary">

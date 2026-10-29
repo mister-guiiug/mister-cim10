@@ -19,8 +19,9 @@ import { APP_PREFIX } from './storage-migration';
  * `./storage.ts` sur l'ancienne liste blanche de sauvegarde).
  *
  * Deux clés restent hors de l'instantané, et chacune pour une raison précise :
- *   - `WHO_CLIENT_SECRET` : la sauvegarde JSON exclut le mot secret PAR SON NOM
- *     DE CLÉ ; fondu dans l'instantané, il repartirait en clair dans le fichier.
+ *   - `WHO_CLIENT_SECRET` : le mot secret n'est plus écrit (29/10/2026) ; la clé
+ *     reste pour effacer celui qu'une version précédente avait gardé, et pour que
+ *     la sauvegarde JSON continue de l'exclure par son nom.
  *   - `THEME` : `dwc_theme` appartient au socle, qui la lit depuis le script
  *     anti-FOUC avant l'exécution du bundle.
  *

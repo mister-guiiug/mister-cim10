@@ -316,6 +316,8 @@ export const messages = {
       omsApiDoc: 'Documentation API',
       clientId: 'Identifiant',
       clientSecret: 'Mot secret',
+      clientSecretSession:
+        'Le mot secret n’est pas conservé : il vaut pour la session, et se ressaisit après un rechargement. Votre gestionnaire de mots de passe peut le remplir.',
       omsPreconfigured:
         'L’application est déjà reliée à un compte OMS, côté passerelle : laissez ces champs vides et tout fonctionne. Les remplir SUBSTITUE le vôtre — vos identifiants portent alors chaque requête, sous vos propres quotas OMS. Les deux vont ensemble : un identifiant sans mot secret est refusé. Videz-les pour revenir au compte fourni.',
       versionLangSummary: 'Version de la classification et langue',
@@ -793,6 +795,8 @@ export const messages = {
       omsApiDoc: 'API documentation',
       clientId: 'Client ID',
       clientSecret: 'Client secret',
+      clientSecretSession:
+        'The secret is not stored: it lasts for the session and must be entered again after a reload. Your password manager can fill it in.',
       omsPreconfigured:
         'The application is already linked to a WHO account, on the gateway side: leave these fields empty and everything works. Filling them SUBSTITUTES yours — your credentials then carry every request, under your own WHO quotas. Both go together: a client ID without a secret is rejected. Clear them to return to the provided account.',
       versionLangSummary: 'Classification version and language',

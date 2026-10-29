@@ -33,11 +33,15 @@ import type { WhoSettings } from '../types/index';
  * efface celle que les appareils avaient gardée. Ici, on lit le build, point.
  */
 export function readWhoSettings(): WhoSettings {
+  // Un mot secret gardé par une version précédente est effacé : il dormait en
+  // clair dans le navigateur (CodeQL js/clear-text-storage-of-sensitive-data).
+  localStorage.removeItem(LS_KEYS.WHO_CLIENT_SECRET);
   const enregistre = readSnapshot().who;
   const defauts = defautsWho();
   return {
     clientId: enregistre.clientId,
-    clientSecret: localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET) || '',
+    // Jamais lu du stockage : il ne vit qu'en mémoire, le temps de la session.
+    clientSecret: '',
     proxyUrl: defauts.proxyUrl,
     releaseId: enregistre.releaseId || defauts.releaseId,
     lang: enregistre.lang || defauts.lang,
@@ -58,9 +62,10 @@ export function writeWhoSettings(s: WhoSettings): void {
       lang: s.lang,
     },
   });
-  if (s.clientSecret)
-    localStorage.setItem(LS_KEYS.WHO_CLIENT_SECRET, s.clientSecret);
-  else localStorage.removeItem(LS_KEYS.WHO_CLIENT_SECRET);
+  // LE MOT SECRET N'EST PAS ÉCRIT. Gardé dans localStorage, il y restait en
+  // clair, lisible par tout script de la page. Le magasin le garde en mémoire
+  // pour la session ; le compte de la passerelle, lui, ne demande rien.
+  localStorage.removeItem(LS_KEYS.WHO_CLIENT_SECRET);
 }
 
 export function readMinConfidenceThreshold(): number {

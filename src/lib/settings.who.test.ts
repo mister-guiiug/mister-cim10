@@ -105,7 +105,9 @@ describe('readWhoSettings', () => {
     expect(readWhoSettings().proxyUrl).toBe('');
   });
 
-  it('le mot secret reste hors de l’instantané, et le build n’en fournit aucun', () => {
+  // LE MOT SECRET N'EST ÉCRIT NULLE PART dans le navigateur : ni sous sa clé,
+  // ni dans l'instantané. Gardé dans localStorage, il y restait en clair.
+  it('le mot secret n’est écrit nulle part, et le build n’en fournit aucun', () => {
     vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
     writeWhoSettings({
       clientId: 'cid',
@@ -114,11 +116,18 @@ describe('readWhoSettings', () => {
       releaseId: '2025-01',
       lang: 'fr',
     });
-    expect(localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET)).toBe('sec');
-    expect(JSON.stringify(readWhoSettings())).toContain('sec');
-    // L'instantané, lui, ne doit pas le porter.
+    expect(localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET)).toBeNull();
+    expect(readWhoSettings().clientSecret).toBe('');
     const brut = localStorage.getItem('cim10_data') ?? '';
     expect(brut).not.toContain('sec');
+    // L'identifiant, lui, n'est pas un secret : il reste enregistré.
+    expect(readWhoSettings().clientId).toBe('cid');
+  });
+
+  it('efface le mot secret qu’une version précédente avait gardé', () => {
+    localStorage.setItem(LS_KEYS.WHO_CLIENT_SECRET, 'ancien-secret');
+    expect(readWhoSettings().clientSecret).toBe('');
+    expect(localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET)).toBeNull();
   });
 });
 
@@ -139,6 +148,14 @@ describe('le magasin de réglages', () => {
     expect(store.getState().who.proxyUrl).toBe(PASSERELLE);
     expect(store.getState().who.clientId).toBe('');
     expect(store.getState().who.clientSecret).toBe('');
+  });
+
+  it('le mot secret saisi vit en mémoire, le temps de la session', async () => {
+    vi.stubEnv('VITE_WHO_PROXY_URL', PASSERELLE);
+    const store = await magasin();
+    store.getState().setWho({ clientId: 'cid', clientSecret: 'sec' });
+    expect(store.getState().who.clientSecret).toBe('sec');
+    expect(localStorage.getItem(LS_KEYS.WHO_CLIENT_SECRET)).toBeNull();
   });
 
   // `isReady()` A DISPARU AVEC LE MODE. Il bloquait « Analyser » tant que l'OMS
