@@ -12,6 +12,7 @@ import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import { ConsentSection } from '@mister-guiiug/dev-pwa-config/react/consent-section';
+import { PrivacyNotice } from '@mister-guiiug/dev-pwa-config/react/privacy-notice';
 import { useI18n } from '../i18n';
 import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react';
 
@@ -422,6 +423,11 @@ export function SettingsPage() {
               )}
             </section>
 
+            <PrivacyNotice
+              env={import.meta.env}
+              className="settings-section"
+              titleClassName="settings-section-title"
+            />
             {/* ── Mesure d’audience ──
                 Revenir sur son choix de mesure d’audience : le retrait se fait
                 ici, en un clic (RGPD, art. 7.3), sous celui de la dictée et
