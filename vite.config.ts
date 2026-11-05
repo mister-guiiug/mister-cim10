@@ -357,6 +357,25 @@ export default defineConfig(({ command }) => {
                 },
               },
             },
+            /*
+             * LES FICHIERS DE POLICE, que la règle ci-dessus ne voyait pas :
+             * elle garde la FEUILLE de `fonts.googleapis.com`, mais IBM Plex
+             * se télécharge depuis `fonts.gstatic.com`. Hors ligne, la feuille
+             * revenait du cache et ses `url()` partaient dans le vide — l'app
+             * s'affichait en police système. Immuables sous leur URL : un an.
+             */
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-webfonts',
+                cacheableResponse: { statuses: [0, 200] },
+                expiration: {
+                  maxEntries: 30,
+                  maxAgeSeconds: 60 * 60 * 24 * 365,
+                },
+              },
+            },
             {
               urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
               handler: 'CacheFirst',
