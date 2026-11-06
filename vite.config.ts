@@ -7,7 +7,13 @@ import { cspPlugin } from '@mister-guiiug/dev-pwa-config/vite-csp';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { readFileSync } from 'node:fs';
 import { versionPlugin } from '@mister-guiiug/dev-pwa-config/vite-version';
-import { NAVIGATE_FALLBACK_DENY_FILES } from '@mister-guiiug/dev-pwa-config/vite-pwa';
+import {
+  googleFontsCaching,
+  NAVIGATE_FALLBACK_DENY_FILES,
+  SENTRY_CHUNK,
+  sentryChunkFileNames,
+  sentryGlobIgnores,
+} from '@mister-guiiug/dev-pwa-config/vite-pwa';
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8')) as {
   version: string;
@@ -105,29 +111,8 @@ export default defineConfig(({ command }) => {
       chunkSizeWarningLimit: 800,
       rollupOptions: {
         output: {
-          /*
-           * LE MORCEAU SENTRY GARDE SON NOM, SANS EMPREINTE — parce qu'il est
-           * exclu du précache (`globIgnores` plus bas) et qu'une URL empreintée
-           * y meurt à chaque déploiement.
-           *
-           * Le service worker sert la coquille précachée jusqu'à ce que
-           * l'utilisateur accepte la mise à jour ; cette coquille demande
-           * l'ANCIENNE empreinte, que le déploiement suivant a supprimée de
-           * `assets/`. Mesuré en production sur mister-qowa le 22/09/2026 :
-           * HTTP 404, « Échec du chargement pour le module » dans la console.
-           * `initSentry` avale l'échec (son `try/catch`), donc l'application ne
-           * casse pas — elle rapporte ses erreurs à personne, sans le dire.
-           *
-           * Rien n'est perdu au cache : GitHub Pages répond
-           * `Cache-Control: max-age=600` sur TOUS les fichiers, empreinte ou pas.
-           *
-           * `pwa-doctor` tient l'invariant depuis le socle 6.8.0
-           * (règle `chunk-hors-precache`).
-           */
-          chunkFileNames: chunk =>
-            chunk.name === 'sentry'
-              ? 'assets/sentry.js'
-              : 'assets/[name]-[hash].js',
+          // Le morceau Sentry, nom sans empreinte : socle (`vite-pwa`, 6.32.0).
+          chunkFileNames: sentryChunkFileNames,
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
 
@@ -138,7 +123,7 @@ export default defineConfig(({ command }) => {
             // préchargés au lieu de 227,2 — pour un total gzip identique
             // à 0,1 kB près. Le total ne voit pas la différence,
             // `bundleBudget.preloadGzipKb` si.
-            if (norm.includes('/@sentry/')) return 'sentry';
+            if (norm.includes('/@sentry/')) return SENTRY_CHUNK;
             // ET POSTHOG POUR LA MÊME RAISON, EN PLUS GRAVE. Sentry préchargé
             // coûtait du poids ; PostHog préchargé casse une PROMESSE : l'ADR
             // 0012 dit que rien n'est chargé avant l'accord, et le socle ne
@@ -329,53 +314,10 @@ export default defineConfig(({ command }) => {
           // Un fichier (sitemap.xml, llms.txt…) va au réseau, pas à index.html.
           navigateFallbackDenylist: [NAVIGATE_FALLBACK_DENY_FILES],
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-          /*
-           * LE MORCEAU SENTRY HORS DU PRÉCACHE, sans quoi le découpage
-           * ci-dessus ne servirait à rien : `globPatterns` ramasse TOUT le
-           * JS émis, `import()` ou pas. Mesuré le 16/09/2026 sur la
-           * production de deux apps du parc, 345 et 463 KiB bruts de SDK
-           * téléchargés par chaque visiteur — sans qu’aucun DSN soit posé.
-           *
-           * Hors précache, il est cherché sur le réseau à la première
-           * erreur, et jamais si l’observabilité reste éteinte. Ne pas
-           * l’avoir hors ligne est sans conséquence : rapporter une erreur
-           * demande le réseau.
-           */
-          globIgnores: ['**/sentry.js', '**/sentry-*.js'],
+          // Le morceau Sentry hors du précache : socle (`vite-pwa`, 6.32.0).
+          globIgnores: sentryGlobIgnores(),
           runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
-              },
-            },
-            /*
-             * LES FICHIERS DE POLICE, que la règle ci-dessus ne voyait pas :
-             * elle garde la FEUILLE de `fonts.googleapis.com`, mais IBM Plex
-             * se télécharge depuis `fonts.gstatic.com`. Hors ligne, la feuille
-             * revenait du cache et ses `url()` partaient dans le vide — l'app
-             * s'affichait en police système. Immuables sous leur URL : un an.
-             */
-            {
-              urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-webfonts',
-                cacheableResponse: { statuses: [0, 200] },
-                expiration: {
-                  maxEntries: 30,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-              },
-            },
+            ...googleFontsCaching(),
             {
               urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
               handler: 'CacheFirst',
