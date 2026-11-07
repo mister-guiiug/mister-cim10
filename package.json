@@ -24,8 +24,8 @@
   },
   "bundleBudget": {
     "totalGzipKb": 391,
-    "preloadGzipKb": 182,
-    "_pourquoiPreload": "Posé le 16/09/2026 avec Sentry, socle 4.18.0. Le total compte les morceaux ASYNCHRONES : il monte de 165 à 331 kB par la seule installation du SDK, alors que le chemin critique ne bouge pas. Sans cette seconde borne, ~151 kB de mou couvriraient toute régression. Mesuré 163.5 kB, budget à +10 %. RELEVÉ DE 180 À 182 LE 05/11/2026 : le panneau « Vos données » du socle 6.29.0 (information exigée par le RGPD) entre dans l’écran Paramètres, chargé d’emblée ; 180,5 kB mesurés en local, la marge laissée par le lazy() du 25/09 étant consommée.",
+    "preloadGzipKb": 188,
+    "_pourquoiPreload": "Posé le 16/09/2026 avec Sentry, socle 4.18.0. Le total compte les morceaux ASYNCHRONES : il monte de 165 à 331 kB par la seule installation du SDK, alors que le chemin critique ne bouge pas. Sans cette seconde borne, ~151 kB de mou couvriraient toute régression. Mesuré 163.5 kB, budget à +10 %. RELEVÉ DE 180 À 182 LE 05/11/2026 : le panneau « Vos données » du socle 6.29.0 (information exigée par le RGPD) entre dans l’écran Paramètres, chargé d’emblée ; 180,5 kB mesurés en local, la marge laissée par le lazy() du 25/09 étant consommée. RELEVÉ DE 182 À 188 LE 07/11/2026 : socle 6.34.0, dont les libellés en sept langues (carte de sauvegarde, signalement par courriel, idée) entrent dans toutes les apps, environ +3,5 kB gzip. Déploiement attendu 185,6 kB (CI de la PR de montée, plus l'écart entre CI et déploiement mesuré sur main) ; 188 = mesure + ~1 %.",
     "_pourquoi": "RELEVÉ DE 331 À 391 LE 19/09/2026 : `posthog-js` entre avec l'ADR 0012, le parc quittant GA4 pour PostHog en Europe. 354,9 kB mesurés, 391 = mesure + 10 % (la formule du cliquet du socle). LE MORCEAU EST DIFFÉRÉ ET LE RESTE : il n'est chargé qu'APRÈS l'accord, et un visiteur qui refuse ne le télécharge jamais — c'est `preloadGzipKb`, inchangé par ce commit, qui garde le chemin critique. Le `loader` vise `posthog-js/dist/module.slim.js` : 48,9 kB gzip au lieu de 97,6 pour l'entrée par défaut, en laissant dehors l'enregistrement de session, l'autocapture, les sondages et la barre d'outils — que l'ADR 0012 coupe de toute façon. MESURER EN CI, PAS EN LOCAL."
   },
   "pwaDoctor": {
@@ -46,7 +46,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
-    "@mister-guiiug/dev-pwa-config": "^6.33.0",
+    "@mister-guiiug/dev-pwa-config": "^6.34.0",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.4",
     "@testing-library/jest-dom": "^7.0.1",
