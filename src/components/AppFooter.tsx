@@ -7,48 +7,44 @@ import { useI18n } from '../i18n';
 import { PrivacyNotice } from './PrivacyNotice';
 
 /**
- * Pied de page : les deux liens famille viennent du socle, la mention de
- * confidentialité reste ici.
+ * LE PIED DE PAGE : ce que l'app fait des comptes-rendus, puis les liens.
  *
- * CE QUE LE SOCLE APPORTE. Les liens externes sécurisés (`target="_blank"` +
- * `rel="noopener noreferrer"`), les icônes GitHub et café — le SVG GitHub de
- * 700 caractères recopié ici est retiré — et les URL tirées du catalogue
- * famille au lieu d'être codées en dur : `repoUrl('mister-cim10')` rend
- * exactement `https://github.com/mister-guiiug/mister-cim10`, et `SPONSOR_URL`
- * la même adresse Buy Me a Coffee qu'auparavant.
+ * CE QUE LE SOCLE APPORTE. Les liens externes sécurisés, les icônes, les URL
+ * tirées du catalogue famille (`repoUrl('mister-cim10')`, `SPONSOR_URL`), et
+ * depuis 6.34 « Signaler un problème » et « Proposer une idée », préremplis.
  *
- * CE QUI RESTE LOCAL, et pourquoi :
- *   - la mention de confidentialité (« aucune donnée clinique… »), propre à
- *     l'app et que le composant partagé ne rend pas ;
- *   - les libellés, passés en props : l'app dit « Code source sur GitHub » et
- *     « ☕ Buy me a coffee », pas les « Code source » / « M'offrir un café »
- *     du socle ;
- *   - l'habillage en pastilles (`style.css`), retargeté sur les attributs
- *     `[data-dwc="footer-…"]`. Le socle livre la structure, l'app garde son
- *     univers.
+ * LA MENTION DE CONFIDENTIALITÉ PASSE DANS LE `<footer>` (prop `children`,
+ * rendue avant les liens). Elle était posée à côté, dans un `<div>`, hors du
+ * repère « informations de contenu » que lisent les lecteurs d'écran, et en
+ * corps de texte : la plus grosse chose du pied de page était sa note.
  *
- * POURQUOI UN `<div>` ENVELOPPE ET NON UN `<footer>` : le composant du socle
- * rend déjà un `<footer>`, et le modèle de contenu de `footer` interdit un
- * `footer` descendant. Même forme que mister-molkky, mister-qowa et
- * miss-lookhouse.
+ * LA VERSION REVIENT, sans le lien mort. Le numéro renvoyait à
+ * `releases/tag/vX.Y.Z`, et aucune app du parc ne crée de tag : 404 garanti,
+ * d'où son retrait. Elle renvoie maintenant aux commits de `main`, et dit la
+ * date du build et le commit — ce qu'on demande d'abord à qui signale un
+ * problème. Le bandeau de mise à jour reste le seul à annoncer une nouvelle
+ * version (`updates: false`).
  */
 export function AppFooter() {
   const { t } = useI18n();
+  const depot = repoUrl('mister-cim10');
   return (
     <div className="app-footer">
-      <PrivacyNotice />
-      {/* PAS DE PROP `version` : le numéro qu'elle affichait portait un lien
-          vers `…/releases/tag/vX.Y.Z`, et aucune app du parc ne crée de tag
-          git — 404 garanti. Le numéro part toujours dans le rapport de bug
-          ouvert par `issues`. */}
       <SocleAppFooter
         issues
         className="footer-actions"
-        repoUrl={repoUrl('mister-cim10')}
+        repoUrl={depot}
         sponsorUrl={SPONSOR_URL}
         sourceLabel={t('footer.source')}
         sponsorLabel={t('footer.coffee')}
-      />
+        version={{
+          details: true,
+          updates: false,
+          releaseUrl: `${depot}/commits/main`,
+        }}
+      >
+        <PrivacyNotice />
+      </SocleAppFooter>
     </div>
   );
 }

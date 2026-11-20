@@ -172,7 +172,9 @@ export function HelpPage() {
       {/* La mention de confidentialité, SANS les liens de la famille : la
           règle du 06/09/2026 les réserve à l'accueil et aux Réglages. */}
       <div className="app-footer">
-        <PrivacyNotice />
+        <footer className="footer-actions">
+          <PrivacyNotice />
+        </footer>
       </div>
     </>
   );
