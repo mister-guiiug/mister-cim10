@@ -60,7 +60,12 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
       ligneE11.getByRole('button', { name: /^(validé|validated)$/i })
     ).toBeDisabled();
 
-    // …et l'export part avec lui.
+    // …et l'export part avec lui. « Copier pour DPI » est le geste principal ;
+    // les fichiers sont sous « Autres formats » depuis la refonte Astryx.
+    await expect(
+      retenus.getByRole('button', { name: /copier pour dpi|copy for ehr/i })
+    ).toBeVisible();
+    await retenus.getByText(/^(autres formats|other formats)$/i).click();
     const downloadPromise = page.waitForEvent('download');
     await retenus
       .getByRole('button', { name: /texte \(\.txt\)|text \(\.txt\)/i })
@@ -113,7 +118,10 @@ test.describe('mister-cim10 - Fonctionnalités critiques @critical', () => {
       page.getByRole('button', { name: /^(descendre|move down) E11\.9$/i })
     ).toBeFocused();
 
+    const autresFormats = retenus.locator('.export-more');
     const exporter = async () => {
+      if (!(await autresFormats.evaluate(d => (d as HTMLDetailsElement).open)))
+        await retenus.getByText(/^(autres formats|other formats)$/i).click();
       const telechargement = page.waitForEvent('download');
       await retenus
         .getByRole('button', { name: /texte \(\.txt\)|text \(\.txt\)/i })

@@ -4,6 +4,9 @@ import { useSettingsStore } from '../../store/settingsStore';
 import { getFamily } from '../../lib/icd-hierarchy';
 import { useI18n } from '../../i18n';
 import { FavoriteToggle } from './FavoriteToggle';
+import { suggestionsATrancher } from './aTrancher';
+import { useDisposition } from './disposition';
+import { useVueStore } from '../../store/vueStore';
 import type { AnalysisResult, ICD10Code } from '../../types/index';
 
 type ConfidenceLevel = 'high' | 'medium' | 'low';
@@ -61,6 +64,8 @@ export function SuggestionsPanel() {
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const minConfidence = useSettingsStore(s => s.minConfidence);
+  const disposition = useDisposition();
+  const setVue = useVueStore(s => s.setVue);
   const { t } = useI18n();
 
   const validatedCodes = useMemo(
@@ -70,17 +75,18 @@ export function SuggestionsPanel() {
 
   const visible = useMemo(() => {
     const f = filterText.trim().toLowerCase();
-    return suggestions.filter(s => {
-      if (rejectedIds.has(s.id)) return false;
-      if (validatedCodes.has(s.code)) return false;
-      if (s.confidence < minConfidence) return false;
-      if (!f) return true;
-      return (
+    return suggestionsATrancher(
+      suggestions,
+      rejectedIds,
+      validatedCodes,
+      minConfidence
+    ).filter(
+      s =>
+        !f ||
         s.code.toLowerCase().includes(f) ||
         s.label.toLowerCase().includes(f) ||
         s.matchedTerm.toLowerCase().includes(f)
-      );
-    });
+    );
   }, [suggestions, rejectedIds, validatedCodes, filterText, minConfidence]);
 
   const groupes = useMemo(() => groupeParTerme(visible), [visible]);
@@ -164,15 +170,9 @@ export function SuggestionsPanel() {
     >
       <div className="panel-head">
         <h2 id="sug-label" className="panel-title">
-          <svg
-            aria-hidden="true"
-            width={12}
-            height={12}
-            viewBox="0 0 16 16"
-            fill="currentColor"
-          >
-            <path d="M8 1a5 5 0 0 0-2.5 9.33V12h5v-1.67A5 5 0 0 0 8 1zM6.5 13v1.5h3V13h-3z" />
-          </svg>
+          <span className="panel-step" aria-hidden="true">
+            2
+          </span>
           <span className="panel-title-text">{t('results.title')}</span>
           {hasSuggestions && (
             <span className="panel-count" aria-hidden="true">
@@ -231,7 +231,7 @@ export function SuggestionsPanel() {
           l'écran sur mobile : valider un code n'avait aucun effet visible.
           Ce rappel est là où le regard travaille. Sur grand écran les deux
           colonnes se voient, il s'efface. */}
-      {validated.length > 0 && (
+      {disposition === 'compacte' && validated.length > 0 && (
         <div className="retenus-rappel">
           <span className="retenus-rappel-compte">
             {validated.length > 1
@@ -241,11 +241,12 @@ export function SuggestionsPanel() {
           <button
             type="button"
             className="ghost"
-            onClick={() =>
-              document
-                .getElementById('val-label')
-                ?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-            }
+            onClick={() => {
+              setVue('retenus');
+              requestAnimationFrame(() =>
+                document.getElementById('onglet-retenus')?.focus()
+              );
+            }}
           >
             {t('results.retainedSee')}
           </button>
@@ -347,8 +348,13 @@ function SuggestionCard({
 
   return (
     <li className="suggestion-card" role="listitem">
+      {/* Code et libellé sur la même ligne : c'est le couple qu'on lit, et la
+          carte de 166 px en faisait deux étages. */}
       <div className="suggestion-card-head">
-        <strong className="suggestion-code">{suggestion.code}</strong>
+        <p className="suggestion-title">
+          <strong className="suggestion-code">{suggestion.code}</strong>{' '}
+          <span className="suggestion-label">{suggestion.label}</span>
+        </p>
         <span
           className={`source-badge source-badge--${suggestion.source ?? 'local'}`}
           title={
@@ -368,39 +374,40 @@ function SuggestionCard({
           onAnnounce={onAnnounce}
         />
       </div>
-      <p className="suggestion-label">{suggestion.label}</p>
-      <div className={`confidence-meter is-${level}`}>
-        <span
-          className="confidence-meter-track"
-          role="img"
-          aria-label={t('results.confidenceAria', {
-            level: levelLabel.toLowerCase(),
-            pct,
-          })}
-        >
+      <div className="suggestion-meta">
+        <div className={`confidence-meter is-${level}`}>
           <span
-            className="confidence-meter-fill"
-            style={{ width: `${pct}%` }}
-          />
-        </span>
-        <span className="confidence-meter-readout">
-          <span className="confidence-meter-level">{levelLabel}</span>
-          <span className="confidence-meter-pct">{pct} %</span>
-        </span>
-      </div>
-      {suggestion.matchedTerm && (
-        <p className="suggestion-term">
-          {t('results.matchedTerm')}{' '}
-          <button
-            type="button"
-            className="suggestion-term-link"
-            onClick={() => onHighlight(suggestion)}
-            title={t('results.matchedTermTitle')}
+            className="confidence-meter-track"
+            role="img"
+            aria-label={t('results.confidenceAria', {
+              level: levelLabel.toLowerCase(),
+              pct,
+            })}
           >
-            {suggestion.matchedTerm}
-          </button>
-        </p>
-      )}
+            <span
+              className="confidence-meter-fill"
+              style={{ width: `${pct}%` }}
+            />
+          </span>
+          <span className="confidence-meter-readout">
+            <span className="confidence-meter-level">{levelLabel}</span>
+            <span className="confidence-meter-pct">{pct} %</span>
+          </span>
+        </div>
+        {suggestion.matchedTerm && (
+          <p className="suggestion-term">
+            {t('results.matchedTerm')}{' '}
+            <button
+              type="button"
+              className="suggestion-term-link"
+              onClick={() => onHighlight(suggestion)}
+              title={t('results.matchedTermTitle')}
+            >
+              {suggestion.matchedTerm}
+            </button>
+          </p>
+        )}
+      </div>
       {/* LES PRÉCISIONS DU MÊME TERME, sous le code qui les porte. Deux cartes
           côte à côte à la même confiance ne disaient pas laquelle choisir ;
           ici la hiérarchie est lisible, et chacune se valide d'un clic. */}
@@ -427,10 +434,13 @@ function SuggestionCard({
           </ul>
         </div>
       )}
-      <div className="toolbar">
+      <div className="toolbar suggestion-actions">
+        {/* « Valider » en bouton SECONDAIRE : neuf boutons principaux dans une
+            même vue n'en font plus aucun (Astryx). Le principal de l'écran
+            reste « Analyser », puis « Copier pour DPI ». */}
         <button
           type="button"
-          className="primary"
+          className="secondary suggestion-validate"
           data-role="valider-principal"
           onClick={() => onValidate(suggestion)}
         >

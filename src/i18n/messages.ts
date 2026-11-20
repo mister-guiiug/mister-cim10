@@ -55,13 +55,16 @@ export const messages = {
       privacy: 'Données sur cet appareil · aucun compte',
     },
     home: {
-      taglineReady: 'Saisir · analyser · valider · exporter',
-      disclaimerReady:
-        'Suggestions indicatives — vous restez responsable des codes retenus et des règles en vigueur.',
       disclaimerHide: 'Masquer cet avertissement',
-      dailyLabel: 'En pratique',
-      dailyText: 'Texte',
-      dailyValidateExport: 'Valider & exporter',
+      disclaimerTitle: 'Suggestions indicatives',
+      disclaimerBody:
+        'Vous restez responsable des codes retenus et des règles en vigueur (ATIH).',
+    },
+    workspace: {
+      tabsLabel: 'Étapes de la cotation',
+      tabCr: 'Texte',
+      tabSuggestions: 'Suggestions',
+      tabRetenus: 'Retenus',
     },
     report: {
       title: 'Compte-rendu',
@@ -279,6 +282,7 @@ export const messages = {
       clipboard: 'Presse-papiers',
       download: 'Télécharger',
       sendShare: 'Envoyer / partager',
+      more: 'Autres formats',
       copyList: 'Copier pour DPI',
       copied: '✓ Copié pour DPI',
       txt: 'Texte (.txt)',
@@ -297,7 +301,6 @@ export const messages = {
       shareDocTitle: 'Mister CIM-10 — diagnostics',
     },
     settings: {
-      subTagline: 'Finesse des suggestions et connexion OMS',
       kicker: 'Configuration',
       title: 'Paramètres',
       leadBefore:
@@ -373,7 +376,6 @@ export const messages = {
       shareCancelled: 'Partage annulé.',
     },
     help: {
-      subTagline: 'Guide d’utilisation et compte API OMS',
       title: 'Aide à l’utilisation',
       leadBefore:
         'Comment utiliser l’application au quotidien, et comment obtenir un ',
@@ -533,13 +535,16 @@ export const messages = {
       privacy: 'Data on this device · no account',
     },
     home: {
-      taglineReady: 'Enter · analyze · validate · export',
-      disclaimerReady:
-        'Suggestions are indicative — you remain responsible for the codes you keep and the applicable rules.',
       disclaimerHide: 'Hide this notice',
-      dailyLabel: 'In practice',
-      dailyText: 'Text',
-      dailyValidateExport: 'Validate & export',
+      disclaimerTitle: 'Indicative suggestions',
+      disclaimerBody:
+        'You remain responsible for the codes you keep and for the rules in force.',
+    },
+    workspace: {
+      tabsLabel: 'Coding steps',
+      tabCr: 'Text',
+      tabSuggestions: 'Suggestions',
+      tabRetenus: 'Retained',
     },
     report: {
       title: 'Report',
@@ -758,6 +763,7 @@ export const messages = {
       clipboard: 'Clipboard',
       download: 'Download',
       sendShare: 'Send / share',
+      more: 'Other formats',
       copyList: 'Copy for EHR',
       copied: '✓ Copied for EHR',
       txt: 'Text (.txt)',
@@ -776,7 +782,6 @@ export const messages = {
       shareDocTitle: 'Mister CIM-10 — diagnoses',
     },
     settings: {
-      subTagline: 'Suggestion tuning and WHO connection',
       kicker: 'Configuration',
       title: 'Settings',
       leadBefore:
@@ -852,7 +857,6 @@ export const messages = {
       shareCancelled: 'Sharing cancelled.',
     },
     help: {
-      subTagline: 'User guide and WHO API account',
       title: 'Usage help',
       leadBefore: 'How to use the app day to day, and how to get a ',
       leadStrong: 'WHO developer account',

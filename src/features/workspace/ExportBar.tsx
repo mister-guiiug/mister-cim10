@@ -162,85 +162,87 @@ export function ExportBar({ disabled }: ExportBarProps) {
   const shareSupported =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+  /*
+   * UN GESTE PRINCIPAL, LE RESTE REPLIÉ. « Copier pour DPI » est ce que fait
+   * une journée type (DESIGN.md) ; les six autres sorties étaient une rangée
+   * de boutons égaux, l'anti-motif que DESIGN.md refuse lui-même, et Astryx
+   * réserve le bouton principal à une seule action par vue.
+   */
   return (
     <div className="export-blocks">
-      <div className="export-block export-block--primary">
-        <span className="export-block-label">{t('export.clipboard')}</span>
-        <div className="toolbar export-row export-row--panel">
-          <button
-            type="button"
-            className="primary export-dpi"
-            onClick={copyList}
-            disabled={disabled}
-            aria-live="polite"
-          >
-            {copied ? t('export.copied') : t('export.copyList')}
-          </button>
-        </div>
-      </div>
-      <div className="export-block">
-        <span className="export-block-label">{t('export.download')}</span>
-        <div className="toolbar export-row export-row--panel">
-          <button
-            type="button"
-            className="secondary"
-            onClick={exportTxt}
-            disabled={disabled}
-          >
-            {t('export.txt')}
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={exportCsv}
-            disabled={disabled}
-          >
-            {t('export.csv')}
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={exportJson}
-            disabled={disabled}
-          >
-            {t('export.json')}
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={print}
-            disabled={disabled}
-          >
-            {t('export.printPdf')}
-          </button>
-        </div>
-      </div>
-      <div className="export-block">
-        <span className="export-block-label">{t('export.sendShare')}</span>
-        <div className="toolbar export-row export-row--panel">
-          <button
-            type="button"
-            className="secondary"
-            onClick={exportEmail}
-            disabled={disabled}
-            title={t('export.emailTitle')}
-          >
-            {t('common.email')}
-          </button>
-          {shareSupported && (
+      <button
+        type="button"
+        className="primary export-dpi"
+        onClick={copyList}
+        disabled={disabled}
+        aria-live="polite"
+      >
+        {copied ? t('export.copied') : t('export.copyList')}
+      </button>
+      <details className="export-more">
+        <summary>{t('export.more')}</summary>
+        <div className="export-more-body">
+          <p className="export-block-label">{t('export.download')}</p>
+          <div className="toolbar export-row">
             <button
               type="button"
               className="secondary"
-              onClick={exportShare}
+              onClick={exportTxt}
               disabled={disabled}
-              title={t('export.shareTitle')}
             >
-              {t('common.share')}
+              {t('export.txt')}
             </button>
-          )}
+            <button
+              type="button"
+              className="secondary"
+              onClick={exportCsv}
+              disabled={disabled}
+            >
+              {t('export.csv')}
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={exportJson}
+              disabled={disabled}
+            >
+              {t('export.json')}
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={print}
+              disabled={disabled}
+            >
+              {t('export.printPdf')}
+            </button>
+          </div>
+          <p className="export-block-label">{t('export.sendShare')}</p>
+          <div className="toolbar export-row">
+            <button
+              type="button"
+              className="secondary"
+              onClick={exportEmail}
+              disabled={disabled}
+              title={t('export.emailTitle')}
+            >
+              {t('common.email')}
+            </button>
+            {shareSupported && (
+              <button
+                type="button"
+                className="secondary"
+                onClick={exportShare}
+                disabled={disabled}
+                title={t('export.shareTitle')}
+              >
+                {t('common.share')}
+              </button>
+            )}
+          </div>
+          <p className="hint export-hint">{t('export.hint')}</p>
         </div>
-      </div>
-      <p className="hint export-hint">{t('export.hint')}</p>
+      </details>
     </div>
   );
 }

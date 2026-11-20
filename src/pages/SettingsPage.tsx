@@ -138,7 +138,7 @@ export function SettingsPage() {
 
   return (
     <>
-      <AppHeader subTagline={t('settings.subTagline')} />
+      <AppHeader />
       <main id="main-content" className="page-main settings-page" tabIndex={-1}>
         <header className="page-hero">
           <p className="page-kicker">{t('settings.kicker')}</p>

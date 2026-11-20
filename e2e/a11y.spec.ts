@@ -60,3 +60,42 @@ test.describe('@a11y accessibilité', () => {
     await expectNoA11yViolations(page, AxeBuilder, expect);
   });
 });
+
+/**
+ * AU TÉLÉPHONE, LES ÉTAPES SONT DES ONGLETS (refonte Astryx, 20/11/2026) : le
+ * motif ARIA des onglets, les compteurs, le bandeau d'avertissement au-dessus
+ * des suggestions. On les audite à 390 px, dans les DEUX thèmes, sur chaque
+ * onglet qu'un cotateur traverse : texte, suggestions, retenus avec l'export.
+ */
+for (const theme of ['light', 'dark'] as const) {
+  test.describe(`@a11y téléphone, thème ${theme === 'light' ? 'clair' : 'sombre'}`, () => {
+    test.use({ viewport: { width: 390, height: 844 }, colorScheme: theme });
+
+    test('les trois onglets de la cotation sans violation WCAG A/AA', async ({
+      page,
+    }) => {
+      await page.goto('/');
+      await expect(page.getByRole('tablist')).toBeVisible();
+      await expectNoA11yViolations(page, AxeBuilder, expect);
+
+      await page
+        .getByRole('textbox', { name: /texte du compte-rendu|report text/i })
+        .fill('Hypertension artérielle essentielle. Fibrillation auriculaire.');
+      await page.getByRole('button', { name: /^(analyser|analyze)$/i }).click();
+      await expect(
+        page.getByRole('tab', { name: /suggestions/i })
+      ).toHaveAttribute('aria-selected', 'true');
+      await expectNoA11yViolations(page, AxeBuilder, expect);
+
+      await page
+        .getByRole('button', { name: /^(valider|validate)$/i })
+        .first()
+        .click();
+      await page.getByRole('tab', { name: /retenus|retained/i }).click();
+      await expect(
+        page.getByRole('button', { name: /copier pour dpi|copy for ehr/i })
+      ).toBeVisible();
+      await expectNoA11yViolations(page, AxeBuilder, expect);
+    });
+  });
+}

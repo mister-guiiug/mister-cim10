@@ -1,6 +1,8 @@
 # DESIGN.md — Mister CIM-10
 
-Direction verrouillée : **Clinical Console** (variante A, 03/10/2026).
+Direction : **Clinical Console** (variante A, 03/10/2026), écrite depuis le
+20/11/2026 dans la **grammaire d'Astryx**, le design system open source de Meta
+(<https://astryx.atmeta.com/>).
 
 > Aide à la cotation CIM-10 pour professionnels de santé (médecins, DIM, TIM).
 > Posture : logiciel métier dense et crédible, pas PWA « produit indie ».
@@ -11,91 +13,124 @@ Direction verrouillée : **Clinical Console** (variante A, 03/10/2026).
 
 ## Visual thesis
 
-Console clinique desktop-first : trois colonnes stables (compte-rendu → suggestions → retenus), chrome sombre, accent teal sobre, codes en mono. Peu d’ornement. La confiance (référentiel local / OMS / seuil) est permanente.
+Console clinique : trois régions stables (compte-rendu → suggestions → retenus),
+surfaces neutres, accent teal sobre, codes en mono. Peu d'ornement. La confiance
+(référentiel local / OMS / seuil) est permanente.
+
+## Astryx : la grammaire, pas le paquet
+
+On reprend d'Astryx ses **noms** et ses **échelles** ; on n'installe pas
+`@astryxdesign/core` (StyleX y est une dépendance obligatoire, le parc est en
+Tailwind sur un socle commun, et la règle 3 du parc refuse une seconde
+bibliothèque de composants — même choix que mister-uwh-tactic).
+
+- **Une source** : `src/astryx.css`. Les couleurs, tailles, rayons, ombres,
+  délais et calques n'existent que là ; `style.css` ne contient que des `var()`.
+- **Un garde** : `src/astryx.test.ts` refuse une taille de texte, une couleur ou
+  un rayon écrit en dur dans `style.css` (hors impression).
+- Les composants du socle suivent : le contrat `--dwc-*` est branché sur les
+  rôles d'Astryx (`src/tailwind.css`).
+- Les anciens noms (`--accent`, `--text-sm`…) restent en alias, sans valeur,
+  le temps que chaque règle soit réécrite.
 
 ## Typography
 
-| Rôle                 | Police                                        | Notes                 |
-| -------------------- | --------------------------------------------- | --------------------- |
-| UI                   | **IBM Plex Sans**                             | 400 / 500 / 600 / 700 |
-| Codes, pourcentages  | **IBM Plex Mono**                             | tabular-nums          |
-| Interdit en primaire | Inter, Roboto, Arial, DM Sans, system-ui seul |                       |
+| Rôle                | Police            | Notes                 |
+| ------------------- | ----------------- | --------------------- |
+| UI                  | **IBM Plex Sans** | 400 / 500 / 600 / 700 |
+| Codes, pourcentages | **IBM Plex Mono** | tabular-nums          |
 
-Échelle : conserver les tokens `--text-2xs` … `--text-2xl` de `src/style.css`.
+Écart assumé : Astryx a une pile système ; un thème Astryx choisit ses polices,
+celui-ci garde IBM Plex.
+
+**Sept styles nommés, rien d'autre** (base 14 px, rapport 1,2) :
+`heading-1` 24 · `heading-2` 20 · `heading-3` 17 · `heading-4` 14 semi-gras ·
+`body` 14 · `label` 14 moyen · `supporting` 12. **Au doigt** (`pointer: coarse`),
+`body`, `label` et `heading-4` passent à 16 px et `supporting` à 13, comme le
+thème Neutral d'Astryx. Titres en casse de phrase : plus de capitales espacées.
 
 ## Color
 
-### Clair
+Les rôles d'Astryx (`--color-<élément>-<rôle>`), valeurs neutres d'Astryx pour
+les surfaces, encres et bordures ; l'accent reste le teal de la marque.
 
-| Token                          | Valeur                          | Usage                           |
-| ------------------------------ | ------------------------------- | ------------------------------- |
-| `--bg`                         | `#e8eef5`                       | Fond page (ardoise claire)      |
-| `--surface`                    | `#ffffff`                       | Panneaux                        |
-| `--surface2`                   | `#d5dee9`                       | Bordures / surfaces secondaires |
-| `--text`                       | `#0f172a`                       | Encre                           |
-| `--muted`                      | `#5b6b7c`                       | Secondaire                      |
-| `--accent`                     | `#0b6e6a`                       | CTA, liens actifs, marque       |
-| `--accent-dim`                 | `#0a5c59`                       | Hover primary                   |
-| `--ok` / `--warn` / `--danger` | verts / ambre / rouge cliniques | Confiance, alertes              |
-| `--nav`                        | `#0b1f33`                       | Bandeau haut desktop            |
+| Rôle                         | Clair     | Sombre    |
+| ---------------------------- | --------- | --------- |
+| `--color-background-body`    | `#f1f4f7` | `#111112` |
+| `--color-background-surface` | `#ffffff` | `#1f1f22` |
+| `--color-text-primary`       | `#0a1317` | `#dfe2e5` |
+| `--color-text-secondary`     | `#445564` | `#b0b5bb` |
+| `--color-accent`             | `#0b6e6a` | `#2dd4bf` |
+| `--color-border-emphasized`  | `#7a8794` | `#7c838c` |
 
-### Sombre
+Écart assumé : la bordure accentuée d'Astryx (`#CCD3DB`) tient 1,5:1 ; le
+pourtour d'un champ en exige 3 (WCAG 1.4.11). Pas de dégradés, pas de glow.
 
-| Token       | Valeur    |
-| ----------- | --------- |
-| `--bg`      | `#0c1222` |
-| `--surface` | `#151b2e` |
-| `--accent`  | `#2dd4bf` |
-| `--text`    | `#f1f5f9` |
+## Layout — les régions d'Astryx
 
-Pas de dégradés violets, pas de glow marketing, pas de fond crème/terracotta.
+| Fenêtre                           | Disposition | Ce qu'on voit                                                                             |
+| --------------------------------- | ----------- | ----------------------------------------------------------------------------------------- |
+| **< 768 px, ou < 500 px de haut** | compacte    | Une région à la fois, choisie par trois onglets : **Texte · Suggestions · Retenus**       |
+| **768 – 1 023 px**                | moyenne     | Deux onglets à gauche (Texte · Suggestions), les retenus toujours visibles à droite       |
+| **≥ 1 024 px**                    | large       | Trois colonnes qui remplissent la fenêtre ; chacune défile seule, son titre reste en haut |
 
-## Layout
-
-- **≥ 1280 px** : grille 3 colonnes `cr | suggestions | retenus` ; retenus sticky.
-- **1024–1279 px** : 2 colonnes (travail empilé à gauche, retenus à droite).
-- **&lt; 1024 px** : une colonne ; `BottomNav` fixe ; rappel « N retenus ».
-- Largeur app : jusqu’à ~1400 px en console, plus le plafond historique 920 px.
+- **L'analyse ouvre les suggestions** quand elles sont dans un onglet ; chaque
+  onglet porte son compte (suggestions à trancher, codes retenus).
+- **Les colonnes ne sont pas des cartes** : une région de page est un titre, de
+  l'espace et une bordure (Astryx : la carte est réservée à un objet qu'on
+  pourrait retirer seul — un diagnostic retenu en est une).
+- Largeur utile jusqu'à 100 rem.
 
 ## Navigation
 
-- **Desktop (≥ 1024 px)** : liens Cotation / Paramètres / Aide dans le header ; barre basse masquée.
-- **Mobile** : `BottomNav` du socle (Accueil → libellé Cotation).
+- **≥ 1 024 px** : Cotation / Paramètres / Aide dans la barre haute ; barre basse masquée.
+- **En dessous** : la barre basse du socle (Cotation, Paramètres, Aide).
+- La barre haute ne porte que la marque et la navigation : ni accroche, ni étapes.
 
 ## Trust bar
 
-Sous le header, toujours visible sur l’accueil :
+Une ligne de texte d'appoint, avec deux points d'état : référentiel local,
+OMS (joignable / indisponible), seuil de confiance (en %, comme Paramètres),
+données sur l'appareil. Pas de pilules : un badge ne se pose que sur un état qui
+demande d'agir. Au bureau et à la tablette, au-dessus du travail ; au téléphone,
+sous le compte-rendu.
 
-1. Statut CIM-10 local (prêt)
-2. Statut OMS (joignable / indisponible)
-3. Seuil de confiance
-4. Rappel privacy (données sur l’appareil)
+L'avertissement (« Suggestions indicatives… ATIH ») est un **bandeau
+d'information** d'Astryx, masquable ; au téléphone, en tête de l'onglet
+Suggestions.
 
 ## Components / patterns
 
-| Pattern           | Règle                                                            |
-| ----------------- | ---------------------------------------------------------------- |
-| Panneaux          | Surface blanche, bordure `--surface2`, radius **8px**            |
-| CTA primaire      | Un par zone : Analyser · Valider · **Copier pour DPI**           |
-| Export            | Presse-papiers = geste principal ; CSV/JSON/print secondaires    |
-| Cartes suggestion | Bord gauche = niveau de confiance ; badge source CIM-10 / CIM-11 |
-| BrandMark         | Croix médicale, fond navy, accent **teal** (aligné `--accent`)   |
-| Workflow 1→2→3    | Compact dans le header accueil ; pas de setup guide              |
+| Pattern          | Règle                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| Bouton principal | **Un par vue** : Analyser (compte-rendu), Copier pour DPI (retenus)                        |
+| Valider          | Bouton secondaire à l'accent : neuf principaux n'en feraient plus aucun                    |
+| Contrôles        | 32 px à la souris (`--size-element-md`), **44 px au doigt** (écart : Astryx s'arrête à 36) |
+| Suggestion       | Une ligne de liste : code + libellé, puis confiance et terme repéré, puis les gestes       |
+| Confiance        | Bord de début coloré + jauge + texte (jamais la couleur seule)                             |
+| Export           | « Copier pour DPI » seul en évidence ; fichiers et envoi sous « Autres formats »           |
+| Retenus          | Liste → export → « Ajouter un code » (recherche, favoris, saisie)                          |
+| Rayons           | `inner` 4 · `element` 8 · `container` 12 · `full`                                          |
+| BrandMark        | Croix médicale, fond navy, accent **teal**                                                 |
 
 ## Motion
 
-- Transitions courtes (`--transition: 0.16s`)
-- Respect `prefers-reduced-motion`
-- Pas d’animations décoratives ; pulse micro uniquement pendant la dictée
+- `--duration-fast` (175 ms), courbe `--ease-standard` d'Astryx
+- `prefers-reduced-motion` : toutes les durées à 0
+- Pas d'animations décoratives ; pulse micro uniquement pendant la dictée
 
 ## Anti-patterns (refusés)
 
+- Une valeur visuelle écrite ailleurs que dans `astryx.css`
+- Une région de page habillée en carte ; des cartes dans des cartes
+- Plusieurs boutons principaux dans une même vue
+- Une rangée de boutons d'export tous égaux, ou affichés grisés sur une liste vide
+- Titres en capitales espacées
 - Bottom-nav seule sur grand écran
-- Rangée de boutons d’export tous égaux
-- Teal « glow » + cards trop arrondies (12–18px) comme identité
-- Logo sky (`#38bdf8`) désaligné de l’accent UI
 - Happy talk / onboarding long devant le geste Analyser
 
-## Source maquette
+## Sources
 
-`~/.gstack/projects/mister-cim10/designs/enterprise-ux-20261003/` — `approved.json` variante **A**.
+- Astryx : <https://astryx.atmeta.com/>, dépôt `meta/astryx`
+  (`packages/core/src/theme/tokens.stylex.ts` pour les valeurs).
+- Maquette d'origine : `~/.gstack/projects/mister-cim10/designs/enterprise-ux-20261003/`, variante **A**.

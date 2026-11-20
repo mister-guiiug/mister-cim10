@@ -6,7 +6,16 @@ import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';
 import { SuggestionsPanel } from '../features/workspace/SuggestionsPanel';
 import { ValidatedPanel } from '../features/workspace/ValidatedPanel';
+import { WorkspaceTabs } from '../features/workspace/WorkspaceTabs';
+import {
+  regionsEnOnglets,
+  useDisposition,
+  vueAffichee,
+} from '../features/workspace/disposition';
+import { TrustBar } from '../components/TrustBar';
+import { DisclaimerBanner } from '../components/DisclaimerBanner';
 import { useWorkspaceStore } from '../store/workspaceStore';
+import { useVueStore, type Vue } from '../store/vueStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { suggestFromText } from '../lib/analyzer';
 import { OmsError, suggestFromOms } from '../lib/oms';
@@ -51,6 +60,9 @@ export function HomePage() {
    * quelque chose à produire.
    */
   const isOnline = useOnline();
+  const setVue = useVueStore(s => s.setVue);
+  const vue = useVueStore(s => s.vue);
+  const disposition = useDisposition();
 
   /** La passerelle est-elle interrogeable ? Réseau ET adresse configurée. */
   const omsJoignable = isOnline && who.proxyUrl.trim() !== '';
@@ -98,6 +110,10 @@ export function HomePage() {
         );
       }
       setSuggestions(classerParConfiance(results));
+      // L'analyse OUVRE ses suggestions quand l'écran n'en montre qu'une
+      // région : sinon, sur un téléphone, le résultat d'un geste resterait
+      // dans un onglet qu'on ne voit pas.
+      setVue('suggestions');
       trackEvent(GESTES.OPERATION, {
         nom: 'analyse',
         etape: 'reussie',
@@ -135,37 +151,66 @@ export function HomePage() {
     }
   };
 
+  // Une région en onglets reçoit le rôle `tabpanel` et se cache quand un
+  // autre onglet est choisi ; hors onglets (les trois colonnes du bureau, ou
+  // les retenus en disposition moyenne), elle reste une simple région.
+  const enOnglets = regionsEnOnglets(disposition);
+  const affichee = vueAffichee(disposition, vue);
+  const region = (r: Vue) =>
+    enOnglets.includes(r)
+      ? {
+          id: `region-${r}`,
+          role: 'tabpanel' as const,
+          'aria-labelledby': `onglet-${r}`,
+          hidden: affichee !== r,
+        }
+      : { id: `region-${r}` };
+
   return (
     <>
       <AppHeader />
-      {/*
-       * DEUX COLONNES AU-DESSUS DE 1024 px, et ce n'est pas de l'esthétique.
-       *
-       * Mesuré en production le 17/09/2026, en 1280 × 900 : la page faisait
-       * 3 475 px, « Diagnostics retenus » commençait à 2 582 px, et un
-       * « Valider » se trouvait à 1 834 px — DEUX ÉCRANS — de l'endroit où son
-       * code allait atterrir. Valider n'avait donc aucun effet visible. La
-       * place existait pourtant : les cartes s'étiraient sur 1 234 px pour un
-       * code et quatre mots de libellé.
-       *
-       * Le travail à gauche (saisie puis suggestions), le résultat à droite,
-       * collant. Sous le seuil, la colonne unique reste — et le rappel du
-       * panneau des suggestions prend le relais.
-       */}
-      <main id="main-content" className="workspace" tabIndex={-1}>
-        {/*
-         * Clinical Console (≥1280) : trois colonnes — CR | suggestions |
-         * retenus. Entre 1024 et 1279 : travail à gauche (CR puis suggestions),
-         * retenus sticky à droite. Sous 1024 : une colonne + rappel retenus.
-         */}
-        <div className="workspace-col workspace-col--cr">
-          <CrPanel onAnalyze={handleAnalyze} />
-        </div>
-        <div className="workspace-col workspace-col--suggestions">
-          <SuggestionsPanel />
-        </div>
-        <div className="workspace-col workspace-col--retenus">
-          <ValidatedPanel />
+      <main
+        id="main-content"
+        className="workspace-page"
+        tabIndex={-1}
+        data-disposition={disposition}
+      >
+        {disposition !== 'compacte' && (
+          <div className="workspace-top">
+            <TrustBar />
+            <DisclaimerBanner />
+          </div>
+        )}
+        <WorkspaceTabs disposition={disposition} />
+        <div className="workspace">
+          <div
+            className="workspace-region workspace-region--cr"
+            {...region('cr')}
+          >
+            <CrPanel onAnalyze={handleAnalyze} />
+            {disposition === 'compacte' && (
+              <div className="region-note">
+                <TrustBar />
+              </div>
+            )}
+          </div>
+          <div
+            className="workspace-region workspace-region--suggestions"
+            {...region('suggestions')}
+          >
+            {disposition === 'compacte' && (
+              <div className="region-note region-note--top">
+                <DisclaimerBanner />
+              </div>
+            )}
+            <SuggestionsPanel />
+          </div>
+          <div
+            className="workspace-region workspace-region--retenus"
+            {...region('retenus')}
+          >
+            <ValidatedPanel />
+          </div>
         </div>
       </main>
 
