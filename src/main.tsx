@@ -17,6 +17,7 @@ import { I18nProvider } from './i18n';
 import { DialogProvider } from './components/DialogProvider';
 import { SocleLabelsBridge } from './components/SocleLabelsBridge';
 import { PwaUpdates } from './components/PwaUpdates';
+import './astryx.css';
 import './tailwind.css';
 import './style.css';
 

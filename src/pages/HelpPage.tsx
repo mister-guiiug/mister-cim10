@@ -10,7 +10,7 @@ export function HelpPage() {
   const { t } = useI18n();
   return (
     <>
-      <AppHeader subTagline={t('help.subTagline')} />
+      <AppHeader />
       <main id="main-content" className="page-main help-page" tabIndex={-1}>
         <header className="page-hero">
           <h1 className="page-title">{t('help.title')}</h1>

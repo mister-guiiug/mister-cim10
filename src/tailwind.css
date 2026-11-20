@@ -4,25 +4,24 @@
 
 /*
  * Contrat `--dwc-*` des composants du socle (components.css) branché sur les
- * jetons de thème de l'app (style.css, `html[data-theme=…]`). Tout est en
- * `var()` : les valeurs suivent le thème actif sans dupliquer les couleurs.
- * `--dwc-info` n'a pas d'équivalent local — `light-dark()` suit le
- * `color-scheme` posé par les deux blocs de thème.
+ * rôles d'Astryx (`astryx.css`). Tout est en `var()` : les composants du socle
+ * suivent le thème actif sans une couleur de plus.
  */
 :root {
-  --dwc-surface: var(--surface);
-  --dwc-surface-2: var(--surface2);
-  --dwc-text: var(--text);
-  --dwc-text-soft: var(--muted);
-  --dwc-border: var(--surface2);
-  --dwc-border-strong: var(--muted);
-  --dwc-primary: var(--accent);
-  --dwc-primary-contrast: var(--btn-primary-fg);
-  --dwc-primary-soft: color-mix(in srgb, var(--accent) 14%, var(--surface));
-  --dwc-success: var(--ok);
-  --dwc-warning: var(--warn);
-  --dwc-danger: var(--danger);
-  --dwc-info: light-dark(#0369a1, #38bdf8);
-  --dwc-radius: var(--radius);
-  --dwc-shadow: var(--shadow-panel);
+  --dwc-bg: var(--color-background-body);
+  --dwc-surface: var(--color-background-surface);
+  --dwc-surface-2: var(--color-background-muted);
+  --dwc-text: var(--color-text-primary);
+  --dwc-text-soft: var(--color-text-secondary);
+  --dwc-border: var(--color-border);
+  --dwc-border-strong: var(--color-border-emphasized);
+  --dwc-primary: var(--color-accent);
+  --dwc-primary-contrast: var(--color-on-accent);
+  --dwc-primary-soft: var(--color-accent-muted);
+  --dwc-success: var(--color-text-success);
+  --dwc-warning: var(--color-text-warning);
+  --dwc-danger: var(--color-text-error);
+  --dwc-info: var(--color-text-accent);
+  --dwc-radius: var(--radius-element);
+  --dwc-shadow: var(--shadow-low);
 }

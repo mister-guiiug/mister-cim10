@@ -195,15 +195,9 @@ export function CrPanel({ onAnalyze, dictationEnvironment }: CrPanelProps) {
     <section className="panel panel--cr" aria-labelledby="cr-label">
       <div className="panel-head">
         <h2 id="cr-label" className="panel-title">
-          <svg
-            aria-hidden="true"
-            width={12}
-            height={12}
-            viewBox="0 0 16 16"
-            fill="currentColor"
-          >
-            <path d="M4 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 2v1h6V4H5zm0 2.5v1h6v-1H5zm0 2.5v1h4v-1H5z" />
-          </svg>
+          <span className="panel-step" aria-hidden="true">
+            1
+          </span>
           <span className="panel-title-text">{t('report.title')}</span>
         </h2>
       </div>

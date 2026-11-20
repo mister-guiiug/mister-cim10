@@ -281,15 +281,9 @@ export function ValidatedPanel() {
     >
       <div className="panel-head">
         <h2 id="val-label" className="panel-title">
-          <svg
-            aria-hidden="true"
-            width={12}
-            height={12}
-            viewBox="0 0 16 16"
-            fill="currentColor"
-          >
-            <path d="M13.854 3.146a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 9.793l6.646-6.647a.5.5 0 0 1 .708 0z" />
-          </svg>
+          <span className="panel-step" aria-hidden="true">
+            3
+          </span>
           <span className="panel-title-text">{t('validated.title')}</span>
           {hasValidated && (
             <span className="panel-count" aria-hidden="true">
@@ -413,14 +407,23 @@ export function ValidatedPanel() {
           </div>
         </>
       )}
+      {/* L'EXPORT SOUS LA LISTE, et seulement quand elle a de quoi sortir :
+          c'est le geste qui suit « Valider ». Il venait en dernier, sous la
+          recherche et les favoris, et ses sept boutons s'affichaient grisés
+          sur une liste vide. */}
+      {hasValidated && <ExportBar disabled={false} />}
       {/* Trois façons d'ajouter un code que le compte-rendu ne contient pas :
           depuis ses FAVORIS (un geste), par son LIBELLÉ (la recherche, qui
           interroge tout le référentiel) ou par son CODE quand on le connaît
           déjà (la saisie manuelle, repliée derrière son bouton). */}
-      <FavoritesPanel existingCodes={validatedCodes} />
-      <CodeSearch onAdd={addManualDiagnostic} existingCodes={validatedCodes} />
-      <ManualEntryForm existingCodes={validatedCodes} />
-      <ExportBar disabled={validated.length === 0} />
+      <div className="validated-add">
+        <CodeSearch
+          onAdd={addManualDiagnostic}
+          existingCodes={validatedCodes}
+        />
+        <FavoritesPanel existingCodes={validatedCodes} />
+        <ManualEntryForm existingCodes={validatedCodes} />
+      </div>
     </section>
   );
 }

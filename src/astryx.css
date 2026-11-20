@@ -1,0 +1,313 @@
+/*
+ * LA GRAMMAIRE D'ASTRYX, LA SEULE SOURCE DES DÉCISIONS VISUELLES.
+ *
+ * Astryx est le design system open source de Meta (MIT, `@astryxdesign/core`,
+ * <https://astryx.atmeta.com/>). On lui prend ses NOMS et ses ÉCHELLES, pas son
+ * paquet : StyleX y est une dépendance obligatoire, le parc est en Tailwind sur
+ * un socle commun, et la règle 3 du parc refuse une seconde bibliothèque de
+ * composants dans une seule application (même choix que mister-uwh-tactic,
+ * ADR 0017 là-bas). Les valeurs sont celles de `tokens.stylex.ts` d'Astryx
+ * (relevées le 20/11/2026), sauf les écarts marqués « ÉCART ».
+ *
+ * Tout ce qui se voit se règle ICI : une couleur, une taille de texte, un
+ * rayon, une ombre, un délai. `style.css` ne contient plus de valeur, seulement
+ * des `var()` ; `scale.test.ts` le vérifie.
+ *
+ * Les anciens noms de l'application (`--accent`, `--surface`, `--text-sm`…)
+ * restent déclarés en bas de ce fichier comme ALIAS des noms d'Astryx, le temps
+ * que chaque règle soit réécrite : ils ne portent plus aucune valeur.
+ */
+
+/* ── Échelles, indépendantes du thème ─────────────────────────────────── */
+:root {
+  /* Texte : base 14 px, rapport 1,2, arrondi au pixel. */
+  --font-size-sm: 0.75rem; /* 12 */
+  --font-size-base: 0.875rem; /* 14 */
+  --font-size-lg: 1.0625rem; /* 17 */
+  --font-size-xl: 1.25rem; /* 20 */
+  --font-size-2xl: 1.5rem; /* 24 */
+  --font-size-3xl: 1.8125rem; /* 29 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ÉCART : IBM Plex, la police de DESIGN.md (« Clinical Console »), et non la
+     pile système d'Astryx. Un thème Astryx choisit ses polices ; celui-ci
+     garde les siennes. */
+  --font-family-body:
+    'IBM Plex Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-heading: var(--font-family-body);
+  --font-family-code:
+    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Consolas,
+    monospace;
+
+  /* Les styles nommés : sept, et rien d'autre. */
+  --text-heading-1-size: var(--font-size-2xl);
+  --text-heading-1-weight: var(--font-weight-semibold);
+  --text-heading-1-leading: 1.3333;
+  --text-heading-2-size: var(--font-size-xl);
+  --text-heading-2-weight: var(--font-weight-semibold);
+  --text-heading-2-leading: 1.4;
+  --text-heading-3-size: var(--font-size-lg);
+  --text-heading-3-weight: var(--font-weight-semibold);
+  --text-heading-3-leading: 1.4118;
+  --text-heading-4-size: var(--font-size-base);
+  --text-heading-4-weight: var(--font-weight-semibold);
+  --text-heading-4-leading: 1.4286;
+  --text-body-size: var(--font-size-base);
+  --text-body-weight: var(--font-weight-normal);
+  --text-body-leading: 1.4286;
+  --text-label-size: var(--font-size-base);
+  --text-label-weight: var(--font-weight-medium);
+  --text-label-leading: 1.4286;
+  --text-code-size: var(--font-size-base);
+  --text-code-weight: var(--font-weight-medium);
+  --text-code-leading: 1.4286;
+  --text-supporting-size: var(--font-size-sm);
+  --text-supporting-weight: var(--font-weight-normal);
+  --text-supporting-leading: 1.6667;
+
+  /* Espacement : le pas de 4 px d'Astryx. */
+  --spacing-0: 0rem;
+  --spacing-0-5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1-5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+
+  /* ÉCART : Astryx s'arrête à 36 px de contrôle et ne publie pas de taille de
+     cible ; le parc exige 44 px au doigt (WCAG 2.5.5). `--size-element-lg`
+     est donc la taille de toute cible au toucher. */
+  --size-element-sm: 1.75rem; /* 28 */
+  --size-element-md: 2rem; /* 32 */
+  --size-element-lg: 2.75rem; /* 44 */
+
+  --border-width: 1px;
+  --focus-outline-width: 2px;
+  --focus-outline-offset: 3px;
+
+  --radius-inner: 4px;
+  --radius-element: 8px;
+  --radius-container: 12px;
+  --radius-full: 9999px;
+
+  --shadow-low:
+    0 1px 1px var(--color-shadow-key), 0 2px 8px var(--color-shadow-key);
+  --shadow-med:
+    0 1px 2px var(--color-shadow-key), 0 2px 12px var(--color-shadow-key);
+  --shadow-high:
+    0 2px 2px var(--color-shadow-key), 0 8px 24px var(--color-shadow-ambient);
+
+  --duration-fast-min: 130ms;
+  --duration-fast: 175ms;
+  --duration-fast-max: 230ms;
+  --duration-medium: 410ms;
+  --duration-exit: var(--duration-fast);
+  --ease-standard: cubic-bezier(0.24, 1, 0.4, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.6, 0.6);
+
+  /* L'ordre des calques, qu'Astryx ne publie pas : un seul endroit. */
+  --layer-sticky: 10;
+  --layer-nav: 30;
+  --layer-banner: 40;
+  --layer-popover: 50;
+  --layer-modal: 60;
+  --layer-skip: 100;
+
+  /* Les régions de l'écran : Astryx range en trois régions dès 1 024 px, deux
+     dès 768, une en dessous. Hauteur de la barre haute : la seule constante de
+     mise en page, lue par l'espace de travail pour remplir la fenêtre. */
+  --app-bar-height: 3.5rem;
+  --app-max-width: 100rem;
+}
+
+/* AU DOIGT, LE TEXTE COURANT PASSE À 16 PX, comme le thème Neutral d'Astryx
+   sous un pointeur grossier : 14 px se lit au bureau, pas sur un téléphone
+   tenu à bout de bras. */
+@media (pointer: coarse) {
+  :root {
+    --text-body-size: 1rem;
+    --text-body-leading: 1.5;
+    --text-label-size: 1rem;
+    --text-label-leading: 1.5;
+    --text-code-size: 1rem;
+    --text-code-leading: 1.5;
+    --text-heading-4-size: 1rem;
+    --text-heading-4-leading: 1.5;
+    --text-supporting-size: 0.8125rem; /* 13 : au plancher, 12 se lit mal au doigt */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast-min: 0ms;
+    --duration-fast: 0ms;
+    --duration-fast-max: 0ms;
+    --duration-medium: 0ms;
+  }
+}
+
+/* ── Couleurs : les rôles d'Astryx, thème clair ──────────────────────────
+   Surfaces, encres et bordures : les valeurs neutres d'Astryx. L'accent reste
+   le teal de la marque (DESIGN.md), comme un thème Astryx choisit le sien ;
+   les couleurs d'état gardent les teintes déjà mesurées AA de l'application. */
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-background-body: #f1f4f7;
+  --color-background-surface: #ffffff;
+  --color-background-card: #ffffff;
+  --color-background-popover: #ffffff;
+  --color-background-muted: #05365908;
+  --color-background-inverted: #0a1317;
+  --color-overlay: #01122866;
+  --color-overlay-hover: #0536590c;
+  --color-overlay-pressed: #05365919;
+
+  --color-text-primary: #0a1317;
+  --color-text-secondary: #445564;
+  --color-text-disabled: #8492a0;
+  --color-text-accent: #0b6e6a;
+  --color-icon-primary: #0a1317;
+  --color-icon-secondary: #4e606f;
+
+  --color-accent: #0b6e6a;
+  --color-accent-hover: #0a5c59;
+  --color-accent-muted: #0b6e6a1f;
+  --color-on-accent: #ffffff;
+
+  --color-border: #05365919;
+  /* ÉCART : la bordure « accentuée » d'Astryx (#CCD3DB) tient 1,5:1 sur blanc.
+     Le pourtour d'un champ en exige 3 (WCAG 1.4.11) : 3,6:1 ici. */
+  --color-border-emphasized: #7a8794;
+  --color-track: #ccd3db;
+
+  --color-text-success: #157a4b;
+  --color-text-warning: #8a5300;
+  --color-text-error: #b42318;
+  --color-success: #157a4b;
+  --color-warning: #c27c00;
+  --color-error: #b42318;
+  --color-success-muted: #157a4b1f;
+  --color-warning-muted: #e2a40026;
+  --color-error-muted: #b423181a;
+  --color-info-muted: #0064e014;
+
+  --color-shadow-key: rgb(0 0 0 / 0.08);
+  --color-shadow-ambient: rgb(0 0 0 / 0.12);
+
+  /* Le bouton « Buy me a coffee » du pied : la couleur de cette marque-là. */
+  --color-sponsor: #f9a825;
+  --color-text-sponsor: #7a4100;
+  --color-text-sponsor-hover: #5a3000;
+}
+
+/* ── Thème sombre : les neutres sombres d'Astryx ───────────────────────── */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-background-body: #111112;
+  --color-background-surface: #1f1f22;
+  --color-background-card: #1f1f22;
+  --color-background-popover: #28292c;
+  --color-background-muted: #ffffff08;
+  --color-background-inverted: #ffffff;
+  --color-overlay: #11111299;
+  --color-overlay-hover: #ffffff0c;
+  --color-overlay-pressed: #ffffff19;
+
+  --color-text-primary: #dfe2e5;
+  --color-text-secondary: #b0b5bb;
+  --color-text-disabled: #80868e;
+  --color-text-accent: #2dd4bf;
+  --color-icon-primary: #dfe2e5;
+  --color-icon-secondary: #aaafb5;
+
+  --color-accent: #2dd4bf;
+  --color-accent-hover: #5eead4;
+  --color-accent-muted: #2dd4bf26;
+  --color-on-accent: #0a1317;
+
+  --color-border: #f2f4f619;
+  /* 3,4:1 sur la surface sombre. */
+  --color-border-emphasized: #7c838c;
+  --color-track: #5a5e66;
+
+  --color-text-success: #4ade80;
+  --color-text-warning: #fbbf24;
+  --color-text-error: #f87171;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-success-muted: #34d39926;
+  --color-warning-muted: #fbbf2426;
+  --color-error-muted: #f8717126;
+  --color-info-muted: #38bdf81f;
+
+  --color-shadow-key: rgb(0 0 0 / 0.2);
+  --color-shadow-ambient: rgb(0 0 0 / 0.3);
+
+  --color-sponsor: #f9a825;
+  --color-text-sponsor: #f9a825;
+  --color-text-sponsor-hover: #fbc02d;
+}
+
+/* ── Les anciens noms, en alias : plus aucune valeur ici ─────────────────
+   Chaque règle de `style.css` réécrite passe aux noms d'Astryx ; ces alias ne
+   servent qu'aux règles qui ne l'ont pas encore été. Une valeur ajoutée ici
+   ferait deux sources : `scale.test.ts` le refuse. */
+html {
+  --bg: var(--color-background-body);
+  --surface: var(--color-background-surface);
+  --surface2: var(--color-border);
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --muted-fg: var(--color-text-secondary);
+  --accent: var(--color-accent);
+  --accent-dim: var(--color-accent-hover);
+  --btn-primary-fg: var(--color-on-accent);
+  --ok: var(--color-text-success);
+  --warn: var(--color-text-warning);
+  --warn-fg: var(--color-text-warning);
+  --danger: var(--color-text-error);
+  --conf-high-fg: var(--color-text-success);
+  --conf-med-fg: var(--color-text-warning);
+  --star-fg: var(--color-text-warning);
+  --hint-box-bg: var(--color-background-muted);
+  --backdrop: var(--color-overlay);
+  --nav: var(--color-background-inverted);
+  --nav-ink: var(--color-background-surface);
+
+  --font: var(--font-family-body);
+  --font-mono: var(--font-family-code);
+
+  --radius: var(--radius-element);
+  --radius-sm: var(--radius-inner);
+  --radius-lg: var(--radius-container);
+  --radius-pill: var(--radius-full);
+  --shadow-panel: var(--shadow-low);
+  --shadow-card: var(--shadow-low);
+  --shadow-drawer: var(--shadow-high);
+  --shadow-glow: 0 0 0 var(--border-width) var(--color-border);
+
+  --ring-width: var(--focus-outline-width);
+  --ring-offset: var(--focus-outline-offset);
+  --transition: var(--duration-fast) var(--ease-standard);
+
+  --text-2xs: var(--text-supporting-size);
+  --text-xs: var(--text-supporting-size);
+  --text-sm: var(--text-supporting-size);
+  --text-md: var(--text-body-size);
+  --text-base: var(--text-body-size);
+  --text-lg: var(--text-heading-3-size);
+  --text-xl: var(--text-heading-2-size);
+  --text-2xl: var(--text-heading-1-size);
+  --leading-tight: var(--text-heading-1-leading);
+  --leading-snug: var(--text-body-leading);
+  --leading-normal: var(--text-body-leading);
+}

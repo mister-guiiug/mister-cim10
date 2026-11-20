@@ -11,6 +11,7 @@ import { I18nProvider, LOCALE_STORAGE_KEY } from '../i18n';
 import { SocleLabelsBridge } from '../components/SocleLabelsBridge';
 import { DialogProvider } from '../components/DialogProvider';
 import { useSettingsStore } from '../store/settingsStore';
+import { useVueStore } from '../store/vueStore';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { resetOmsToken } from '../lib/oms';
 import type { WhoSettings } from '../types/index';
@@ -86,7 +87,29 @@ function renderHome() {
 
 const analyzeButton = () => screen.getByRole('button', { name: 'Analyser' });
 
+/**
+ * Ces tests parlent du repli OMS, pas de la mise en page : on se met en
+ * disposition « large » (trois colonnes). Sans cela, jsdom — dont
+ * `matchMedia` ne répond jamais — se croit sur un téléphone, et la première
+ * analyse ouvre l'onglet des suggestions, ce qui cache « Analyser » au test
+ * suivant. Les onglets ont leur propre test (`HomePage.dispositions.test`).
+ */
+function enDispositionLarge() {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: /min-width/.test(query),
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }));
+}
+
 beforeEach(() => {
+  enDispositionLarge();
+  useVueStore.setState({ vue: 'cr' });
   // Le harnais jsdom annonce `en-US` : on fixe la langue, les messages
   // attendus ci-dessous sont ceux du catalogue français.
   localStorage.setItem(LOCALE_STORAGE_KEY, 'fr');

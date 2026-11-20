@@ -1,13 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { BrandMark } from './BrandMark';
-import { TrustBar } from './TrustBar';
-import { useSettingsStore } from '../store/settingsStore';
 import { useI18n } from '../i18n';
 import type { AppRoute } from '../types/index';
-
-interface AppHeaderProps {
-  subTagline?: string;
-}
 
 function pathToRoute(pathname: string): AppRoute {
   const segment = pathname.replace(/^\//, '').split('/')[0] ?? '';
@@ -17,130 +11,51 @@ function pathToRoute(pathname: string): AppRoute {
 }
 
 /**
- * Chrome Clinical Console : marque + nav desktop + trust bar (accueil).
- * La barre basse du socle reste pour le mobile ; ici, les liens métier.
+ * LA BARRE HAUTE, ET RIEN D'AUTRE : la marque, puis la navigation au bureau.
+ *
+ * Elle portait aussi l'accroche, les étapes 1 → 2 → 3, l'avertissement et la
+ * barre d'état : 230 px avant le premier champ. Les étapes sont devenues les
+ * onglets de l'espace de travail (au téléphone) et les titres numérotés de ses
+ * colonnes (au bureau) ; l'avertissement et l'état, une ligne au-dessus du
+ * travail, sur l'accueil seulement.
  */
-export function AppHeader({ subTagline }: AppHeaderProps) {
+export function AppHeader() {
   const location = useLocation();
   const route = pathToRoute(location.pathname);
   const isHome = route === 'home';
-  const disclaimerDismissed = useSettingsStore(s => s.disclaimerDismissed);
-  const dismissDisclaimer = useSettingsStore(s => s.dismissDisclaimer);
   const { t } = useI18n();
 
-  const taglineText = isHome
-    ? t('home.taglineReady')
-    : (subTagline ?? t('home.taglineReady'));
+  const lien = (cible: AppRoute, to: string, libelle: string) => (
+    <Link
+      to={to}
+      className={
+        route === cible ? 'app-top-nav-link is-current' : 'app-top-nav-link'
+      }
+      aria-current={route === cible ? 'page' : undefined}
+    >
+      {libelle}
+    </Link>
+  );
 
   return (
-    <header className="app-header">
-      <div
-        className={[
-          'app-header-inner',
-          isHome ? 'app-header-inner--daily' : 'app-header-inner--subpage',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className="app-header-body">
-          <div className="app-header-top">
-            <Link
-              to="/"
-              className="brand-block brand-link"
-              // Pas d'aria-label : le nom vient de ce que le lien montre
-              // (« Mister CIM-10 » et l'accroche). Un nom à part,
-              // « Cotation — Mister CIM-10 », laissait l'accroche visible hors
-              // du nom accessible (WCAG 2.5.3 ; axe 4.14, le 29/10/2026).
-            >
-              <BrandMark />
-              <div className="brand-text">
-                {isHome ? (
-                  <h1 className="app-title">Mister CIM-10</h1>
-                ) : (
-                  <p className="app-title">Mister CIM-10</p>
-                )}
-                <p className="app-tagline">{taglineText}</p>
-              </div>
-            </Link>
-            <nav className="app-top-nav" aria-label={t('nav.primary')}>
-              <Link
-                to="/"
-                className={
-                  route === 'home'
-                    ? 'app-top-nav-link is-current'
-                    : 'app-top-nav-link'
-                }
-                aria-current={route === 'home' ? 'page' : undefined}
-              >
-                {t('nav.home')}
-              </Link>
-              <Link
-                to="/parametres"
-                className={
-                  route === 'parametres'
-                    ? 'app-top-nav-link is-current'
-                    : 'app-top-nav-link'
-                }
-                aria-current={route === 'parametres' ? 'page' : undefined}
-              >
-                {t('nav.settings')}
-              </Link>
-              <Link
-                to="/aide"
-                className={
-                  route === 'aide'
-                    ? 'app-top-nav-link is-current'
-                    : 'app-top-nav-link'
-                }
-                aria-current={route === 'aide' ? 'page' : undefined}
-              >
-                {t('nav.help')}
-              </Link>
-            </nav>
-          </div>
-          {isHome && (
-            <>
-              <DailyGuide />
-              {!disclaimerDismissed && (
-                <p className="disclaimer disclaimer--compact">
-                  <span>{t('home.disclaimerReady')}</span>
-                  <button
-                    type="button"
-                    className="disclaimer-dismiss"
-                    aria-label={t('home.disclaimerHide')}
-                    onClick={dismissDisclaimer}
-                  >
-                    ×
-                  </button>
-                </p>
-              )}
-            </>
+    <header className="app-bar">
+      <div className="app-bar-inner">
+        <Link to="/" className="brand-link">
+          <BrandMark />
+          {/* Le `h1` de l'accueil : celui que lisent les moteurs et les
+              lecteurs d'écran. Ailleurs, chaque page porte le sien. */}
+          {isHome ? (
+            <h1 className="app-title">Mister CIM-10</h1>
+          ) : (
+            <p className="app-title">Mister CIM-10</p>
           )}
-        </div>
-        {isHome && <TrustBar />}
+        </Link>
+        <nav className="app-top-nav" aria-label={t('nav.primary')}>
+          {lien('home', '/', t('nav.home'))}
+          {lien('parametres', '/parametres', t('nav.settings'))}
+          {lien('aide', '/aide', t('nav.help'))}
+        </nav>
       </div>
     </header>
-  );
-}
-
-function DailyGuide() {
-  const { t } = useI18n();
-  return (
-    <div className="header-guide header-guide--daily">
-      <ul className="workflow-strip" aria-label={t('home.dailyLabel')}>
-        <li className="workflow-strip-item">
-          <span className="workflow-num">1</span> {t('home.dailyText')}
-        </li>
-        <li className="workflow-strip-sep" aria-hidden="true" />
-        <li className="workflow-strip-item">
-          <span className="workflow-num">2</span> {t('common.analyze')}
-        </li>
-        <li className="workflow-strip-sep" aria-hidden="true" />
-        <li className="workflow-strip-item">
-          <span className="workflow-num">3</span>{' '}
-          {t('home.dailyValidateExport')}
-        </li>
-      </ul>
-    </div>
   );
 }
