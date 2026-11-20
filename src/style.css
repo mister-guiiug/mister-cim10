@@ -849,105 +849,157 @@ button.mic.listening {
 
 /* ── Recherche manuelle ──────────────────────────────────── */
 
-footer {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--surface2);
-  font-size: var(--text-supporting-size);
-  color: var(--muted);
-}
-
-/*
- * Pied de page. La structure vient du socle (`react/app-footer`) : l'app garde
- * ses pastilles en accrochant l'habillage aux attributs `[data-dwc="footer-…"]`
- * posés par le composant, à la place des anciennes classes `.footer-pill--*`.
- * `style.css` n'est pas dans une `@layer`, il l'emporte donc sur la base de
- * `components.css` (`@layer components`) sans avoir à monter en spécificité.
- */
+/* ═══ LE PIED DE PAGE (grammaire d'Astryx, 21/11/2026) ════════════════════
+   Une région de la page, sur toute la largeur et alignée sur l'espace de
+   travail : la note de confidentialité à gauche, les liens à droite, la
+   version dessous. Plus de pastilles colorées : des liens discrets, à la
+   taille d'une cible (44 px au doigt, 32 à la souris). La structure vient du
+   socle (`react/app-footer`) ; l'habillage s'accroche à ses attributs
+   `[data-dwc="footer-…"]`. */
 .app-footer {
-  max-width: none;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: max(0.35rem, var(--safe-l));
-  padding-right: max(0.35rem, var(--safe-r));
-  line-height: 1.45;
+  margin-top: var(--spacing-8);
+  background: var(--color-background-surface);
+  border-top: var(--border-width) solid var(--color-border);
 }
 
-.footer-privacy {
-  margin: 0 0 0.75rem;
+/* Sur l'accueil, l'espace de travail finit déjà sur une bordure. */
+.workspace-page ~ .app-footer {
+  margin-top: 0;
 }
 
 footer.footer-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
   align-items: center;
+  gap: var(--spacing-1) var(--spacing-2);
+  max-width: var(--app-max-width);
+  margin-inline: auto;
+  padding: var(--spacing-5) var(--spacing-4) var(--spacing-6);
+  color: var(--color-text-secondary);
+  font-size: var(--text-supporting-size);
+  line-height: var(--text-supporting-leading);
+}
+
+.footer-privacy {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-supporting-size);
+  line-height: var(--text-supporting-leading);
+}
+
+/* La note prend la ligne au téléphone ; au bureau, elle tient la gauche
+   (une soixantaine de caractères par ligne) et pousse les liens à droite. */
+.footer-actions > .footer-privacy {
+  flex: 1 1 100%;
+  max-width: 42rem;
+  margin-bottom: var(--spacing-2);
+}
+
+@media (min-width: 1024px) {
+  .footer-actions > .footer-privacy {
+    flex: 1 1 24rem;
+    margin: 0 auto 0 0;
+    padding-inline-end: var(--spacing-6);
+  }
 }
 
 .footer-actions [data-dwc='footer-source'],
-.footer-actions [data-dwc='footer-sponsor'] {
+.footer-actions [data-dwc='footer-sponsor'],
+.footer-actions [data-dwc='footer-issues'],
+.footer-actions [data-dwc='footer-idea'] {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: var(--text-supporting-size);
-  font-weight: 500;
+  gap: var(--spacing-1-5);
+  min-height: var(--size-element-lg);
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-element);
+  color: var(--color-text-secondary);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
   text-decoration: none;
-  border: 1px solid;
   transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
-.footer-actions [data-dwc='footer-source'] svg,
-.footer-actions [data-dwc='footer-sponsor'] svg {
-  width: 0.875rem;
-  height: 0.875rem;
+@media (pointer: fine) {
+  .footer-actions [data-dwc='footer-source'],
+  .footer-actions [data-dwc='footer-sponsor'],
+  .footer-actions [data-dwc='footer-issues'],
+  .footer-actions [data-dwc='footer-idea'] {
+    min-height: var(--size-element-md);
+  }
+}
+
+.footer-actions [data-dwc='footer-source']:hover,
+.footer-actions [data-dwc='footer-sponsor']:hover,
+.footer-actions [data-dwc='footer-issues']:hover,
+.footer-actions [data-dwc='footer-idea']:hover {
+  background: var(--color-overlay-hover);
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.footer-actions [data-dwc='footer-source']:focus-visible,
+.footer-actions [data-dwc='footer-sponsor']:focus-visible,
+.footer-actions [data-dwc='footer-issues']:focus-visible,
+.footer-actions [data-dwc='footer-idea']:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-accent);
+  outline-offset: calc(-1 * var(--focus-outline-width));
+}
+
+.footer-actions [data-dwc] svg {
   flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
 }
 
-.footer-actions [data-dwc='footer-source'] {
-  color: var(--text);
-  background: var(--surface2);
-  border-color: var(--surface2);
-}
-
-.footer-actions [data-dwc='footer-source']:hover {
-  background: var(--surface);
-  border-color: var(--muted);
-  color: var(--text);
-  text-decoration: none;
-}
-
-.footer-actions [data-dwc='footer-sponsor'] {
-  color: var(--color-text-sponsor);
-  background: color-mix(in srgb, var(--color-sponsor) 18%, transparent);
-  border-color: color-mix(in srgb, var(--color-sponsor) 35%, transparent);
-}
-
-.footer-actions [data-dwc='footer-sponsor']:hover {
-  background: color-mix(in srgb, var(--color-sponsor) 28%, transparent);
-  border-color: var(--color-sponsor);
-  color: var(--color-text-sponsor-hover);
-  text-decoration: none;
-}
-
-html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor'] {
+/* La marque du café ne garde que son icône : un lien parmi d'autres, pas une
+   pastille qui attire l'œil avant la note de confidentialité. */
+.footer-actions [data-dwc='footer-sponsor'] svg {
   color: var(--color-sponsor);
 }
 
-html[data-theme='dark'] .footer-actions [data-dwc='footer-sponsor']:hover {
-  color: var(--color-text-sponsor-hover);
+/* Au téléphone, les quatre liens en grille de deux : en rangée libre, ils
+   tombaient sur trois lignes irrégulières (421 px de pied de page). */
+@media (max-width: 767.98px) {
+  footer.footer-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--spacing-1);
+  }
+
+  footer.footer-actions > .footer-privacy,
+  footer.footer-actions > [data-dwc='app-version'] {
+    grid-column: 1 / -1;
+  }
+
+  .footer-actions [data-dwc='footer-source'],
+  .footer-actions [data-dwc='footer-sponsor'],
+  .footer-actions [data-dwc='footer-issues'],
+  .footer-actions [data-dwc='footer-idea'] {
+    padding-inline: var(--spacing-1);
+    font-size: var(--text-supporting-size);
+  }
 }
 
-@media (min-width: 640px) {
-  .app-footer {
-    max-width: 920px;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
-  }
+/* La version, sous tout le reste : le build et son commit, pour le support. */
+.footer-actions [data-dwc='app-version'] {
+  flex: 1 1 100%;
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: var(--border-width) solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--text-supporting-size);
+}
+
+.footer-actions [data-dwc='app-version'] a {
+  color: inherit;
+  text-underline-offset: 2px;
+}
+
+.footer-actions [data-dwc='app-version'] a:hover {
+  color: var(--color-text-primary);
 }
 
 .inline-link {
