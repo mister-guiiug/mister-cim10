@@ -7,6 +7,7 @@ import {
   writeWhoSettings,
 } from '../lib/settings';
 import { resetOmsToken } from '../lib/oms';
+import { defautsWho } from '../lib/who-defaults';
 import { readSnapshot, updateSnapshot } from '../lib/app-store';
 
 interface SettingsState {
@@ -15,7 +16,11 @@ interface SettingsState {
   disclaimerDismissed: boolean;
   setMinConfidence: (value: number) => void;
   setWho: (patch: Partial<WhoSettings>) => void;
-  forgetSecret: () => void;
+  /**
+   * Revient à la configuration du build : efface le compte saisi, son mot
+   * secret, la version et la langue surchargées, et le jeton en cache.
+   */
+  resetWho: () => void;
   dismissDisclaimer: () => void;
   resetDisclaimer: () => void;
 }
@@ -47,8 +52,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     resetOmsToken(); // identifiants/passerelle changés → jeton caché obsolète
     set({ who: next });
   },
-  forgetSecret: () => {
-    const next = { ...get().who, clientSecret: '' };
+  resetWho: () => {
+    const defauts = defautsWho();
+    const next = {
+      ...get().who,
+      clientId: '',
+      clientSecret: '',
+      releaseId: defauts.releaseId,
+      lang: defauts.lang,
+    };
     writeWhoSettings(next);
     resetOmsToken();
     set({ who: next });

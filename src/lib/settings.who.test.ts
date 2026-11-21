@@ -186,3 +186,32 @@ describe('le magasin de réglages', () => {
     expect(store.getState().who.clientSecret).toBe('');
   });
 });
+
+describe('la configuration est fixée par le build, l’appareil la surcharge', () => {
+  // LE DÉFAUT CORRIGÉ LE 21/11/2026 : écrire un compte figeait AUSSI la version
+  // et la langue du moment, et la version suivante posée au build n'atteignait
+  // plus cet appareil.
+  it('changer le compte ne fige ni la version ni la langue du build', () => {
+    writeWhoSettings({
+      clientId: 'cid',
+      clientSecret: '',
+      proxyUrl: '',
+      releaseId: '2025-01',
+      lang: 'fr',
+    });
+    vi.stubEnv('VITE_WHO_RELEASE_ID', '2026-01');
+    expect(readWhoSettings().releaseId).toBe('2026-01');
+  });
+
+  it('une version surchargée tient, même quand le build change la sienne', () => {
+    writeWhoSettings({
+      clientId: '',
+      clientSecret: '',
+      proxyUrl: '',
+      releaseId: '2023-01',
+      lang: 'fr',
+    });
+    vi.stubEnv('VITE_WHO_RELEASE_ID', '2026-01');
+    expect(readWhoSettings().releaseId).toBe('2023-01');
+  });
+});

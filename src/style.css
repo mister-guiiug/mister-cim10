@@ -375,16 +375,34 @@ body {
   margin-bottom: 0.25rem;
 }
 
+/* Les champs du compte OMS : la forme des autres champs (surface, pourtour à
+   3:1). Le mot secret tombait sur le fond de page et un pourtour à peine
+   visible : il avait l'air désactivé. */
 .who-field input,
 .who-field select {
   width: 100%;
-  padding: 0.45rem 0.55rem;
+  min-height: var(--size-element-lg);
+  padding: 0 var(--spacing-3);
   border-radius: var(--radius-element);
-  border: 1px solid var(--surface2);
-  background: var(--bg);
-  color: var(--text);
+  border: var(--border-width) solid var(--color-border-emphasized);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
   font-family: inherit;
   font-size: var(--text-body-size);
+}
+
+@media (pointer: fine) {
+  .who-field input,
+  .who-field select {
+    min-height: var(--size-element-md);
+  }
+}
+
+.who-field input:focus-visible,
+.who-field select:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-accent);
+  outline-offset: 0;
+  border-color: var(--color-accent);
 }
 
 .api-row2 {
@@ -397,35 +415,6 @@ body {
 .who-field-inline {
   flex: 1;
   min-width: 140px;
-}
-
-.who-clear-btn {
-  margin-top: 0.35rem;
-}
-
-.settings-share-block {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--surface2);
-}
-
-.settings-share-title {
-  margin: 0 0 var(--spacing-1);
-  font-size: var(--text-heading-4-size);
-  font-weight: var(--text-heading-4-weight);
-  line-height: var(--text-heading-4-leading);
-  color: var(--color-text-primary);
-}
-
-.settings-share-toolbar {
-  margin-top: 0.45rem;
-}
-
-.settings-share-feedback {
-  margin: 0.55rem 0 0;
-  font-size: var(--text-body-size);
-  line-height: 1.45;
-  color: var(--muted);
 }
 
 #disclaimer-text {
@@ -3078,4 +3067,47 @@ button.banner-dismiss {
   .panel-head:not(:has(.panel-head-actions)) {
   min-height: 0;
   margin-bottom: 0;
+}
+
+/* La configuration OMS en vigueur, en lecture (fixée par l'installation). */
+.oms-config {
+  display: grid;
+  gap: var(--spacing-1);
+  margin: var(--spacing-3) 0;
+}
+
+.oms-config-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+  gap: var(--spacing-3);
+  align-items: baseline;
+}
+
+.oms-config dt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-supporting-size);
+}
+
+.oms-config dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.oms-config-tag {
+  padding: 0 var(--spacing-1-5);
+  border-radius: var(--radius-full);
+  background: var(--color-warning-muted);
+  color: var(--color-text-warning);
+  font-size: var(--text-supporting-size);
+  font-weight: var(--font-weight-medium);
+}
+
+.oms-override .settings-sub-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
 }
