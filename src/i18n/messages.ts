@@ -317,18 +317,29 @@ export const messages = {
       omsResources: 'Ressources OMS',
       omsPortal: 'Portail ICD API',
       omsApiDoc: 'Documentation API',
+      omsGateway: 'Passerelle',
+      omsGatewaySite: 'celle du site',
+      omsAccount: 'Compte OMS',
+      omsAccountGateway: 'celui de la passerelle',
+      omsAccountYours: 'le vôtre ({id}), en surcharge',
+      omsOverridden: 'surchargée',
+      omsFixedHint:
+        'La configuration est fixée par l’installation : l’OMS répond sans rien à régler. Vous pouvez seulement la surcharger.',
+      omsOverrideSummary: 'Surcharger la configuration',
+      omsOverrideHint:
+        'Pour un compte OMS à vous (vos requêtes partent alors sous vos identifiants et vos quotas), ou une autre version de la classification ou langue des libellés. Identifiant et mot secret vont ensemble : l’un sans l’autre est refusé.',
+      omsDefaultOption: '{valeur} (installation)',
+      omsReset: 'Revenir à la configuration du site',
+      omsNoGateway:
+        'Cette installation n’est pas reliée à l’OMS : seul le dictionnaire CIM-10 embarqué répond, et il n’y a rien à surcharger.',
       clientId: 'Identifiant',
       clientSecret: 'Mot secret',
       clientSecretSession:
         'Le mot secret n’est pas conservé : il vaut pour la session, et se ressaisit après un rechargement. Votre gestionnaire de mots de passe peut le remplir.',
-      omsPreconfigured:
-        'L’application est déjà reliée à un compte OMS, côté passerelle : laissez ces champs vides et tout fonctionne. Les remplir SUBSTITUE le vôtre — vos identifiants portent alors chaque requête, sous vos propres quotas OMS. Les deux vont ensemble : un identifiant sans mot secret est refusé. Videz-les pour revenir au compte fourni.',
-      versionLangSummary: 'Version de la classification et langue',
       version: 'Version',
       labelLang: 'Langue des libellés',
       omsRisk:
-        'Un compte saisi ici est enregistré dans ce navigateur : à éviter sur un poste partagé. Le mot secret ne quitte jamais l’appareil — ni dans un lien partagé, ni dans une sauvegarde.',
-      forgetSecret: 'Oublier mot secret et session OMS',
+        'Un compte saisi ici est enregistré dans ce navigateur : à éviter sur un poste partagé. Le mot secret ne quitte jamais l’appareil, pas même dans une sauvegarde.',
       appearanceTitle: 'Apparence',
       themeLabel: 'Thème',
       languageLabel: 'Langue de l’application',
@@ -338,11 +349,7 @@ export const messages = {
       disclaimerShown: 'Avertissement réaffiché ✓',
       disclaimerReshow: 'Réafficher l’avertissement',
       dataTitle: 'Données',
-      dataSummaryHint: 'Partage du paramétrage, sauvegarde et restauration',
-      shareTitle: 'Partager le paramétrage',
-      shareHint:
-        'Génère un lien reprenant votre identifiant OMS, la version de la classification et la langue des libellés. Ni le mot secret ni l’adresse de la passerelle n’y figurent : le premier ne doit jamais voyager, la seconde vient déjà de l’installation du destinataire.',
-      shareButton: 'Partager ou copier le lien',
+      dataSummaryHint: 'Sauvegarde et restauration',
       backupTitle: 'Sauvegarde et Restauration',
       backupHint:
         'Téléchargez vos données (compte-rendu en cours, diagnostics retenus, dossiers enregistrés, favoris, paramètres) dans un fichier pour les sauvegarder ou les transférer. Le mot secret OMS n’y figure pas : saisissez-le à nouveau sur l’appareil restauré. L’accord pour la dictée en ligne non plus : il ne vaut que pour ce navigateur.',
@@ -365,15 +372,9 @@ export const messages = {
       familyTitle: 'Nos autres applications',
       familySummaryHint: 'Dix-neuf applications gratuites de la même famille',
       familyHint: 'D’autres applications gratuites de la même famille.',
-      shareDocTitle: 'Mister CIM-10 — paramétrage',
-      importedFromLink:
-        'Paramétrage importé depuis le lien — saisissez votre mot secret OMS.',
       restoreConfirm:
         'Restaurer les données ? Les paramètres et données actuels seront écrasés. L’application va redémarrer.',
       importError: 'Erreur lors de l’import. Fichier invalide.',
-      linkShared: 'Lien partagé.',
-      linkCopied: 'Lien copié dans le presse-papiers.',
-      shareCancelled: 'Partage annulé.',
     },
     help: {
       title: 'Aide à l’utilisation',
@@ -434,7 +435,7 @@ export const messages = {
       accountStep3Title: '3. Renseigner l’application Mister CIM-10',
       goTo: 'Allez dans ',
       accountStep3aAfter:
-        ', section « Connexion OMS », puis collez l’identifiant et le mot secret fournis par le portail. Ils remplacent le compte fourni ; videz les deux champs pour y revenir.',
+        ', section « Connexion OMS », ouvrez « Surcharger la configuration » et collez l’identifiant et le mot secret fournis par le portail. Ils remplacent le compte fourni ; « Revenir à la configuration du site » efface la surcharge.',
       accountNoteBefore:
         'Les écrans exacts du portail OMS peuvent évoluer ; en cas de doute, consultez la ',
       accountNoteLink: 'documentation officielle de l’API ICD',
@@ -460,7 +461,7 @@ export const messages = {
         credentialsRejected:
           'Identifiants OMS refusés (Client ID / mot secret).',
         gatewayAccountMissing:
-          'La passerelle n’a pas de compte OMS utilisable : la CIM-11 est indisponible. Vous pouvez saisir le vôtre dans les Paramètres.',
+          'La passerelle n’a pas de compte OMS utilisable : la CIM-11 est indisponible. Vous pouvez surcharger la configuration avec le vôtre, dans les Paramètres.',
         corsForbidden: 'Origine non autorisée par la passerelle (CORS).',
         authFailed: 'Authentification OMS impossible (HTTP {status}).',
         authInvalid: 'Réponse d’authentification OMS invalide.',
@@ -798,18 +799,29 @@ export const messages = {
       omsResources: 'WHO resources',
       omsPortal: 'ICD API portal',
       omsApiDoc: 'API documentation',
+      omsGateway: 'Gateway',
+      omsGatewaySite: 'the site’s own',
+      omsAccount: 'WHO account',
+      omsAccountGateway: 'the gateway’s',
+      omsAccountYours: 'yours ({id}), overriding',
+      omsOverridden: 'overridden',
+      omsFixedHint:
+        'The configuration is set by this installation: WHO answers with nothing to configure. You can only override it.',
+      omsOverrideSummary: 'Override the configuration',
+      omsOverrideHint:
+        'For a WHO account of your own (your requests then go out under your credentials and quotas), or another classification version or label language. Client ID and secret go together: one without the other is rejected.',
+      omsDefaultOption: '{valeur} (installation)',
+      omsReset: 'Back to the site configuration',
+      omsNoGateway:
+        'This installation is not connected to WHO: only the built-in ICD-10 dictionary answers, and there is nothing to override.',
       clientId: 'Client ID',
       clientSecret: 'Client secret',
       clientSecretSession:
         'The secret is not stored: it lasts for the session and must be entered again after a reload. Your password manager can fill it in.',
-      omsPreconfigured:
-        'The application is already linked to a WHO account, on the gateway side: leave these fields empty and everything works. Filling them SUBSTITUTES yours — your credentials then carry every request, under your own WHO quotas. Both go together: a client ID without a secret is rejected. Clear them to return to the provided account.',
-      versionLangSummary: 'Classification version and language',
       version: 'Version',
       labelLang: 'Label language',
       omsRisk:
         'An account entered here is saved in this browser: avoid on shared computers. The client secret never leaves the device — not in a shared link, not in a backup.',
-      forgetSecret: 'Forget client secret and WHO session',
       appearanceTitle: 'Appearance',
       themeLabel: 'Theme',
       languageLabel: 'App language',
@@ -819,11 +831,7 @@ export const messages = {
       disclaimerShown: 'Notice shown again ✓',
       disclaimerReshow: 'Show the notice again',
       dataTitle: 'Data',
-      dataSummaryHint: 'Settings sharing, backup and restore',
-      shareTitle: 'Share settings',
-      shareHint:
-        'Generates a link carrying your WHO client ID, the classification version and the label language. Neither the client secret nor the gateway address is included: the first must never travel, the second already comes from the recipient’s own installation.',
-      shareButton: 'Share or copy the link',
+      dataSummaryHint: 'Backup and restore',
       backupTitle: 'Backup and restore',
       backupHint:
         'Download your data (current report, kept diagnoses, saved cases, favorites, settings) to a file to back it up or transfer it. The WHO client secret is not included: enter it again on the restored device. Nor is the consent for online dictation: it only applies to this browser.',
@@ -846,15 +854,9 @@ export const messages = {
       familyTitle: 'Our other apps',
       familySummaryHint: 'Nineteen free apps from the same family',
       familyHint: 'More free apps from the same family.',
-      shareDocTitle: 'Mister CIM-10 — settings',
-      importedFromLink:
-        'Settings imported from the link — enter your WHO client secret.',
       restoreConfirm:
         'Restore data? Current settings and data will be overwritten. The app will restart.',
       importError: 'Import failed. Invalid file.',
-      linkShared: 'Link shared.',
-      linkCopied: 'Link copied to the clipboard.',
-      shareCancelled: 'Sharing cancelled.',
     },
     help: {
       title: 'Usage help',
@@ -913,7 +915,7 @@ export const messages = {
       accountStep3Title: '3. Fill in the Mister CIM-10 app',
       goTo: 'Go to ',
       accountStep3aAfter:
-        ', “WHO connection” section, then paste the client ID and client secret provided by the portal. They replace the provided account; clear both fields to return to it.',
+        ', “WHO connection” section, open “Override the configuration” and paste the client ID and client secret provided by the portal. They replace the provided account; “Back to the site configuration” clears the override.',
       accountNoteBefore:
         'The exact WHO portal screens may change; when in doubt, see the ',
       accountNoteLink: 'official ICD API documentation',
@@ -938,7 +940,7 @@ export const messages = {
           'Gateway unreachable — check your connection, then try again.',
         credentialsRejected: 'WHO credentials rejected (Client ID / secret).',
         gatewayAccountMissing:
-          'The gateway has no usable WHO account: ICD-11 is unavailable. You can enter your own in Settings.',
+          'The gateway has no usable WHO account: ICD-11 is unavailable. You can override the configuration with your own, in Settings.',
         corsForbidden: 'Origin not allowed by the gateway (CORS).',
         authFailed: 'WHO authentication failed (HTTP {status}).',
         authInvalid: 'Invalid WHO authentication response.',

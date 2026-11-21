@@ -55,11 +55,17 @@ export function readWhoSettings(): WhoSettings {
  * faire sortir par la porte.
  */
 export function writeWhoSettings(s: WhoSettings): void {
+  // SEULES LES SURCHARGES SONT ÉCRITES. La version et la langue égales à celles
+  // du build s'enregistrent VIDES : elles suivent alors le build. Jusqu'au
+  // 21/11/2026, le premier changement de n'importe quel champ OMS figeait la
+  // version et la langue du moment dans le navigateur, et une nouvelle version
+  // de la classification posée au build n'atteignait plus cet appareil.
+  const defauts = defautsWho();
   updateSnapshot({
     who: {
       clientId: s.clientId.trim(),
-      releaseId: s.releaseId,
-      lang: s.lang,
+      releaseId: s.releaseId === defauts.releaseId ? '' : s.releaseId,
+      lang: s.lang === defauts.lang ? '' : s.lang,
     },
   });
   // LE MOT SECRET N'EST PAS ÉCRIT. Gardé dans localStorage, il y restait en

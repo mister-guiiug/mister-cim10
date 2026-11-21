@@ -71,3 +71,30 @@ export function defautsWho(): DefautsWho {
 export function passerelleFournie(): boolean {
   return defautsWho().proxyUrl !== '';
 }
+
+/** Ce qu'un appareil a SURCHARGÉ de la configuration du build. */
+export interface SurchargesWho {
+  /** Un compte OMS à soi, à la place de celui de la passerelle. */
+  compte: boolean;
+  /** Une autre version de la classification que celle du build. */
+  version: boolean;
+  /** Une autre langue de libellés que celle du build. */
+  langue: boolean;
+}
+
+/**
+ * LA CONFIGURATION EST FIXÉE PAR LE BUILD ; l'appareil ne fait que la
+ * surcharger. Cette fonction dit quoi, pour que les Réglages affichent la
+ * configuration en vigueur et ne présentent les champs que comme des
+ * surcharges.
+ */
+export function surchargesWho(
+  who: Pick<WhoSettings, 'clientId' | 'releaseId' | 'lang'>
+): SurchargesWho {
+  const defauts = defautsWho();
+  return {
+    compte: who.clientId.trim() !== '',
+    version: who.releaseId !== defauts.releaseId,
+    langue: who.lang !== defauts.lang,
+  };
+}

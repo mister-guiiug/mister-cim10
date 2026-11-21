@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
 import { lireAccordDictee, retirerAccordDictee } from '../lib/dictee';
-import { passerelleFournie } from '../lib/who-defaults';
+import {
+  defautsWho,
+  passerelleFournie,
+  surchargesWho,
+} from '../lib/who-defaults';
 import { useAnnouncer } from '@mister-guiiug/dev-pwa-config/react/a11y';
-import type { WhoSettings } from '../types/index';
 import { UpdateButton } from '@mister-guiiug/dev-pwa-config/react/update-button';
 import { ThemeToggle } from '@mister-guiiug/dev-pwa-config/react/theme-toggle';
 import { ConsentSection } from '@mister-guiiug/dev-pwa-config/react/consent-section';
@@ -21,14 +24,13 @@ export function SettingsPage() {
   const who = useSettingsStore(s => s.who);
   const setMinConfidence = useSettingsStore(s => s.setMinConfidence);
   const setWho = useSettingsStore(s => s.setWho);
-  const forgetSecret = useSettingsStore(s => s.forgetSecret);
+  const resetWho = useSettingsStore(s => s.resetWho);
   const resetDisclaimer = useSettingsStore(s => s.resetDisclaimer);
 
   const dialog = useDialog();
   const { t, locale, setLocale, locales } = useI18n();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [resetFeedback, setResetFeedback] = useState(false);
   // Lu au montage : l'accord se donne depuis l'accueil, au premier clic sur
   // « Dictée », et cette page le relit en s'ouvrant.
@@ -36,51 +38,28 @@ export function SettingsPage() {
   const [accordRetire, setAccordRetire] = useState(false);
   const annoncer = useAnnouncer();
 
-  // Auto-clear feedback messages
-  useEffect(() => {
-    if (!shareFeedback) return;
-    const id = setTimeout(() => setShareFeedback(null), 3000);
-    return () => clearTimeout(id);
-  }, [shareFeedback]);
-
   useEffect(() => {
     if (!resetFeedback) return;
     const id = setTimeout(() => setResetFeedback(false), 2000);
     return () => clearTimeout(id);
   }, [resetFeedback]);
 
-  // Import d'un lien « Partager le paramétrage » : applique identifiant et
-  // passerelle depuis l'URL (le mot secret n'y figure jamais), puis nettoie
-  // l'URL pour ne pas le réappliquer ni le laisser dans l'historique.
-  //
-  // Les paramètres `mode` et `proxyUrl` des anciens liens sont IGNORÉS en
-  // silence, et c'est le bon comportement : le premier ne désigne plus rien, le
-  // second imposerait une adresse que la CSP du destinataire refuse. Rejeter le
-  // lien entier pour un champ périmé ferait perdre ce qu'il porte encore.
-  const [searchParams, setSearchParams] = useSearchParams();
-  useEffect(() => {
-    if ([...searchParams.keys()].length === 0) return;
-    const patch: Partial<WhoSettings> = {};
-    const cid = searchParams.get('clientId');
-    const rel = searchParams.get('release');
-    const lang = searchParams.get('lang');
-    if (cid) patch.clientId = cid;
-    if (rel) patch.releaseId = rel;
-    if (lang) patch.lang = lang;
-    if (Object.keys(patch).length > 0) setWho(patch);
-    setSearchParams({}, { replace: true });
-    // L'URL est une source EXTÉRIEURE, et un lien ouvert n'est pas un
-    // événement qu'on puisse écouter : il n'existe pas de `onLinkOpened`. La
-    // seule place où s'en saisir est l'effet, et dire ce qu'on vient
-    // d'appliquer fait partie du travail — un réglage changé en silence est un
-    // réglage qu'on croit ne pas avoir reçu.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShareFeedback(t('settings.importedFromLink'));
-  }, [searchParams, setSearchParams, setWho, t]);
-
-  // La passerelle du build s'authentifie seule : les champs de compte deviennent
-  // des champs de REMPLACEMENT, plus des champs à remplir.
+  // LA CONFIGURATION OMS EST FIXÉE PAR LE BUILD (passerelle, compte côté
+  // passerelle, version, langue) : elle s'affiche en lecture, et l'appareil ne
+  // peut que la SURCHARGER, dans un volet replié. Il n'y a plus de paramétrage
+  // à faire pour que l'OMS réponde.
   const preconfigure = passerelleFournie();
+  const defauts = defautsWho();
+  const surcharges = surchargesWho(who);
+  const surchargeActive =
+    surcharges.compte || surcharges.version || surcharges.langue;
+  const [surchargeOuverte, setSurchargeOuverte] = useState(surchargeActive);
+  const versions = [
+    ...new Set([defauts.releaseId, '2025-01', '2024-01', '2023-01']),
+  ];
+  const langues = [...new Set([defauts.lang, 'fr', 'en'])];
+  const nomLangue = (code: string) =>
+    code === 'fr' ? t('language.fr') : code === 'en' ? t('language.en') : code;
 
   const handleExportAll = () => {
     downloadAppBackup();
@@ -103,37 +82,6 @@ export function SettingsPage() {
       }
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleShareSettings = async () => {
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams();
-    if (who.clientId) params.set('clientId', who.clientId);
-    // Le mot secret n'est JAMAIS mis dans l'URL (sécurité) : le destinataire
-    // saisit le sien.
-    //
-    // LA PASSERELLE NON PLUS, et pour une autre raison : le destinataire a
-    // déjà celle de son build, et la CSP de son site refuserait la nôtre.
-    // L'envoyer, c'était lui transmettre une adresse qui ne pouvait que le
-    // priver de l'OMS.
-    params.set('release', who.releaseId);
-    params.set('lang', who.lang);
-    url.hash = `#/parametres?${params.toString()}`;
-    const link = url.toString();
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: t('settings.shareDocTitle'),
-          url: link,
-        });
-        setShareFeedback(t('settings.linkShared'));
-      } else {
-        await navigator.clipboard.writeText(link);
-        setShareFeedback(t('settings.linkCopied'));
-      }
-    } catch {
-      setShareFeedback(t('settings.shareCancelled'));
-    }
   };
 
   return (
@@ -234,88 +182,159 @@ export function SettingsPage() {
                   </nav>
                 </div>
 
-                {/* LE COMPTE EST FACULTATIF QUAND LA PASSERELLE PORTE LE SIEN.
-                    Sans cette phrase, deux champs vides sur une page de
-                    réglages se lisent comme une configuration inachevée : on
-                    cherche des identifiants qu'on n'a pas, et on renonce. */}
-                {preconfigure && (
-                  <p className="hint hint--compact">
-                    {t('settings.omsPreconfigured')}
-                  </p>
+                {preconfigure ? (
+                  <>
+                    {/* LA CONFIGURATION EN VIGUEUR, en lecture : ce que le
+                        build a fixé, et ce que cet appareil surcharge. */}
+                    <dl className="oms-config">
+                      <div className="oms-config-row">
+                        <dt>{t('settings.omsGateway')}</dt>
+                        <dd>{t('settings.omsGatewaySite')}</dd>
+                      </div>
+                      <div className="oms-config-row">
+                        <dt>{t('settings.omsAccount')}</dt>
+                        <dd>
+                          {surcharges.compte
+                            ? t('settings.omsAccountYours', {
+                                id: who.clientId,
+                              })
+                            : t('settings.omsAccountGateway')}
+                        </dd>
+                      </div>
+                      <div className="oms-config-row">
+                        <dt>{t('settings.version')}</dt>
+                        <dd>
+                          {who.releaseId}
+                          {surcharges.version && (
+                            <span className="oms-config-tag">
+                              {t('settings.omsOverridden')}
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="oms-config-row">
+                        <dt>{t('settings.labelLang')}</dt>
+                        <dd>
+                          {nomLangue(who.lang)}
+                          {surcharges.langue && (
+                            <span className="oms-config-tag">
+                              {t('settings.omsOverridden')}
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                    <p className="settings-hint">
+                      {t('settings.omsFixedHint')}
+                    </p>
+                    <details
+                      className="settings-sub oms-override"
+                      open={surchargeOuverte}
+                      onToggle={e => setSurchargeOuverte(e.currentTarget.open)}
+                    >
+                      <summary className="settings-sub-summary">
+                        {t('settings.omsOverrideSummary')}
+                      </summary>
+                      <div className="settings-sub-inner">
+                        <p className="settings-hint">
+                          {t('settings.omsOverrideHint')}
+                        </p>
+                        <div className="api-fields-grid" role="group">
+                          <label className="who-field">
+                            <span className="who-field-label">
+                              {t('settings.clientId')}
+                            </span>
+                            <input
+                              type="text"
+                              autoComplete="username"
+                              spellCheck={false}
+                              value={who.clientId}
+                              onChange={e =>
+                                setWho({ clientId: e.target.value })
+                              }
+                            />
+                          </label>
+                          <label className="who-field">
+                            <span className="who-field-label">
+                              {t('settings.clientSecret')}
+                            </span>
+                            <input
+                              type="password"
+                              autoComplete="current-password"
+                              value={who.clientSecret}
+                              onChange={e =>
+                                setWho({ clientSecret: e.target.value })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <p className="settings-hint">
+                          {t('settings.clientSecretSession')}
+                        </p>
+                        <div className="api-row2">
+                          <label className="who-field who-field-inline">
+                            <span className="who-field-label">
+                              {t('settings.version')}
+                            </span>
+                            <select
+                              value={who.releaseId}
+                              onChange={e =>
+                                setWho({ releaseId: e.target.value })
+                              }
+                            >
+                              {versions.map(v => (
+                                <option key={v} value={v}>
+                                  {v === defauts.releaseId
+                                    ? t('settings.omsDefaultOption', {
+                                        valeur: v,
+                                      })
+                                    : v}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="who-field who-field-inline">
+                            <span className="who-field-label">
+                              {t('settings.labelLang')}
+                            </span>
+                            <select
+                              value={who.lang}
+                              onChange={e => setWho({ lang: e.target.value })}
+                            >
+                              {langues.map(l => (
+                                <option key={l} value={l}>
+                                  {l === defauts.lang
+                                    ? t('settings.omsDefaultOption', {
+                                        valeur: nomLangue(l),
+                                      })
+                                    : nomLangue(l)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                        <p className="hint hint--compact who-risk">
+                          {t('settings.omsRisk')}
+                        </p>
+                        <div className="toolbar">
+                          <button
+                            type="button"
+                            className="secondary"
+                            disabled={!surchargeActive && !who.clientSecret}
+                            onClick={resetWho}
+                          >
+                            {t('settings.omsReset')}
+                          </button>
+                        </div>
+                      </div>
+                    </details>
+                  </>
+                ) : (
+                  // SANS PASSERELLE AU BUILD, IL N'Y A RIEN À SURCHARGER :
+                  // l'adresse de l'OMS ne vient que du build (la CSP refuse
+                  // toute autre), et le dictionnaire répond seul.
+                  <p className="settings-hint">{t('settings.omsNoGateway')}</p>
                 )}
-
-                <div className="api-fields-grid" role="group">
-                  <label className="who-field">
-                    <span className="who-field-label">
-                      {t('settings.clientId')}
-                    </span>
-                    <input
-                      type="text"
-                      autoComplete="username"
-                      spellCheck={false}
-                      value={who.clientId}
-                      onChange={e => setWho({ clientId: e.target.value })}
-                    />
-                  </label>
-                  <label className="who-field">
-                    <span className="who-field-label">
-                      {t('settings.clientSecret')}
-                    </span>
-                    <input
-                      type="password"
-                      autoComplete="current-password"
-                      value={who.clientSecret}
-                      onChange={e => setWho({ clientSecret: e.target.value })}
-                    />
-                  </label>
-                </div>
-                <p className="settings-hint">
-                  {t('settings.clientSecretSession')}
-                </p>
-
-                <details className="settings-sub">
-                  <summary className="settings-sub-summary">
-                    {t('settings.versionLangSummary')}
-                  </summary>
-                  <div className="api-row2 settings-sub-inner">
-                    <label className="who-field who-field-inline">
-                      <span className="who-field-label">
-                        {t('settings.version')}
-                      </span>
-                      <select
-                        value={who.releaseId}
-                        onChange={e => setWho({ releaseId: e.target.value })}
-                      >
-                        <option value="2025-01">2025-01</option>
-                        <option value="2024-01">2024-01</option>
-                        <option value="2023-01">2023-01</option>
-                      </select>
-                    </label>
-                    <label className="who-field who-field-inline">
-                      <span className="who-field-label">
-                        {t('settings.labelLang')}
-                      </span>
-                      <select
-                        value={who.lang}
-                        onChange={e => setWho({ lang: e.target.value })}
-                      >
-                        <option value="fr">{t('language.fr')}</option>
-                        <option value="en">{t('language.en')}</option>
-                      </select>
-                    </label>
-                  </div>
-                </details>
-
-                <p className="hint hint--compact who-risk">
-                  {t('settings.omsRisk')}
-                </p>
-                <button
-                  type="button"
-                  className="ghost who-clear-btn"
-                  onClick={forgetSecret}
-                >
-                  {t('settings.forgetSecret')}
-                </button>
               </div>
             </section>
 
@@ -451,29 +470,6 @@ export function SettingsPage() {
                 </span>
               </summary>
               <div className="settings-section-body">
-                <div className="settings-share-block">
-                  <p className="settings-share-title">
-                    {t('settings.shareTitle')}
-                  </p>
-                  <p className="settings-share-hint hint">
-                    {t('settings.shareHint')}
-                  </p>
-                  <div className="toolbar settings-share-toolbar">
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={handleShareSettings}
-                    >
-                      {t('settings.shareButton')}
-                    </button>
-                  </div>
-                  {shareFeedback && (
-                    <p className="settings-share-feedback" role="status">
-                      {shareFeedback}
-                    </p>
-                  )}
-                </div>
-
                 <div className="settings-block">
                   <p className="settings-block-title">
                     {t('settings.backupTitle')}
