@@ -176,3 +176,74 @@ describe('le rappel des retenus', () => {
     });
   });
 });
+
+describe('trier au clavier, sans tabuler', () => {
+  const principal = () =>
+    screen
+      .getAllByRole('button', { name: 'Valider' })
+      .filter(b => b.dataset.role === 'valider-principal');
+
+  it('↓ et ↑ passent d’un « Valider » à l’autre, Fin et Début aux bords', () => {
+    monter();
+    const boutons = principal();
+    boutons[0]!.focus();
+
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(boutons[1]);
+    fireEvent.keyDown(document.activeElement!, { key: 'End' });
+    expect(document.activeElement).toBe(boutons.at(-1));
+    // Au bord, la flèche ne sort pas de la liste.
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(boutons.at(-1));
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+    expect(document.activeElement).toBe(boutons.at(-2));
+    fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+    expect(document.activeElement).toBe(boutons[0]);
+  });
+
+  it('V valide la carte qui a le focus, R la rejette — même depuis un autre de ses boutons', async () => {
+    monter();
+    const carte = (code: string) =>
+      [...document.querySelectorAll<HTMLElement>('.suggestion-list > li')].find(
+        c => within(c).queryByText(code)
+      )!;
+
+    within(carte('I10'))
+      .getAllByRole('button')
+      .find(b => b.dataset.role === 'valider-principal')!
+      .focus();
+    fireEvent.keyDown(document.activeElement!, { key: 'v' });
+    await waitFor(() =>
+      expect(useWorkspaceStore.getState().validated.map(v => v.code)).toEqual([
+        'I10',
+      ])
+    );
+
+    within(carte('E66.9')).getByRole('button', { name: 'Rejeter' }).focus();
+    fireEvent.keyDown(document.activeElement!, { key: 'R' });
+    await waitFor(() =>
+      expect(useWorkspaceStore.getState().rejectedIds.size).toBe(1)
+    );
+    expect(screen.queryByText('E66.9')).toBeNull();
+  });
+
+  it('avec un modificateur, la touche n’est pas à nous (Ctrl+R recharge)', () => {
+    monter();
+    principal()[0]!.focus();
+    fireEvent.keyDown(document.activeElement!, { key: 'r', ctrlKey: true });
+    fireEvent.keyDown(document.activeElement!, { key: 'v', metaKey: true });
+    expect(useWorkspaceStore.getState().rejectedIds.size).toBe(0);
+    expect(useWorkspaceStore.getState().validated).toEqual([]);
+  });
+
+  it('hors des cartes, rien ne se passe', () => {
+    monter();
+    fireEvent.keyDown(document.body, { key: 'v' });
+    expect(useWorkspaceStore.getState().validated).toEqual([]);
+  });
+
+  it('les boutons annoncent leur raccourci', () => {
+    monter();
+    expect(principal()[0]!.getAttribute('aria-keyshortcuts')).toBe('V');
+  });
+});

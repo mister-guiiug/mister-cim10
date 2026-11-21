@@ -2,11 +2,13 @@ import { create } from 'zustand';
 import type {
   AnalysisResult,
   FavoriteCode,
+  RolePmsi,
   SavedSession,
   ValidatedDiagnostic,
 } from '../types/index';
 import { MAX_SESSIONS, readSnapshot, updateSnapshot } from '../lib/app-store';
 import { deplacer, remplacer } from '../lib/diagnostics';
+import { attribuerRole } from '../lib/pmsi';
 import { basculerFavori, type ResultatBascule } from '../lib/favoris';
 import {
   annuler,
@@ -51,6 +53,7 @@ export type OperationRetenus =
   | { type: 'modification'; ancien: string; nouveau: string }
   | { type: 'note'; code: string }
   | { type: 'deplacement'; code: string; position: number }
+  | { type: 'role'; code: string; role: RolePmsi }
   | { type: 'vidage'; nombre: number };
 
 export type EntreeRetenus = EntreeHistorique<
@@ -105,6 +108,11 @@ interface WorkspaceState {
   editValidated: (id: string, correction: CorrectionDiagnostic) => boolean;
   /** Déplace d'une place ; rend la nouvelle position (1 = en tête) ou `null`. */
   moveValidated: (id: string, delta: -1 | 1) => number | null;
+  /**
+   * Donne un rôle PMSI (cf. `lib/pmsi.ts`) — annulable. Rend la nouvelle
+   * position (1 = en tête), ou `null` si rien n'a changé.
+   */
+  setRolePmsi: (id: string, role: RolePmsi) => number | null;
   /** Vide la liste des retenus — annulable. Rend le nombre de codes retirés. */
   clearValidated: () => number;
   /** Annule le dernier geste sur les retenus ; `null` s'il n'y en a pas. */
@@ -241,6 +249,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => {
       const position = items.findIndex(v => v.id === id) + 1;
       const code = items[position - 1]?.code ?? '';
       appliquer(items, { type: 'deplacement', code, position });
+      return position;
+    },
+    setRolePmsi: (id, role) => {
+      const items = attribuerRole(get().validated, id, role);
+      if (!items) return null;
+      const position = items.findIndex(v => v.id === id) + 1;
+      const code = items[position - 1]?.code ?? '';
+      appliquer(items, { type: 'role', code, role });
       return position;
     },
     clearValidated: () => {

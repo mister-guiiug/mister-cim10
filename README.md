@@ -52,15 +52,17 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 
 ### Recherche et saisie d'un code
 
-| Fonctionnalité              | Ce que ça fait                                                                                                                                                                                                                                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Chercher un code**        | Par libellé, synonyme ou code (`diabète`, `dt2`, `E11`) — y compris sans accent ou mal orthographié. Pour coter un terme absent du compte-rendu                                                                                                                                                                                |
-| **Saisie manuelle**         | Si vous connaissez déjà le code, saisissez-le ; un code du référentiel embarqué reprend son libellé                                                                                                                                                                                                                            |
-| **Contrôle du format**      | La saisie est remise en forme (`e11,9` ou `E 11 9` → `E11.9`, `a000` → `A00.0`) et ce qui n'a pas la forme d'un code CIM-10 est refusé, extensions ATIH comprises (`R53.+0`). Un code bien formé mais absent du référentiel embarqué — un échantillon — n'est pas bloqué : il est signalé, avec les codes de la même catégorie |
-| **Détection de doublon**    | Un code déjà retenu n'est pas ajouté deux fois, et l'application le signale                                                                                                                                                                                                                                                    |
-| **Modifier un code retenu** | Corrigez le code et le libellé à leur place dans la liste, avec le même contrôle de format ; Échap annule                                                                                                                                                                                                                      |
-| **Favoris**                 | L'étoile d'un code — retenu, suggéré ou trouvé par la recherche — le range dans le panneau **Favoris**, d'où il s'ajoute aux diagnostics retenus en un geste (cent au plus)                                                                                                                                                    |
-| **Note libre**              | Annotez un diagnostic retenu ; la note suit dans les exports texte, CSV et JSON                                                                                                                                                                                                                                                |
+| Fonctionnalité               | Ce que ça fait                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Chercher un code**         | Par libellé, synonyme ou code (`diabète`, `dt2`, `E11`) — y compris sans accent ou mal orthographié. Pour coter un terme absent du compte-rendu                                                                                                                                                                                |
+| **Saisie manuelle**          | Si vous connaissez déjà le code, saisissez-le ; un code du référentiel embarqué reprend son libellé                                                                                                                                                                                                                            |
+| **Contrôle du format**       | La saisie est remise en forme (`e11,9` ou `E 11 9` → `E11.9`, `a000` → `A00.0`) et ce qui n'a pas la forme d'un code CIM-10 est refusé, extensions ATIH comprises (`R53.+0`). Un code bien formé mais absent du référentiel embarqué — un échantillon — n'est pas bloqué : il est signalé, avec les codes de la même catégorie |
+| **Détection de doublon**     | Un code déjà retenu n'est pas ajouté deux fois, et l'application le signale                                                                                                                                                                                                                                                    |
+| **Modifier un code retenu**  | Corrigez le code et le libellé à leur place dans la liste, avec le même contrôle de format ; Échap annule                                                                                                                                                                                                                      |
+| **Favoris**                  | L'étoile d'un code — retenu, suggéré ou trouvé par la recherche — le range dans le panneau **Favoris**, d'où il s'ajoute aux diagnostics retenus en un geste (cent au plus)                                                                                                                                                    |
+| **Note libre**               | Annotez un diagnostic retenu ; la note suit dans les exports texte, CSV et JSON                                                                                                                                                                                                                                                |
+| **Rôle PMSI**                | Chaque diagnostic retenu est un DAS tant qu'on ne dit pas autre chose ; désignez le DP (placé en tête) et, s'il y a lieu, le DR (juste après). Un seul de chaque. Dès qu'un DP ou un DR est désigné, le rôle suit dans la copie et les exports texte, CSV (dernière colonne) et JSON                                           |
+| **Contexte des suggestions** | Un terme se reconnaît mot à mot (pluriel admis), un chiffre doit figurer tel quel (« type 2 » ne propose plus le type 1). Une mention niée (« pas de fièvre », « embolie éliminée ») ne devient pas une suggestion ; un antécédent ou une maladie d'un proche reste proposé, signalé d'un badge et classé plus bas             |
 
 ### Confort d'utilisation
 
@@ -74,6 +76,7 @@ L'application peut être **installée sur votre appareil** (bouton d'installatio
 | **Réordonner**                | **Monter** / **Descendre** sur chaque diagnostic retenu, au clavier comme à la souris ; l'ordre est celui des exports, de la copie et de l'impression                                                                                                                      |
 | **Annuler / rétablir**        | Ajout, retrait, modification, déplacement, note, **Vider la liste** : tout geste sur les diagnostics retenus s'annule (cinquante pas en arrière), au bouton ou par Ctrl + Z / Ctrl + Maj + Z / Ctrl + Y hors d'un champ de saisie. Changer de dossier referme l'historique |
 | **Raccourci clavier**         | Ctrl + Entrée (⌘ + Entrée sur Mac) dans le compte-rendu lance l'analyse                                                                                                                                                                                                    |
+| **Trier au clavier**          | Focus sur une suggestion : ↑ ↓ (Début / Fin) passent d'une carte à l'autre, V valide, R rejette — sans tabuler à travers les boutons de chaque carte                                                                                                                       |
 | **Thème et langue**           | Clair / sombre / système, interface en français ou en anglais                                                                                                                                                                                                              |
 | **Hors connexion**            | Une fois chargée ou installée, l'application fonctionne sans réseau (sauf les suggestions CIM-11 de l'OMS et la dictée en ligne)                                                                                                                                           |
 
@@ -234,7 +237,8 @@ src/
 ├── store/                        settingsStore (Zustand), workspaceStore (Zustand, historique annuler / rétablir)
 ├── hooks/                        useDialog, useSpeechRecognition (dictée Web Speech)
 ├── lib/
-│   ├── analyzer.ts               suggestFromText + searchIcdCodes — logique pure (TS strict)
+│   ├── analyzer.ts               searchIcdCodes + briques communes (normalisation, trigrammes, index)
+│   ├── suggestions.ts            suggestFromText : phrases, négation, antécédent — chargé à la demande
 │   ├── app-store.ts              instantané versionné { v, data } + migrations 0 → 1 → 2
 │   ├── code-format.ts            normalisation et contrôle de forme d'un code CIM-10 / CIM-11
 │   ├── constants.ts              LS_KEYS (mot secret OMS, thème — lus hors instantané)
@@ -246,6 +250,8 @@ src/
 │   ├── icd-hierarchy.ts          getFamily — code parent et codes apparentés
 │   ├── raccourcis.ts             Ctrl+Entrée, Ctrl+Z / Ctrl+Y, plateforme, champs éditables
 │   ├── oms.ts                    client OAuth2 + autocodage CIM-11 via la passerelle
+│   ├── pmsi.ts                   rôle DP / DR / DAS d'un diagnostic retenu
+│   ├── rapport.ts                exports texte, CSV, JSON et presse-papiers (fonctions pures)
 │   ├── settings.ts               lecture/écriture des réglages (façade sur app-store)
 │   ├── who-defaults.ts           réglages OMS fournis par le build (VITE_WHO_*)
 │   ├── storage.ts                sauvegarde/restauration .json (module `backup` du socle)

@@ -186,6 +186,7 @@ export const messages = {
         replace: 'remplacement de {ancien} par {nouveau}',
         note: 'note de {code}',
         move: 'déplacement de {code}',
+        role: '{code} en {role}',
         clear: 'vidage de la liste ({count})',
       },
     },
@@ -244,6 +245,18 @@ export const messages = {
       badgeIcd11: 'CIM-11',
       sourceApiTitle: 'Classification CIM-11 (OMS)',
       sourceLocalTitle: 'Dictionnaire CIM-10 embarqué',
+      keyboardHintBefore: 'Au clavier :',
+      keyboardHintMove: 'd’une suggestion à l’autre,',
+      keyboardHintValidate: 'valider,',
+      keyboardHintReject: 'rejeter.',
+      contexte: {
+        antecedent: 'Antécédent',
+        antecedentTitle:
+          'Mentionné comme antécédent : à coder, le cas échéant, en diagnostic associé.',
+        familial: 'Familial',
+        familialTitle:
+          'Mentionné chez un proche : ce n’est pas, a priori, une maladie du patient.',
+      },
     },
     validated: {
       title: 'Diagnostics retenus',
@@ -277,6 +290,20 @@ export const messages = {
         'Liste vidée : {count} diagnostics retirés. « Annuler » les rétablit.',
       orderHint:
         'L’ordre de cette liste est celui des exports, de la copie et de l’impression.',
+      roleAria: 'Rôle PMSI de {code}',
+      roleTitle:
+        'Rôle dans le résumé PMSI : un seul diagnostic principal (placé en tête), un seul relié (juste après), les autres associés.',
+      roleOption: {
+        dp: 'DP',
+        dr: 'DR',
+        das: 'DAS',
+      },
+      roleOptionLong: {
+        dp: 'DP — diagnostic principal',
+        dr: 'DR — diagnostic relié',
+        das: 'DAS — diagnostic associé',
+      },
+      roleSet: '{code} désigné {role}, en position {position}.',
     },
     export: {
       clipboard: 'Presse-papiers',
@@ -297,6 +324,7 @@ export const messages = {
       reportSourceHeading: 'Texte source :',
       reportEmpty: '(vide)',
       csvHeader: 'code,libellé,note,validé_le',
+      csvRoleHeader: 'rôle_pmsi',
       emailSubject: 'Mister CIM-10 — diagnostics',
       shareDocTitle: 'Mister CIM-10 — diagnostics',
     },
@@ -404,7 +432,7 @@ export const messages = {
       use5: 'Les diagnostics retenus s’affichent à côté des suggestions sur grand écran, et sous elles sinon ; vous pouvez les exporter en texte (.txt) ou tableur (.csv), et les envoyer par e-mail ou via le partage du système.',
       use6: 'Réglez l’ordre des diagnostics retenus avec Monter / Descendre : c’est celui des exports et de l’impression. Modifier corrige un code à sa place ; l’étoile range un code dans vos favoris, d’où il s’ajoute en un geste.',
       shortcuts:
-        'Raccourcis : Ctrl + Entrée dans le compte-rendu lance l’analyse. Hors d’un champ de saisie, Ctrl + Z annule le dernier geste sur les diagnostics retenus, Ctrl + Maj + Z ou Ctrl + Y le rétablit (⌘ au lieu de Ctrl sur Mac).',
+        'Raccourcis : Ctrl + Entrée dans le compte-rendu lance l’analyse. Sur une suggestion, ↑ et ↓ passent à la précédente ou à la suivante, V la valide, R la rejette. Hors d’un champ de saisie, Ctrl + Z annule le dernier geste sur les diagnostics retenus, Ctrl + Maj + Z ou Ctrl + Y le rétablit (⌘ au lieu de Ctrl sur Mac).',
       useSourceNoteBefore:
         'Pour ajouter la classification CIM-11 de l’OMS aux suggestions, voir « Aller plus loin » ci-dessous, puis la page ',
       useSourceNoteAfter: '. Ce n’est pas nécessaire pour coter.',
@@ -455,6 +483,8 @@ export const messages = {
     },
     errors: {
       emptyReport: 'Saisissez un compte-rendu avant de lancer l’analyse.',
+      engineUnavailable:
+        'Le moteur d’analyse n’a pas pu être chargé. Rechargez la page, une fois la connexion revenue.',
       oms: {
         proxyUnreachable:
           'Passerelle injoignable — vérifiez votre connexion, puis réessayez.',
@@ -668,6 +698,7 @@ export const messages = {
         replace: 'replacing {ancien} with {nouveau}',
         note: 'note on {code}',
         move: 'moving {code}',
+        role: '{code} as {role}',
         clear: 'clearing the list ({count})',
       },
     },
@@ -726,6 +757,18 @@ export const messages = {
       badgeIcd11: 'ICD-11',
       sourceApiTitle: 'ICD-11 classification (WHO)',
       sourceLocalTitle: 'Built-in ICD-10 dictionary',
+      keyboardHintBefore: 'Keyboard:',
+      keyboardHintMove: 'move between suggestions,',
+      keyboardHintValidate: 'validate,',
+      keyboardHintReject: 'reject.',
+      contexte: {
+        antecedent: 'History',
+        antecedentTitle:
+          'Mentioned as past history: code it, if relevant, as a secondary diagnosis.',
+        familial: 'Family',
+        familialTitle:
+          'Mentioned in a relative: not, a priori, a condition of the patient.',
+      },
     },
     validated: {
       title: 'Kept diagnoses',
@@ -759,6 +802,20 @@ export const messages = {
         'List cleared: {count} diagnoses removed. “Undo” brings them back.',
       orderHint:
         'The order of this list is the order of the exports, the copy and the print-out.',
+      roleAria: 'PMSI role of {code}',
+      roleTitle:
+        'Role in the French PMSI summary: one principal diagnosis (placed first), one related diagnosis (right after), the others secondary.',
+      roleOption: {
+        dp: 'DP',
+        dr: 'DR',
+        das: 'DAS',
+      },
+      roleOptionLong: {
+        dp: 'DP — principal diagnosis',
+        dr: 'DR — related diagnosis',
+        das: 'DAS — secondary diagnosis',
+      },
+      roleSet: '{code} set as {role}, at position {position}.',
     },
     export: {
       clipboard: 'Clipboard',
@@ -779,6 +836,7 @@ export const messages = {
       reportSourceHeading: 'Source text:',
       reportEmpty: '(empty)',
       csvHeader: 'code,label,note,validated_at',
+      csvRoleHeader: 'pmsi_role',
       emailSubject: 'Mister CIM-10 — diagnoses',
       shareDocTitle: 'Mister CIM-10 — diagnoses',
     },
@@ -885,7 +943,7 @@ export const messages = {
       use5: 'Kept diagnoses appear next to the suggestions on a wide screen, and below them otherwise; you can export them as text (.txt) or spreadsheet (.csv), and send them by email or via the system share.',
       use6: 'Set the order of the kept diagnoses with Move up / Move down: it is the order of the exports and of the print-out. Edit corrects a code in place; the star puts a code in your favorites, from which it is added in one gesture.',
       shortcuts:
-        'Shortcuts: Ctrl + Enter in the report runs the analysis. Outside a text field, Ctrl + Z undoes the last action on the kept diagnoses, Ctrl + Shift + Z or Ctrl + Y redoes it (⌘ instead of Ctrl on a Mac).',
+        'Shortcuts: Ctrl + Enter in the report runs the analysis. On a suggestion, ↑ and ↓ move to the previous or next one, V validates it, R rejects it. Outside a text field, Ctrl + Z undoes the last action on the kept diagnoses, Ctrl + Shift + Z or Ctrl + Y redoes it (⌘ instead of Ctrl on a Mac).',
       useSourceNoteBefore:
         'To add the WHO ICD-11 classification to the suggestions, see “Going further” below, then the ',
       useSourceNoteAfter: ' page. It is not required for coding.',
@@ -935,6 +993,8 @@ export const messages = {
     },
     errors: {
       emptyReport: 'Enter a report before running the analysis.',
+      engineUnavailable:
+        'The analysis engine could not be loaded. Reload the page once you are back online.',
       oms: {
         proxyUnreachable:
           'Gateway unreachable — check your connection, then try again.',

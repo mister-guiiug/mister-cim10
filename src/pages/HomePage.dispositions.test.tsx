@@ -104,8 +104,12 @@ describe('au téléphone : trois onglets, dans l’ordre du travail', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     });
 
+    // Le moteur de lecture se charge à la demande : l'issue de l'analyse
+    // s'attend, elle ne suit plus le clic dans le même tour.
     const suggestions = screen.getByRole('tab', { name: /suggestions/i });
-    expect(suggestions).toHaveAttribute('aria-selected', 'true');
+    await waitFor(() =>
+      expect(suggestions).toHaveAttribute('aria-selected', 'true')
+    );
     expect(suggestions.textContent).toMatch(/Suggestions\d+$/);
     expect(
       screen.queryByRole('button', { name: 'Analyser' })
@@ -170,6 +174,9 @@ describe('à la tablette et au bureau', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Analyser' }));
     });
+    await waitFor(() =>
+      expect(useWorkspaceStore.getState().isAnalyzing).toBe(false)
+    );
     // Le compte-rendu reste là : rien n'est caché au bureau.
     expect(screen.getByRole('button', { name: 'Analyser' })).toBeVisible();
   });

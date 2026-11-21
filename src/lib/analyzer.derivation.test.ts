@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { suggestFromText } from './analyzer';
+import { suggestFromText } from './suggestions';
 
 /**
  * CE QUE CE FICHIER TIENT : la forme sous laquelle un clinicien ÉCRIT.

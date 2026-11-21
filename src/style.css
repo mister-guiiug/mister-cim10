@@ -1405,6 +1405,58 @@ footer.footer-actions {
   color: var(--color-text-secondary);
 }
 
+/* Le tri au clavier, dit là où il sert — et seulement à qui a un clavier :
+   au doigt, ces touches n'existent pas. */
+.suggestions-clavier {
+  display: none;
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--text-supporting-size);
+  line-height: var(--text-supporting-leading);
+  color: var(--color-text-secondary);
+}
+
+.suggestions-clavier kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0 var(--spacing-1);
+  border: var(--border-width) solid var(--color-border-emphasized);
+  border-radius: var(--radius-inner);
+  font-family: var(--font-family-code);
+  font-size: var(--text-supporting-size);
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+@media (pointer: fine) {
+  .suggestions-clavier {
+    display: block;
+  }
+}
+
+/* Une mention qui n'est pas actuelle : antécédent, ou maladie d'un proche.
+   Elle reste proposée, classée plus bas — le badge dit pourquoi. */
+.context-badge {
+  display: inline-block;
+  margin-inline-start: var(--spacing-1);
+  padding: 0 var(--spacing-1);
+  border-radius: var(--radius-full);
+  font-size: var(--text-supporting-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-supporting-leading);
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.context-badge--antecedent {
+  background: var(--color-warning-muted);
+  color: var(--color-text-warning);
+}
+
+.context-badge--familial {
+  background: var(--color-info-muted);
+  color: var(--color-text-secondary);
+}
+
 /* ── Scrollbar thématique (WebKit) ── */
 ::-webkit-scrollbar {
   width: 6px;
@@ -1750,6 +1802,41 @@ footer.footer-actions {
   flex: 1 1 10rem;
 }
 
+/* Le rôle PMSI : discret tant qu'il vaut DAS (le défaut, qui ne décide rien),
+   affirmé en DP et en DR. Un sélecteur natif : clavier, lecteur d'écran et
+   doigt le savent tous. */
+.validated-role {
+  flex-shrink: 0;
+  min-height: var(--size-element-lg);
+  padding: 0 var(--spacing-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--text-supporting-size);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.validated-role--dp,
+.validated-role--dr {
+  border-color: var(--color-accent);
+  background: var(--color-accent-muted);
+  color: var(--color-text-accent);
+}
+
+.validated-role:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+@media (pointer: fine) {
+  .validated-role {
+    min-height: var(--size-element-sm);
+  }
+}
+
 .validated-row .validated-actions {
   flex: 1 1 100%;
   justify-content: flex-end;
@@ -2055,6 +2142,18 @@ p.hint.dictation-status {
     border: 1px solid darkgray;
     background: none;
     color: black;
+  }
+
+  /* Le rôle s'imprime comme un mot, et seulement dans un résumé PMSI. */
+  .validated-role {
+    appearance: none;
+    border: none;
+    background: none;
+    color: black;
+  }
+
+  .validated-list:not(.is-pmsi) .validated-role {
+    display: none;
   }
 }
 

@@ -24,7 +24,11 @@ import {
   estChampEditable,
 } from '../../lib/raccourcis';
 import { useI18n } from '../../i18n';
-import type { ValidatedDiagnostic } from '../../types/index';
+import { estResumePmsi, roleEffectif } from '../../lib/pmsi';
+import type { RolePmsi, ValidatedDiagnostic } from '../../types/index';
+
+/** Dans l'ordre du résumé. */
+const ROLES: readonly RolePmsi[] = ['dp', 'dr', 'das'];
 
 /*
  * LE FORMULAIRE DE SAISIE EST CHARGÉ À LA DEMANDE. Il ne sert qu'après un clic
@@ -81,6 +85,7 @@ function FormulaireIndisponible({ onCancel }: CodeEntryFormProps) {
  */
 type CibleFocus =
   | { type: 'element'; id: string; action: 'monter' | 'descendre' }
+  | { type: 'role'; id: string }
   | { type: 'apres-retrait'; index: number }
   | { type: 'annuler' }
   | { type: 'si-perdu' };
@@ -93,6 +98,7 @@ export function ValidatedPanel() {
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const editValidated = useWorkspaceStore(s => s.editValidated);
   const moveValidated = useWorkspaceStore(s => s.moveValidated);
+  const setRolePmsi = useWorkspaceStore(s => s.setRolePmsi);
   const clearValidated = useWorkspaceStore(s => s.clearValidated);
   const undo = useWorkspaceStore(s => s.undo);
   const redo = useWorkspaceStore(s => s.redo);
@@ -142,6 +148,15 @@ export function ValidatedPanel() {
         if (!focaliser(bouton(li, demande.action))) {
           focaliser(bouton(li, autre));
         }
+        return;
+      }
+      case 'role': {
+        // Désigné DP ou DR, le diagnostic change de place : le focus le
+        // suit, sur son sélecteur de rôle.
+        items
+          .find(el => el.dataset.id === demande.id)
+          ?.querySelector<HTMLSelectElement>('[data-action="role"]')
+          ?.focus();
         return;
       }
       case 'apres-retrait': {
@@ -233,6 +248,19 @@ export function ValidatedPanel() {
       action: delta < 0 ? 'monter' : 'descendre',
     };
     annoncer(t('validated.moved', { code: v.code, position }));
+  };
+
+  const definirRole = (v: ValidatedDiagnostic, role: RolePmsi) => {
+    const position = setRolePmsi(v.id, role);
+    if (position === null) return;
+    aFocaliser.current = { type: 'role', id: v.id };
+    annoncer(
+      t('validated.roleSet', {
+        code: v.code,
+        role: t(`validated.roleOption.${role}`),
+        position,
+      })
+    );
   };
 
   const retirer = (v: ValidatedDiagnostic, index: number) => {
@@ -376,7 +404,11 @@ export function ValidatedPanel() {
         <>
           {/* UNE LISTE ORDONNÉE, parce qu'elle l'est : son ordre est celui
               des exports, de la copie et de l'impression. */}
-          <ol className="validated-list" role="list" ref={listeRef}>
+          <ol
+            className={`validated-list${estResumePmsi(validated) ? ' is-pmsi' : ''}`}
+            role="list"
+            ref={listeRef}
+          >
             {validated.map((v, index) => (
               <ValidatedItem
                 key={v.id}
@@ -385,6 +417,7 @@ export function ValidatedPanel() {
                 total={validated.length}
                 autresCodes={validatedCodes}
                 onMove={delta => deplacer(v, delta)}
+                onRole={role => definirRole(v, role)}
                 onRemove={() => retirer(v, index)}
                 onNote={note => updateValidatedNote(v.id, note)}
                 onEdit={saisie => modifier(v, saisie)}
@@ -436,6 +469,7 @@ interface ValidatedItemProps {
   /** Les codes retenus ; celui de l'élément en est retiré pour la modification. */
   autresCodes: Set<string>;
   onMove: (delta: -1 | 1) => void;
+  onRole: (role: RolePmsi) => void;
   onRemove: () => void;
   onNote: (note: string) => void;
   /** `false` si la correction est refusée : le formulaire reste ouvert. */
@@ -448,6 +482,7 @@ function ValidatedItem({
   total,
   autresCodes,
   onMove,
+  onRole,
   onRemove,
   onNote,
   onEdit,
@@ -458,6 +493,7 @@ function ValidatedItem({
   const [note, setNote] = useState(item.note ?? '');
   const modifierRef = useRef<HTMLButtonElement | null>(null);
   const rendreFocus = useRef(false);
+  const role = roleEffectif(item);
 
   const codesSaufLui = useMemo(() => {
     const codes = new Set(autresCodes);
@@ -499,6 +535,26 @@ function ValidatedItem({
       ) : (
         <div className="validated-row">
           <span className="validated-pos">{position}</span>
+          {/* LE RÔLE PMSI, discret tant qu'il vaut DAS — un médecin qui ne
+              fait que lister des codes n'a pas à le remarquer. */}
+          <select
+            className={`validated-role validated-role--${role}`}
+            data-action="role"
+            value={role}
+            aria-label={t('validated.roleAria', { code: item.code })}
+            title={t('validated.roleTitle')}
+            onChange={e => onRole(e.target.value as RolePmsi)}
+          >
+            {ROLES.map(r => (
+              <option
+                key={r}
+                value={r}
+                title={t(`validated.roleOptionLong.${r}`)}
+              >
+                {t(`validated.roleOption.${r}`)}
+              </option>
+            ))}
+          </select>
           <strong className="validated-code">{item.code}</strong>
           <span
             className={`source-badge source-badge--${item.source ?? 'local'}`}

@@ -16,7 +16,26 @@ export interface AnalysisResult {
   score: number;
   confidence: number;
   source?: 'local' | 'api';
+  /**
+   * Le passage du compte-rendu qui a répondu, tel qu'écrit (accents, casse) :
+   * c'est lui qu'on montre et qu'on surligne. `matchedTerm` est le terme du
+   * référentiel, normalisé — introuvable tel quel dans « Diabète ».
+   */
+  extrait?: string;
+  /**
+   * La mention n'est pas actuelle : antécédent du patient, ou maladie d'un
+   * proche. Absent = affirmée au présent. Une mention NIÉE ne devient pas une
+   * suggestion du tout.
+   */
+  contexte?: 'antecedent' | 'familial';
 }
+
+/**
+ * Rôle d'un diagnostic dans le résumé d'hospitalisation (PMSI) : diagnostic
+ * principal, relié, ou associé significatif. Un seul DP et un seul DR par
+ * résumé ; les autres sont des DAS.
+ */
+export type RolePmsi = 'dp' | 'dr' | 'das';
 
 export interface ValidatedDiagnostic {
   id: string;
@@ -26,6 +45,8 @@ export interface ValidatedDiagnostic {
   validatedAt: number;
   /** Référentiel d'origine : 'local' = CIM-10 embarqué, 'api' = OMS CIM-11. */
   source?: 'local' | 'api';
+  /** Rôle PMSI ; absent = DAS (cf. `lib/pmsi.ts`). */
+  role?: RolePmsi;
 }
 
 /**
