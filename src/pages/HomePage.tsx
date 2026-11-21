@@ -1,6 +1,8 @@
 import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
 import { PwaInstallPrompt } from '@mister-guiiug/dev-pwa-config/react/pwa-install-prompt';
 import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
+import { recordError } from '@mister-guiiug/dev-pwa-config/react/observability';
+import { useIdlePrefetch } from '@mister-guiiug/dev-pwa-config/react/use-prefetch';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
 import { CrPanel } from '../features/workspace/CrPanel';
@@ -17,7 +19,6 @@ import { DisclaimerBanner } from '../components/DisclaimerBanner';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useVueStore, type Vue } from '../store/vueStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { suggestFromText } from '../lib/analyzer';
 import { OmsError, suggestFromOms } from '../lib/oms';
 import { useI18n } from '../i18n';
 import type { AnalysisResult } from '../types/index';
@@ -35,6 +36,15 @@ function classerParConfiance(results: AnalysisResult[]): AnalysisResult[] {
   return [...byCode.values()].sort((a, b) => b.confidence - a.confidence);
 }
 
+/*
+ * LE MOTEUR DE LECTURE EST CHARGÉ À LA DEMANDE (cf. `lib/suggestions.ts`) :
+ * il ne sert qu'au clic sur « Analyser », et le garder dans le morceau
+ * d'entrée coûtait 3 kB au préchargé de chaque visiteur. Préchargé au repos,
+ * le premier « Analyser » ne l'attend pas. Le chargeur est NOMMÉ : le socle
+ * déduplique sur son identité.
+ */
+const chargerSuggestions = () => import('../lib/suggestions');
+
 export function HomePage() {
   const setSuggestions = useWorkspaceStore(s => s.setSuggestions);
   const setIsAnalyzing = useWorkspaceStore(s => s.setIsAnalyzing);
@@ -43,6 +53,7 @@ export function HomePage() {
   const crText = useWorkspaceStore(s => s.crText);
   const who = useSettingsStore(s => s.who);
   const { t } = useI18n();
+  useIdlePrefetch(chargerSuggestions);
 
   /**
    * DEUX RÉFÉRENTIELS, PLUS AUCUN CHOIX À FAIRE.
@@ -96,7 +107,25 @@ export function HomePage() {
      * la passerelle soit interrogée : tant que cette variable vivait dans le
      * `try`, l'échec réseau emportait avec lui des résultats déjà calculés.
      */
-    const results: AnalysisResult[] = suggestFromText(crText);
+    let results: AnalysisResult[];
+    try {
+      results = (await chargerSuggestions()).suggestFromText(crText);
+    } catch (erreur) {
+      // Un morceau manquant (déploiement entre-temps, réseau coupé avant le
+      // précache) : on le dit, sans faire tomber l'écran.
+      recordError(erreur, {
+        source: 'moteur-suggestions',
+        etape: 'chargement',
+      });
+      trackEvent(GESTES.OPERATION, {
+        nom: 'analyse',
+        etape: 'echouee',
+        oms: omsJoignable,
+      });
+      setAnalyzeError(t('errors.engineUnavailable'));
+      setIsAnalyzing(false);
+      return;
+    }
     try {
       if (omsJoignable) {
         results.push(...(await suggestFromOms(crText, who)));

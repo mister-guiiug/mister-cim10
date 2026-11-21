@@ -1,4 +1,5 @@
 import type { useI18n } from '../../i18n';
+import { SIGLE_ROLE } from '../../lib/pmsi';
 import type { OperationRetenus } from '../../store/workspaceStore';
 
 type Traduire = ReturnType<typeof useI18n>['t'];
@@ -24,6 +25,8 @@ export function decrireOperation(op: OperationRetenus, t: Traduire): string {
       return t('history.op.note', { code: op.code });
     case 'deplacement':
       return t('history.op.move', { code: op.code });
+    case 'role':
+      return t('history.op.role', { code: op.code, role: SIGLE_ROLE[op.role] });
     case 'vidage':
       return t('history.op.clear', { count: op.nombre });
   }

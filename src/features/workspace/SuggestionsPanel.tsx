@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n';
 import { FavoriteToggle } from './FavoriteToggle';
 import { suggestionsATrancher } from './aTrancher';
 import { useDisposition } from './disposition';
+import { estChampEditable } from '../../lib/raccourcis';
 import { useVueStore } from '../../store/vueStore';
 import type { AnalysisResult, ICD10Code } from '../../types/index';
 
@@ -158,6 +159,65 @@ export function SuggestionsPanel() {
     setAFocaliser(index);
   }, []);
 
+  /*
+   * TRIER AU CLAVIER, SANS TABULER.
+   *
+   * Le focus suit déjà la carte suivante après un geste ; restait à aller
+   * d'une carte à l'autre sans traverser les quatre à six boutons de chacune.
+   * ↑ ↓ (et Début / Fin) passent d'un « Valider » à l'autre, V valide, R
+   * rejette.
+   *
+   * DES TOUCHES À UN CARACTÈRE, ET LE CRITÈRE 2.1.4 DES WCAG LES ADMET
+   * PARCE QU'ELLES NE VIVENT QUE SUR LA LISTE : elles ne s'entendent que
+   * lorsque le focus est sur une carte. Taper un « v » dans le compte-rendu
+   * ou la recherche reste taper un « v ». Et aucun modificateur : Ctrl+R
+   * recharge la page, il n'est pas à nous.
+   */
+  useEffect(() => {
+    const panneau = panneauRef.current;
+    if (panneau === null) return;
+    const surTouche = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.isComposing || estChampEditable(e.target)) return;
+      const cartes = [
+        ...(listeRef.current?.querySelectorAll<HTMLElement>(
+          ':scope > .suggestion-card'
+        ) ?? []),
+      ];
+      const carte =
+        e.target instanceof Element
+          ? e.target.closest<HTMLElement>('.suggestion-card')
+          : null;
+      const index = carte ? cartes.indexOf(carte) : -1;
+      if (index === -1) return;
+      const bouton = (i: number, role: string) =>
+        cartes[i]?.querySelector<HTMLButtonElement>(`[data-role="${role}"]`) ??
+        null;
+      const touche = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const cibles: Record<string, () => HTMLButtonElement | null> = {
+        ArrowDown: () =>
+          bouton(Math.min(index + 1, cartes.length - 1), 'valider-principal'),
+        ArrowUp: () => bouton(Math.max(index - 1, 0), 'valider-principal'),
+        Home: () => bouton(0, 'valider-principal'),
+        End: () => bouton(cartes.length - 1, 'valider-principal'),
+      };
+      if (touche in cibles) {
+        e.preventDefault();
+        cibles[touche]!()?.focus();
+      } else if (touche === 'v' || touche === 'r') {
+        e.preventDefault();
+        bouton(
+          index,
+          touche === 'v' ? 'valider-principal' : 'rejeter-principal'
+        )?.click();
+      }
+    };
+    // Sur le panneau, toujours monté — la liste, elle, va et vient avec ses
+    // suggestions. La carte visée est relue à chaque frappe.
+    panneau.addEventListener('keydown', surTouche);
+    return () => panneau.removeEventListener('keydown', surTouche);
+  }, []);
+
   return (
     <section
       className={`panel panel--suggestions ${pristine ? 'is-pristine' : 'is-active'}`}
@@ -273,30 +333,42 @@ export function SuggestionsPanel() {
             </p>
           )
         ) : (
-          <ul className="suggestion-list" role="list" ref={listeRef}>
-            {groupes.map((groupe, index) => (
-              <SuggestionCard
-                key={groupe[0]!.id}
-                groupe={groupe}
-                validatedCodes={validatedCodes}
-                onValidate={s => {
-                  validate(s);
-                  setAnnonce(t('results.announceValidated', { code: s.code }));
-                  suivreLeFocus(index);
-                }}
-                onReject={s => {
-                  reject(s.id);
-                  setAnnonce(t('results.announceRejected', { code: s.code }));
-                  suivreLeFocus(index);
-                }}
-                onHighlight={s => setHighlightedMatchedTerm(s.matchedTerm)}
-                onValidateRelated={(code, label) =>
-                  addManualDiagnostic(code, label)
-                }
-                onAnnounce={setAnnonce}
-              />
-            ))}
-          </ul>
+          <>
+            <p className="suggestions-clavier">
+              {t('results.keyboardHintBefore')} <kbd>↑</kbd> <kbd>↓</kbd>{' '}
+              {t('results.keyboardHintMove')} <kbd>V</kbd>{' '}
+              {t('results.keyboardHintValidate')} <kbd>R</kbd>{' '}
+              {t('results.keyboardHintReject')}
+            </p>
+            <ul className="suggestion-list" role="list" ref={listeRef}>
+              {groupes.map((groupe, index) => (
+                <SuggestionCard
+                  key={groupe[0]!.id}
+                  groupe={groupe}
+                  validatedCodes={validatedCodes}
+                  onValidate={s => {
+                    validate(s);
+                    setAnnonce(
+                      t('results.announceValidated', { code: s.code })
+                    );
+                    suivreLeFocus(index);
+                  }}
+                  onReject={s => {
+                    reject(s.id);
+                    setAnnonce(t('results.announceRejected', { code: s.code }));
+                    suivreLeFocus(index);
+                  }}
+                  onHighlight={s =>
+                    setHighlightedMatchedTerm(s.extrait ?? s.matchedTerm)
+                  }
+                  onValidateRelated={(code, label) =>
+                    addManualDiagnostic(code, label)
+                  }
+                  onAnnounce={setAnnonce}
+                />
+              ))}
+            </ul>
+          </>
         )}
       </div>
     </section>
@@ -403,8 +475,18 @@ function SuggestionCard({
               onClick={() => onHighlight(suggestion)}
               title={t('results.matchedTermTitle')}
             >
-              {suggestion.matchedTerm}
+              {/* Le passage tel qu'écrit dans le compte-rendu : c'est
+                  lui qu'on cherche des yeux, pas sa forme normalisée. */}
+              {suggestion.extrait ?? suggestion.matchedTerm}
             </button>
+            {suggestion.contexte && (
+              <span
+                className={`context-badge context-badge--${suggestion.contexte}`}
+                title={t(`results.contexte.${suggestion.contexte}Title`)}
+              >
+                {t(`results.contexte.${suggestion.contexte}`)}
+              </span>
+            )}
           </p>
         )}
       </div>
@@ -442,6 +524,7 @@ function SuggestionCard({
           type="button"
           className="secondary suggestion-validate"
           data-role="valider-principal"
+          aria-keyshortcuts="V"
           onClick={() => onValidate(suggestion)}
         >
           {t('common.validate')}
@@ -449,6 +532,8 @@ function SuggestionCard({
         <button
           type="button"
           className="ghost"
+          data-role="rejeter-principal"
+          aria-keyshortcuts="R"
           onClick={() => onReject(suggestion)}
         >
           {t('common.reject')}

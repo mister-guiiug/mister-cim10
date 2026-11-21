@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { searchIcdCodes, suggestFromText } from './analyzer';
+import { searchIcdCodes } from './analyzer';
+import { suggestFromText } from './suggestions';
 
 /**
  * CE QUE CE FICHIER TIENT. `suggestFromText` part du compte-rendu : elle ne

@@ -468,3 +468,41 @@ describe('favoris', () => {
     expect(state().favorites).toMatchObject([{ code: 'BA00', source: 'api' }]);
   });
 });
+
+describe('le rôle PMSI', () => {
+  const role = (code: string) =>
+    screen.getByRole('combobox', { name: `Rôle PMSI de ${code}` });
+  const roles = () =>
+    state()
+      .validated.map(v => `${v.role ?? 'das'}:${v.code}`)
+      .join(' ');
+
+  it('tout est DAS par défaut — aucun DP désigné d’office', () => {
+    monter();
+    expect(role('C34.9')).toHaveValue('das');
+    expect(role('A00.0')).toHaveValue('das');
+    expect(document.querySelector('.validated-list.is-pmsi')).toBeNull();
+  });
+
+  it('désigner un DP le place en tête, le dit, et le focus le suit', async () => {
+    monter();
+    role('A00.0').focus();
+    fireEvent.change(role('A00.0'), { target: { value: 'dp' } });
+
+    expect(roles()).toBe('dp:A00.0 das:C34.9 das:B01.9');
+    expect(document.querySelector('.validated-list.is-pmsi')).not.toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(role('A00.0')));
+    expect(annonce()).toBe('A00.0 désigné DP, en position 1.');
+  });
+
+  it('un seul DP ; « Annuler » rend l’ancien, à sa place', () => {
+    monter();
+    fireEvent.change(role('A00.0'), { target: { value: 'dp' } });
+    fireEvent.change(role('B01.9'), { target: { value: 'dp' } });
+    expect(roles()).toBe('dp:B01.9 das:A00.0 das:C34.9');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Annuler' }));
+    expect(roles()).toBe('dp:A00.0 das:C34.9 das:B01.9');
+    expect(annonce()).toBe('Annulé : B01.9 en DP.');
+  });
+});

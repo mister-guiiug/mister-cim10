@@ -1,83 +1,18 @@
 import { useState } from 'react';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { dateSlug, downloadBlob } from '@mister-guiiug/dev-pwa-config/download';
-import { toCsv } from '@mister-guiiug/dev-pwa-config/csv';
 import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import { useI18n } from '../../i18n';
-import type { ValidatedDiagnostic } from '../../types/index';
+import {
+  buildClipboardList,
+  buildCsvReport,
+  buildJsonReport,
+  buildTextReport,
+  type TextReportStrings,
+} from '../../lib/rapport';
 
 interface ExportBarProps {
   disabled: boolean;
-}
-
-/** Libellés localisés du rapport texte (le corps — codes/notes — reste des données). */
-interface TextReportStrings {
-  title: string;
-  validatedHeading: string;
-  sourceHeading: string;
-  empty: string;
-}
-
-function buildTextReport(
-  crText: string,
-  validated: ValidatedDiagnostic[],
-  s: TextReportStrings
-): string {
-  const lines: string[] = [
-    s.title,
-    '',
-    s.validatedHeading,
-    ...validated.map(v =>
-      v.note
-        ? `  ${v.code} — ${v.label} [${v.note}]`
-        : `  ${v.code} — ${v.label}`
-    ),
-    '',
-    s.sourceHeading,
-    crText || s.empty,
-  ];
-  return lines.join('\n');
-}
-
-/**
- * CSV via le socle, dialecte `unix` (virgule + LF, sans BOM) : celui que
- * produisait l'échappement maison. Les libellés de colonnes restent i18n
- * (clé `export.csvHeader`, quatre segments séparés par des virgules).
- */
-function buildCsvReport(
-  validated: ValidatedDiagnostic[],
-  header: string
-): string {
-  const [codeH, labelH, noteH, dateH] = header.split(',');
-  return toCsv(validated, {
-    dialect: 'unix',
-    columns: [
-      { key: 'code', header: codeH },
-      { key: 'label', header: labelH },
-      { key: 'note', header: noteH },
-      {
-        key: 'validatedAt',
-        header: dateH,
-        // `Date` : sérialisée en ISO 8601 par le socle, comme avant.
-        map: (_value, row) => new Date(row.validatedAt),
-      },
-    ],
-  });
-}
-
-function buildJsonReport(
-  crText: string,
-  validated: ValidatedDiagnostic[]
-): string {
-  return JSON.stringify(
-    {
-      generatedAt: new Date().toISOString(),
-      compteRendu: crText,
-      validated,
-    },
-    null,
-    2
-  );
 }
 
 export function ExportBar({ disabled }: ExportBarProps) {
@@ -96,9 +31,7 @@ export function ExportBar({ disabled }: ExportBarProps) {
   });
 
   const copyList = async () => {
-    const text = validated
-      .map(v => `${v.code} — ${v.label}${v.note ? ` [${v.note}]` : ''}`)
-      .join('\n');
+    const text = buildClipboardList(validated);
     try {
       await navigator.clipboard.writeText(text);
       trackEvent(GESTES.EXPORT, { format: 'presse-papiers' });
@@ -119,9 +52,16 @@ export function ExportBar({ disabled }: ExportBarProps) {
   };
 
   const exportCsv = () => {
-    const blob = new Blob([buildCsvReport(validated, t('export.csvHeader'))], {
-      type: 'text/csv;charset=utf-8',
-    });
+    const blob = new Blob(
+      [
+        buildCsvReport(
+          validated,
+          t('export.csvHeader'),
+          t('export.csvRoleHeader')
+        ),
+      ],
+      { type: 'text/csv;charset=utf-8' }
+    );
     downloadBlob(blob, `cim10-${dateSlug()}.csv`);
     trackEvent(GESTES.EXPORT, { format: 'csv' });
   };

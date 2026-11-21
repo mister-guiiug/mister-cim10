@@ -1,7 +1,6 @@
 import { icdEntries } from '../icd10-data.js';
-import type { AnalysisResult } from '../types/index';
 
-const randomId = (): string =>
+export const randomId = (): string =>
   typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2, 12);
@@ -16,14 +15,20 @@ function normalize(s: string): string {
     .trim();
 }
 
-function normalizeForMatch(s: string): string {
-  return normalize(s)
-    .replace(/[^a-z0-9]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+export function normalizeForMatch(s: string): string {
+  return (
+    normalize(s)
+      // NFD ne décompose ni « œ » ni « æ » : sans cette ligne, « œdème »
+      // devenait « deme », et ne rejoignait jamais « oedème ».
+      .replace(/œ/g, 'oe')
+      .replace(/æ/g, 'ae')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  );
 }
 
-function trigrams(s: string): Set<string> {
+export function trigrams(s: string): Set<string> {
   const padded = `  ${s}  `;
   const set = new Set<string>();
   for (let i = 0; i < padded.length - 2; i++) set.add(padded.slice(i, i + 3));
@@ -115,131 +120,35 @@ function estDerive(a: string, b: string): boolean {
  * D'où des paramètres nommés par leur rôle et non par leur origine : la
  * mécanique est la même, on ne l'écrit pas deux fois.
  */
-function fuzzyTermMatch(
+export function fuzzyTermMatch(
   needles: string[],
-  haystack: { w: string; tg: Set<string> }[]
-): { avgSim: number } | null {
+  haystack: { w: string; tg: Set<string>; i?: number }[]
+): { avgSim: number; positions: number[] } | null {
   const significant = needles.filter(w => w.length >= 4);
   if (significant.length === 0) return null;
   let totalSim = 0;
+  // Où chaque mot a trouvé son répondant : `suggestFromText` en a besoin
+  // pour lire la négation autour de la mention et en montrer l'extrait.
+  const positions: number[] = [];
   for (const tw of significant) {
     const twTg = trigrams(tw);
     let best = 0;
-    for (const { w, tg } of haystack) {
-      const sim = trigramSim(twTg, tg);
-      if (sim > best) best = sim;
+    let at = -1;
+    haystack.forEach(({ w, tg, i }, idx) => {
+      let sim = trigramSim(twTg, tg);
       // Une dérivation compte comme une reconnaissance sûre, sans jamais
       // égaler une correspondance littérale.
-      if (best < DERIVATION_SIM && estDerive(tw, w)) best = DERIVATION_SIM;
-    }
+      if (sim < DERIVATION_SIM && estDerive(tw, w)) sim = DERIVATION_SIM;
+      if (sim > best) {
+        best = sim;
+        at = i ?? idx;
+      }
+    });
     if (best < FUZZY_THRESHOLD) return null;
     totalSim += best;
+    positions.push(at);
   }
-  return { avgSim: totalSim / significant.length };
-}
-
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-interface IcdEntry {
-  code: string;
-  label: string;
-  synonyms?: string[];
-}
-
-export function suggestFromText(rawText: string): AnalysisResult[] {
-  const text = normalizeForMatch(rawText);
-  if (text.length < 2) return [];
-
-  const inputWords = text.split(' ').filter(w => w.length >= 3);
-  const inputWordTrigs = inputWords.map(w => ({ w, tg: trigrams(w) }));
-
-  const upperRaw = rawText.trim().toUpperCase();
-  const entries = icdEntries as IcdEntry[];
-  const exactCodeEntry = entries.find(e => e.code === upperRaw);
-  const exactCodeHits: AnalysisResult[] = exactCodeEntry
-    ? [
-        {
-          id: randomId(),
-          code: exactCodeEntry.code,
-          label: exactCodeEntry.label,
-          matchedTerm: exactCodeEntry.code,
-          score: 999,
-          confidence: 0.99,
-          source: 'local',
-        },
-      ]
-    : [];
-  const exactCodes = new Set(exactCodeHits.map(h => h.code));
-  const hits: AnalysisResult[] = [];
-
-  for (const e of entries) {
-    const terms = [e.label, ...(e.synonyms ?? [])]
-      .map(x => normalizeForMatch(x))
-      .filter(t => t.length >= 2);
-    let bestScore = 0;
-    let matchedTerm = '';
-    let bestFuzzy: { term: string; avgSim: number } | null = null;
-
-    for (const t of terms) {
-      if (text.includes(t)) {
-        const isWholeWord = new RegExp(
-          `(^|[^a-z0-9])${escapeRegExp(t)}([^a-z0-9]|$)`,
-          'i'
-        ).test(text);
-        const bonus = isWholeWord ? 15 : 0;
-        const score = t.length * 8 + bonus + (t.length >= 12 ? 20 : 0);
-        if (score > bestScore) {
-          bestScore = score;
-          matchedTerm = t;
-        }
-      } else if (bestScore === 0) {
-        const termWords = t.split(' ').filter(w => w.length >= 3);
-        const result = fuzzyTermMatch(termWords, inputWordTrigs);
-        if (result && result.avgSim > (bestFuzzy?.avgSim ?? 0)) {
-          bestFuzzy = { term: t, avgSim: result.avgSim };
-        }
-      }
-    }
-
-    if (bestScore > 0) {
-      const confidence = Math.min(0.94, 0.35 + bestScore / 180);
-      hits.push({
-        id: randomId(),
-        code: e.code,
-        label: e.label,
-        matchedTerm,
-        score: bestScore,
-        confidence,
-        source: 'local',
-      });
-    } else if (bestFuzzy) {
-      const score = bestFuzzy.term.length * 6 * bestFuzzy.avgSim;
-      const confidence = Math.min(0.62, 0.22 + score / 180);
-      hits.push({
-        id: randomId(),
-        code: e.code,
-        label: e.label,
-        matchedTerm: bestFuzzy.term,
-        score,
-        confidence,
-        source: 'local',
-      });
-    }
-  }
-
-  hits.sort((a, b) => b.score - a.score);
-
-  const seen = new Set(exactCodes);
-  const out = [...exactCodeHits];
-  for (const h of hits) {
-    if (seen.has(h.code)) continue;
-    seen.add(h.code);
-    out.push(h);
-    if (out.length >= 30) break;
-  }
-  return out;
+  return { avgSim: totalSim / significant.length, positions };
 }
 
 /* -------------------------------------------------------------------------
@@ -266,6 +175,9 @@ export interface CodeSearchHit {
 
 interface IndexedTerm {
   text: string;
+  /** Les mots du terme, dans l'ordre : la lecture d'un compte-rendu. */
+  tokens: string[];
+  /** Les mots de trois lettres et plus, avec leurs trigrammes : la recherche. */
   words: { w: string; tg: Set<string> }[];
 }
 
@@ -283,9 +195,15 @@ interface IndexedEntry {
  * recherche se déclenche à chaque caractère, et le coût est exactement le même
  * à chaque fois alors que les données, elles, ne bougent jamais.
  */
+interface IcdEntry {
+  code: string;
+  label: string;
+  synonyms?: string[];
+}
+
 let searchIndex: IndexedEntry[] | null = null;
 
-function getSearchIndex(): IndexedEntry[] {
+export function getSearchIndex(): IndexedEntry[] {
   if (searchIndex !== null) return searchIndex;
   searchIndex = (icdEntries as IcdEntry[]).map(e => ({
     code: e.code,
@@ -295,6 +213,7 @@ function getSearchIndex(): IndexedEntry[] {
       .filter(t => t.length >= 2)
       .map(text => ({
         text,
+        tokens: text.split(' '),
         words: text
           .split(' ')
           .filter(w => w.length >= 3)
