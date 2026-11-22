@@ -60,6 +60,7 @@ import { favorisValides } from './favoris';
 import type {
   FavoriteCode,
   SavedSession,
+  SourcePriority,
   ValidatedDiagnostic,
   WhoSettings,
 } from '../types/index';
@@ -78,6 +79,9 @@ export const MAX_SESSIONS = 5;
 
 /** Seuil de confiance par défaut, repris de l'ancien `settings.ts`. */
 const DEFAULT_MIN_CONFIDENCE = 0.4;
+
+/** Ordre d'affichage des suggestions : OMS d'abord quand elle a répondu. */
+const DEFAULT_SOURCE_PRIORITY: SourcePriority = 'api';
 
 /**
  * Connexion OMS telle que l'APPAREIL la garde : ni le mot secret, ni la
@@ -98,6 +102,11 @@ export interface AppSnapshot {
   favorites: FavoriteCode[];
   /** Confiance minimale d'affichage d'une suggestion. */
   minConfidence: number;
+  /**
+   * Référentiel en tête de liste. Champ AJOUTÉ sans cran de version : `valider()`
+   * comble `'api'` quand il manque, comme pour les favoris.
+   */
+  sourcePriority: SourcePriority;
   /** L'avertissement d'accueil a été masqué. */
   disclaimerDismissed: boolean;
   /** Connexion OMS, mot secret exclu. */
@@ -112,6 +121,7 @@ function etatInitial(): AppSnapshot {
     sessions: [],
     favorites: [],
     minConfidence: DEFAULT_MIN_CONFIDENCE,
+    sourcePriority: DEFAULT_SOURCE_PRIORITY,
     disclaimerDismissed: false,
     who: {
       clientId: '',
@@ -119,6 +129,11 @@ function etatInitial(): AppSnapshot {
       lang: 'fr',
     },
   };
+}
+
+/** `'api'` | `'local'` — tout le reste reprend le défaut produit (OMS d'abord). */
+export function bornePriorite(value: unknown): SourcePriority {
+  return value === 'local' ? 'local' : DEFAULT_SOURCE_PRIORITY;
 }
 
 function estObjet(value: unknown): value is Record<string, unknown> {
@@ -187,6 +202,7 @@ function valider(data: unknown): AppSnapshot {
     sessions: sessionsValides(data.sessions),
     favorites: favorisValides(data.favorites),
     minConfidence: borneSeuil(data.minConfidence),
+    sourcePriority: bornePriorite(data.sourcePriority),
     disclaimerDismissed: data.disclaimerDismissed === true,
     who: {
       clientId: texte(who.clientId, '').trim(),

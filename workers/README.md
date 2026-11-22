@@ -72,7 +72,7 @@ Sans les deux secrets Cloudflare, le job se termine **en succès** avec un avert
 2. **Add variable** :
    - **Name** : `ALLOWED_ORIGINS`
    - **Value** : vos origines, **séparées par une virgule**, sans espace inutile, par exemple :  
-     `https://guigui43.github.io,http://localhost:5173`
+     `https://mister-guiiug.github.io,http://localhost:5173`
 3. Enregistrez. **Redéployez** le worker si l’interface le demande.
 
 > Si vous laissez `ALLOWED_ORIGINS` vide, le worker répond avec `Access-Control-Allow-Origin: *` : pratique pour un test rapide, **déconseillé** si le worker est public.

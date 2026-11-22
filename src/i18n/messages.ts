@@ -336,7 +336,12 @@ export const messages = {
       leadAfter: ' (section compte OMS).',
       sourceTitle: 'Suggestions',
       sourceHint:
-        'L’analyse interroge les deux référentiels : le dictionnaire CIM-10 embarqué, qui répond dans la page, et l’OMS (CIM-11) par la passerelle. Hors connexion, le dictionnaire répond seul et l’application vous le dit. Les suggestions de l’OMS supposent que des segments du compte-rendu partent vers ses serveurs.',
+        'L’analyse interroge les deux référentiels : l’OMS (CIM-11) par la passerelle, et le dictionnaire CIM-10 embarqué. Quand l’OMS est joignable, ses codes passent en tête par défaut ; hors connexion, le dictionnaire répond seul et l’application vous le dit. Les suggestions de l’OMS supposent que des segments du compte-rendu partent vers ses serveurs.',
+      priorityTitle: 'Ordre d’affichage',
+      priorityHint:
+        'Les deux sources restent interrogées. Choisissez laquelle apparaît en premier dans la liste des suggestions.',
+      priorityApi: 'API CIM-11 d’abord',
+      priorityLocal: 'CIM-10 local d’abord',
       thresholdTitle: 'Seuil de confiance minimal',
       thresholdHint:
         'Les suggestions avec une confiance inférieure à ce seuil restent ignorées par défaut dans la liste.',
@@ -848,7 +853,12 @@ export const messages = {
       leadAfter: ' page (WHO account section).',
       sourceTitle: 'Suggestions',
       sourceHint:
-        'The analysis queries both references: the built-in ICD-10 dictionary, which answers in the page, and the WHO (ICD-11) through the gateway. Offline, the dictionary answers alone and the application says so. WHO suggestions mean segments of the report are sent to its servers.',
+        'The analysis queries both references: the WHO (ICD-11) through the gateway, and the built-in ICD-10 dictionary. When the WHO is reachable, its codes come first by default; offline, the dictionary answers alone and the application says so. WHO suggestions mean segments of the report are sent to its servers.',
+      priorityTitle: 'Display order',
+      priorityHint:
+        'Both sources are still queried. Choose which one appears first in the suggestions list.',
+      priorityApi: 'ICD-11 API first',
+      priorityLocal: 'Local ICD-10 first',
       thresholdTitle: 'Minimum confidence threshold',
       thresholdHint:
         'Suggestions with a confidence below this threshold stay hidden from the list by default.',

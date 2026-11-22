@@ -11,9 +11,14 @@
  * reste de l'app attend.
  */
 import { LS_KEYS } from './constants';
-import { readSnapshot, updateSnapshot, borneSeuil } from './app-store';
+import {
+  bornePriorite,
+  readSnapshot,
+  updateSnapshot,
+  borneSeuil,
+} from './app-store';
 import { defautsWho } from './who-defaults';
-import type { WhoSettings } from '../types/index';
+import type { SourcePriority, WhoSettings } from '../types/index';
 
 /**
  * Les réglages OMS : l'enregistré d'abord, le défaut du build pour combler —
@@ -80,4 +85,12 @@ export function readMinConfidenceThreshold(): number {
 
 export function writeMinConfidenceThreshold(value: number): void {
   updateSnapshot({ minConfidence: borneSeuil(value) });
+}
+
+export function readSourcePriority(): SourcePriority {
+  return readSnapshot().sourcePriority;
+}
+
+export function writeSourcePriority(value: SourcePriority): void {
+  updateSnapshot({ sourcePriority: bornePriorite(value) });
 }
