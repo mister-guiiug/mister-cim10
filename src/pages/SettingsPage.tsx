@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppHeader } from '../components/AppHeader';
 import { AppFooter } from '../components/AppFooter';
+import { SourceMark } from '../components/SourceMark';
 import { useDialog } from '../hooks/useDialog';
 import { useSettingsStore } from '../store/settingsStore';
 import { downloadAppBackup, restoreAppBackup } from '../lib/storage';
@@ -119,7 +120,7 @@ export function SettingsPage() {
                 </p>
                 <p className="settings-hint">{t('settings.priorityHint')}</p>
                 <div
-                  className="toolbar"
+                  className="toolbar settings-priority-toolbar"
                   role="radiogroup"
                   aria-labelledby="source-priority-label"
                 >
@@ -133,10 +134,15 @@ export function SettingsPage() {
                       key={value}
                       type="button"
                       role="radio"
-                      className={sourcePriority === value ? 'primary' : 'ghost'}
+                      className={
+                        sourcePriority === value
+                          ? 'primary settings-priority-btn'
+                          : 'ghost settings-priority-btn'
+                      }
                       aria-checked={sourcePriority === value}
                       onClick={() => setSourcePriority(value)}
                     >
+                      <SourceMark source={value} size={15} />
                       {t(labelKey)}
                     </button>
                   ))}

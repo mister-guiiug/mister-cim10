@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { SourceBadge } from '../../components/SourceBadge';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getFamily } from '../../lib/icd-hierarchy';
@@ -427,18 +428,7 @@ function SuggestionCard({
           <strong className="suggestion-code">{suggestion.code}</strong>{' '}
           <span className="suggestion-label">{suggestion.label}</span>
         </p>
-        <span
-          className={`source-badge source-badge--${suggestion.source ?? 'local'}`}
-          title={
-            suggestion.source === 'api'
-              ? t('results.sourceApiTitle')
-              : t('results.sourceLocalTitle')
-          }
-        >
-          {suggestion.source === 'api'
-            ? t('results.badgeIcd11')
-            : t('results.badgeIcd10')}
-        </span>
+        <SourceBadge source={suggestion.source} />
         <FavoriteToggle
           code={suggestion.code}
           label={suggestion.label}
