@@ -80,8 +80,12 @@ describe('un terme repéré, une carte', () => {
     const { container } = monter();
     // Les cartes de PREMIER niveau : les précisions sont elles aussi des
     // `listitem`, et les compter ferait dire n'importe quoi à ce test.
+    // `.suggestion-card` — pas tous les `li` : les en-têtes de section
+    // (CIM-10 / CIM-11) sont aussi des `li` de présentation.
     const cartes = [
-      ...container.querySelectorAll<HTMLElement>('.suggestion-list > li'),
+      ...container.querySelectorAll<HTMLElement>(
+        '.suggestion-list > .suggestion-card'
+      ),
     ];
     // Trois cartes pour quatre suggestions : les deux BPCO n'en font qu'une.
     expect(cartes.length).toBe(3);
@@ -97,7 +101,9 @@ describe('un terme repéré, une carte', () => {
     monter();
     const { container } = { container: document.body };
     const carteBpco = [
-      ...container.querySelectorAll<HTMLElement>('.suggestion-list > li'),
+      ...container.querySelectorAll<HTMLElement>(
+        '.suggestion-list > .suggestion-card'
+      ),
     ].find(c => within(c).queryByText('J44.1'))!;
     const precisions = within(carteBpco).getByRole('list');
     fireEvent.click(
@@ -204,9 +210,11 @@ describe('trier au clavier, sans tabuler', () => {
   it('V valide la carte qui a le focus, R la rejette — même depuis un autre de ses boutons', async () => {
     monter();
     const carte = (code: string) =>
-      [...document.querySelectorAll<HTMLElement>('.suggestion-list > li')].find(
-        c => within(c).queryByText(code)
-      )!;
+      [
+        ...document.querySelectorAll<HTMLElement>(
+          '.suggestion-list > .suggestion-card'
+        ),
+      ].find(c => within(c).queryByText(code))!;
 
     within(carte('I10'))
       .getAllByRole('button')

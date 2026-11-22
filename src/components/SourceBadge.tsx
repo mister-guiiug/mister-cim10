@@ -1,6 +1,7 @@
 /**
  * Badge CIM-10 / CIM-11 avec l'icône du référentiel. Un seul endroit pour
- * suggestions, retenus et favoris — le titre long reste en `title`.
+ * suggestions, retenus et favoris — le titre long reste en `title` et
+ * `aria-label` (le `title` seul ne suffit pas au clavier).
  */
 import { useI18n } from '../i18n';
 import { SourceMark } from './SourceMark';
@@ -12,10 +13,14 @@ interface SourceBadgeProps {
 export function SourceBadge({ source = 'local' }: SourceBadgeProps) {
   const { t } = useI18n();
   const api = source === 'api';
+  const detail = api
+    ? t('results.sourceApiTitle')
+    : t('results.sourceLocalTitle');
   return (
     <span
       className={`source-badge source-badge--${source}`}
-      title={api ? t('results.sourceApiTitle') : t('results.sourceLocalTitle')}
+      title={detail}
+      aria-label={detail}
     >
       <SourceMark source={source} size={12} />
       {api ? t('results.badgeIcd11') : t('results.badgeIcd10')}

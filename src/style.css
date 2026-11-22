@@ -16,6 +16,9 @@ html {
   --safe-r: env(safe-area-inset-right, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
+  /* Identité visuelle des deux classifications (TrustBar, badges, Paramètres). */
+  --source-cim10: var(--muted-fg, var(--color-text-secondary));
+  --source-cim11: var(--accent, var(--color-accent));
 }
 
 /* Numéraux tabulaires : codes, %, compteurs alignés (lisibilité « pro »). */
@@ -125,8 +128,7 @@ body {
 
 /* ——— Paramètres (mode + API) ——— */
 
-/* Badge de référentiel sur une suggestion / un diagnostic : CIM-10 (local) vs
-   CIM-11 (OMS). */
+/* Badge de référentiel sur une suggestion / un diagnostic : CIM-10 vs CIM-11. */
 .source-badge {
   display: inline-flex;
   align-items: center;
@@ -146,15 +148,15 @@ body {
 }
 
 .source-badge--local {
-  background: color-mix(in srgb, var(--muted) 16%, transparent);
-  color: var(--muted-fg);
-  border-color: color-mix(in srgb, var(--muted) 30%, transparent);
+  background: color-mix(in srgb, var(--source-cim10) 14%, transparent);
+  color: var(--source-cim10);
+  border-color: color-mix(in srgb, var(--source-cim10) 28%, transparent);
 }
 
 .source-badge--api {
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 36%, transparent);
+  background: color-mix(in srgb, var(--source-cim11) 16%, transparent);
+  color: var(--source-cim11);
+  border-color: color-mix(in srgb, var(--source-cim11) 36%, transparent);
 }
 
 .settings-body {
@@ -2372,30 +2374,137 @@ p.hint.dictation-status {
   color: var(--color-warning);
 }
 
-/* Icône de référentiel dans la barre d'état : même rôle que le point, avec
-   la forme livre / nuage pour reconnaître CIM-10 et CIM-11 d'un coup d'œil. */
+/* Icône de référentiel dans la barre d'état : livre / nuage + teinte source. */
 .trust-source {
   display: inline-flex;
   flex-shrink: 0;
   line-height: 0;
 }
 
-.trust-source--ok {
-  color: var(--color-success);
+.trust-source--cim10 {
+  color: var(--source-cim10);
+}
+
+.trust-source--cim11 {
+  color: var(--source-cim11);
 }
 
 .trust-source--warn {
   color: var(--color-warning);
 }
 
-.settings-priority-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
+.settings-hint--sample {
+  margin-top: -0.35rem;
+  font-size: var(--text-supporting-size);
+  color: var(--muted);
 }
 
-.settings-priority-btn svg {
+.settings-priority-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2);
+}
+
+@media (max-width: 420px) {
+  .settings-priority-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-priority-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  text-align: start;
+  font: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-background-surface, var(--surface));
+  border: 1px solid var(--color-border-emphasized, var(--surface2));
+  border-radius: var(--radius-element, 0.5rem);
+  cursor: pointer;
+}
+
+.settings-priority-card:hover {
+  border-color: color-mix(in srgb, var(--source-cim11) 40%, transparent);
+}
+
+.settings-priority-card.is-selected {
+  border-color: var(--source-cim11);
+  box-shadow: inset 0 0 0 1px var(--source-cim11);
+  background: color-mix(in srgb, var(--source-cim11) 8%, transparent);
+}
+
+.settings-priority-card:focus-visible {
+  outline: var(--focus-outline-width, 2px) solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.settings-priority-icon {
+  display: inline-flex;
   flex-shrink: 0;
+  margin-top: 0.1rem;
+  line-height: 0;
+}
+
+.settings-priority-icon--api {
+  color: var(--source-cim11);
+}
+
+.settings-priority-icon--local {
+  color: var(--source-cim10);
+}
+
+.settings-priority-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.settings-priority-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.settings-priority-sub {
+  font-size: var(--text-supporting-size);
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.suggestions-legend {
+  margin: 0 0 0.55rem;
+  padding: 0 0.15rem;
+  font-size: var(--text-supporting-size);
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.suggestion-section-item {
+  list-style: none;
+  margin: 0.55rem 0 0.2rem;
+  padding: 0;
+}
+
+.suggestion-section-item:first-child {
+  margin-top: 0;
+}
+
+.suggestion-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: 0;
+  font-size: var(--text-supporting-size);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--source-cim10);
+}
+
+.suggestion-section-item--api .suggestion-section {
+  color: var(--source-cim11);
 }
 
 /* Le bandeau d'information d'Astryx : statut dit par le titre, icône

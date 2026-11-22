@@ -113,6 +113,9 @@ export function SettingsPage() {
                 {t('settings.sourceTitle')}
               </h2>
               <p className="settings-hint">{t('settings.sourceHint')}</p>
+              <p className="settings-hint settings-hint--sample">
+                {t('settings.sampleNote')}
+              </p>
 
               <div className="settings-block">
                 <p className="settings-block-title" id="source-priority-label">
@@ -120,30 +123,50 @@ export function SettingsPage() {
                 </p>
                 <p className="settings-hint">{t('settings.priorityHint')}</p>
                 <div
-                  className="toolbar settings-priority-toolbar"
+                  className="settings-priority-cards"
                   role="radiogroup"
                   aria-labelledby="source-priority-label"
                 >
                   {(
                     [
-                      ['api', 'settings.priorityApi'],
-                      ['local', 'settings.priorityLocal'],
+                      [
+                        'api',
+                        'settings.priorityApi',
+                        'settings.priorityApiHint',
+                      ],
+                      [
+                        'local',
+                        'settings.priorityLocal',
+                        'settings.priorityLocalHint',
+                      ],
                     ] as const
-                  ).map(([value, labelKey]) => (
+                  ).map(([value, labelKey, hintKey]) => (
                     <button
                       key={value}
                       type="button"
                       role="radio"
                       className={
                         sourcePriority === value
-                          ? 'primary settings-priority-btn'
-                          : 'ghost settings-priority-btn'
+                          ? 'settings-priority-card is-selected'
+                          : 'settings-priority-card'
                       }
                       aria-checked={sourcePriority === value}
                       onClick={() => setSourcePriority(value)}
                     >
-                      <SourceMark source={value} size={15} />
-                      {t(labelKey)}
+                      <span
+                        className={`settings-priority-icon settings-priority-icon--${value}`}
+                        aria-hidden="true"
+                      >
+                        <SourceMark source={value} size={18} />
+                      </span>
+                      <span className="settings-priority-copy">
+                        <span className="settings-priority-title">
+                          {t(labelKey)}
+                        </span>
+                        <span className="settings-priority-sub">
+                          {t(hintKey)}
+                        </span>
+                      </span>
                     </button>
                   ))}
                 </div>

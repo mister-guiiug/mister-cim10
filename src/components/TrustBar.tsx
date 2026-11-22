@@ -20,7 +20,7 @@ export function TrustBar() {
   return (
     <div className="trust-bar" role="status" aria-label={t('trust.label')}>
       <span className="trust-item">
-        <span className="trust-source trust-source--ok" aria-hidden="true">
+        <span className="trust-source trust-source--cim10" aria-hidden="true">
           <SourceMark source="local" size={13} />
         </span>
         {t('trust.localReady')}
@@ -29,7 +29,7 @@ export function TrustBar() {
         <span
           className={
             omsJoignable
-              ? 'trust-source trust-source--ok'
+              ? 'trust-source trust-source--cim11'
               : 'trust-source trust-source--warn'
           }
           aria-hidden="true"
