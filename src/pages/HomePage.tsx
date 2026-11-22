@@ -19,22 +19,10 @@ import { DisclaimerBanner } from '../components/DisclaimerBanner';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useVueStore, type Vue } from '../store/vueStore';
 import { useSettingsStore } from '../store/settingsStore';
+import { classerSuggestions } from '../lib/classer-suggestions';
 import { OmsError, suggestFromOms } from '../lib/oms';
 import { useI18n } from '../i18n';
 import type { AnalysisResult } from '../types/index';
-
-/**
- * Dédup par code (CIM-10 et CIM-11 ne se chevauchent pas), tri par confiance.
- *
- * Sortie du corps de `handleAnalyze` parce qu'elle a maintenant DEUX
- * appelants : l'analyse complète, et l'échec OMS qui ne garde que la moitié
- * locale. Fonction pure — elle ne lit ni l'état ni les réglages.
- */
-function classerParConfiance(results: AnalysisResult[]): AnalysisResult[] {
-  const byCode = new Map<string, AnalysisResult>();
-  for (const r of results) if (!byCode.has(r.code)) byCode.set(r.code, r);
-  return [...byCode.values()].sort((a, b) => b.confidence - a.confidence);
-}
 
 /*
  * LE MOTEUR DE LECTURE EST CHARGÉ À LA DEMANDE (cf. `lib/suggestions.ts`) :
@@ -52,23 +40,14 @@ export function HomePage() {
   const setAnalyzeNotice = useWorkspaceStore(s => s.setAnalyzeNotice);
   const crText = useWorkspaceStore(s => s.crText);
   const who = useSettingsStore(s => s.who);
+  const sourcePriority = useSettingsStore(s => s.sourcePriority);
   const { t } = useI18n();
   useIdlePrefetch(chargerSuggestions);
 
   /**
-   * DEUX RÉFÉRENTIELS, PLUS AUCUN CHOIX À FAIRE.
-   *
-   * Il y avait un sélecteur à trois modes — local, OMS, les deux — et un garde
-   * qui désactivait « Analyser » hors connexion en mode OMS seul. C'était
-   * demander à un professionnel d'arbitrer entre deux classifications avant
-   * d'obtenir le moindre code, et le mode par défaut (`local`) faisait que
-   * l'OMS, pourtant livrée, ne servait à personne.
-   *
-   * L'analyse interroge donc les deux, toujours : le dictionnaire CIM-10
-   * embarqué, immédiat, puis la passerelle OMS (CIM-11) quand elle est
-   * joignable. Le dictionnaire porte seul le résultat quand le réseau manque —
-   * et le dit. « Analyser » n'est plus jamais désactivé : il y a toujours
-   * quelque chose à produire.
+   * DEUX RÉFÉRENTIELS INTERROGÉS ENSEMBLE. L'ordre d'affichage se règle dans
+   * Paramètres (`sourcePriority`, défaut OMS). Hors connexion, le dictionnaire
+   * porte seul le résultat — et le dit. « Analyser » n'est jamais désactivé.
    */
   const isOnline = useOnline();
   const setVue = useVueStore(s => s.setVue);
@@ -89,13 +68,9 @@ export function HomePage() {
     /*
      * L'ANALYSE, MESURÉE PAR SON ISSUE.
      *
-     * La ventilation par `mode` a disparu avec le sélecteur. Reste `oms`, qui
-     * dit si la passerelle a été interrogée : elle est le point faible connu de
-     * l'app, et c'est la seule chose qu'on ait besoin de savoir.
-     *
-     * RIEN D'AUTRE NE PART. Ni le compte-rendu, ni sa longueur, ni le nombre
-     * de codes trouvés, ni leur nature. Chacune de ces mesures serait un pas
-     * vers le texte clinique, et c'est exactement ce que l'ADR 0012 refuse.
+     * `oms` dit si la passerelle a été interrogée : c'est le point faible
+     * connu de l'app. RIEN D'AUTRE NE PART — pas le compte-rendu, ni sa
+     * longueur, ni les codes (ADR 0012).
      */
     trackEvent(GESTES.OPERATION, {
       nom: 'analyse',
@@ -138,7 +113,7 @@ export function HomePage() {
             : t('errors.oms.offlineSkipped')
         );
       }
-      setSuggestions(classerParConfiance(results));
+      setSuggestions(classerSuggestions(results, sourcePriority));
       // L'analyse OUVRE ses suggestions quand l'écran n'en montre qu'une
       // région : sinon, sur un téléphone, le résultat d'un geste resterait
       // dans un onglet qu'on ne voit pas.
@@ -161,7 +136,7 @@ export function HomePage() {
         etape: 'echouee',
         oms: omsJoignable,
       });
-      setSuggestions(classerParConfiance(results));
+      setSuggestions(classerSuggestions(results, sourcePriority));
       const raison =
         err instanceof OmsError
           ? t(

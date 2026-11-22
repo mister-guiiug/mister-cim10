@@ -21,8 +21,10 @@ import { FamilyApps } from '@mister-guiiug/dev-pwa-config/react';
 
 export function SettingsPage() {
   const minConfidence = useSettingsStore(s => s.minConfidence);
+  const sourcePriority = useSettingsStore(s => s.sourcePriority);
   const who = useSettingsStore(s => s.who);
   const setMinConfidence = useSettingsStore(s => s.setMinConfidence);
+  const setSourcePriority = useSettingsStore(s => s.setSourcePriority);
   const setWho = useSettingsStore(s => s.setWho);
   const resetWho = useSettingsStore(s => s.resetWho);
   const resetDisclaimer = useSettingsStore(s => s.resetDisclaimer);
@@ -103,16 +105,43 @@ export function SettingsPage() {
         <div className="panel panel--settings-page">
           <div className="settings-body settings-body--compact settings-body--page">
             {/* ── Suggestions ──
-                LE SÉLECTEUR À TROIS MODES A DISPARU. Il demandait d'arbitrer
-                entre deux classifications avant d'obtenir le moindre code, et
-                son défaut (`local`) faisait que l'OMS, pourtant livrée, ne
-                servait à personne. L'analyse interroge les deux ; reste ici ce
-                qui se règle vraiment — la finesse, et le compte OMS. */}
+                Les deux référentiels restent interrogés. On règle l'ordre
+                d'affichage (OMS d'abord par défaut) et le seuil. */}
             <section className="settings-section" aria-labelledby="sec-source">
               <h2 className="settings-section-title" id="sec-source">
                 {t('settings.sourceTitle')}
               </h2>
               <p className="settings-hint">{t('settings.sourceHint')}</p>
+
+              <div className="settings-block">
+                <p className="settings-block-title" id="source-priority-label">
+                  {t('settings.priorityTitle')}
+                </p>
+                <p className="settings-hint">{t('settings.priorityHint')}</p>
+                <div
+                  className="toolbar"
+                  role="radiogroup"
+                  aria-labelledby="source-priority-label"
+                >
+                  {(
+                    [
+                      ['api', 'settings.priorityApi'],
+                      ['local', 'settings.priorityLocal'],
+                    ] as const
+                  ).map(([value, labelKey]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      className={sourcePriority === value ? 'primary' : 'ghost'}
+                      aria-checked={sourcePriority === value}
+                      onClick={() => setSourcePriority(value)}
+                    >
+                      {t(labelKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="settings-block">
                 <p className="settings-block-title">

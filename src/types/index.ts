@@ -85,4 +85,10 @@ export interface WhoSettings {
   lang: string;
 }
 
+/**
+ * Référentiel affiché en tête des suggestions. Les deux restent interrogés ;
+ * seul l'ordre change. Défaut produit : `'api'` (CIM-11 OMS, puis CIM-10 local).
+ */
+export type SourcePriority = 'api' | 'local';
+
 export type AppRoute = 'home' | 'parametres' | 'aide';

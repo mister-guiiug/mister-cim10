@@ -1,9 +1,11 @@
 import { create } from 'zustand';
-import type { WhoSettings } from '../types/index';
+import type { SourcePriority, WhoSettings } from '../types/index';
 import {
   readMinConfidenceThreshold,
+  readSourcePriority,
   readWhoSettings,
   writeMinConfidenceThreshold,
+  writeSourcePriority,
   writeWhoSettings,
 } from '../lib/settings';
 import { resetOmsToken } from '../lib/oms';
@@ -12,9 +14,12 @@ import { readSnapshot, updateSnapshot } from '../lib/app-store';
 
 interface SettingsState {
   minConfidence: number;
+  /** Référentiel affiché en tête — les deux restent interrogés. */
+  sourcePriority: SourcePriority;
   who: WhoSettings;
   disclaimerDismissed: boolean;
   setMinConfidence: (value: number) => void;
+  setSourcePriority: (value: SourcePriority) => void;
   setWho: (patch: Partial<WhoSettings>) => void;
   /**
    * Revient à la configuration du build : efface le compte saisi, son mot
@@ -26,25 +31,24 @@ interface SettingsState {
 }
 
 /**
- * LE MODE D'ANALYSE A DISPARU, ET `isReady` AVEC LUI.
- *
- * Il y avait un sélecteur à trois valeurs — dictionnaire local, OMS, les deux —
- * et un `isReady()` qui bloquait « Analyser » tant que l'OMS n'était pas
- * configurée. Trois choix pour une question que l'utilisateur n'a pas à se
- * poser : il veut des codes, pas arbitrer entre deux référentiels.
- *
- * L'analyse interroge maintenant les deux, systématiquement, et le dictionnaire
- * embarqué porte seul le résultat quand le réseau manque (`HomePage`). Il n'y a
- * donc plus d'état « pas prêt » : le dictionnaire répond toujours.
+ * L'ANALYSE INTERROGE LES DEUX RÉFÉRENTIELS. Ce qui se règle, c'est l'ordre
+ * d'affichage (`sourcePriority`, défaut OMS) et le seuil — pas un mode qui
+ * couperait l'un ou l'autre. Hors connexion, le dictionnaire porte seul le
+ * résultat (`HomePage`).
  */
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   minConfidence: readMinConfidenceThreshold(),
+  sourcePriority: readSourcePriority(),
   who: readWhoSettings(),
   disclaimerDismissed: readSnapshot().disclaimerDismissed,
 
   setMinConfidence: value => {
     writeMinConfidenceThreshold(value);
     set({ minConfidence: value });
+  },
+  setSourcePriority: value => {
+    writeSourcePriority(value);
+    set({ sourcePriority: value });
   },
   setWho: patch => {
     const next = { ...get().who, ...patch };
