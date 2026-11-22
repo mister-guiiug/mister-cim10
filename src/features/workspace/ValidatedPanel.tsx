@@ -11,6 +11,7 @@ import {
 import { useAnnouncer } from '@mister-guiiug/dev-pwa-config/react/a11y';
 import { useIdlePrefetch } from '@mister-guiiug/dev-pwa-config/react/use-prefetch';
 import { recordError } from '@mister-guiiug/dev-pwa-config/react/observability';
+import { SourceBadge } from '../../components/SourceBadge';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { CodeSearch } from './CodeSearch';
 import { ExportBar } from './ExportBar';
@@ -556,18 +557,7 @@ function ValidatedItem({
             ))}
           </select>
           <strong className="validated-code">{item.code}</strong>
-          <span
-            className={`source-badge source-badge--${item.source ?? 'local'}`}
-            title={
-              item.source === 'api'
-                ? t('results.sourceApiTitle')
-                : t('results.sourceLocalTitle')
-            }
-          >
-            {item.source === 'api'
-              ? t('results.badgeIcd11')
-              : t('results.badgeIcd10')}
-          </span>
+          <SourceBadge source={item.source} />
           <span className="validated-label">{item.label}</span>
           <div className="toolbar validated-actions">
             <FavoriteToggle

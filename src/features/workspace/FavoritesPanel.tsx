@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAnnouncer } from '@mister-guiiug/dev-pwa-config/react/a11y';
+import { SourceBadge } from '../../components/SourceBadge';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { MAX_FAVORIS } from '../../lib/favoris';
 import { FavoriteToggle } from './FavoriteToggle';
@@ -71,18 +72,7 @@ export function FavoritesPanel({ existingCodes }: FavoritesPanelProps) {
               return (
                 <li key={f.code}>
                   <div className="suggestion-compare-row suggestion-compare-row--sibling">
-                    <span
-                      className={`source-badge source-badge--${f.source}`}
-                      title={
-                        f.source === 'api'
-                          ? t('results.sourceApiTitle')
-                          : t('results.sourceLocalTitle')
-                      }
-                    >
-                      {f.source === 'api'
-                        ? t('results.badgeIcd11')
-                        : t('results.badgeIcd10')}
-                    </span>
+                    <SourceBadge source={f.source} />
                     <strong className="suggestion-compare-code">
                       {f.code}
                     </strong>

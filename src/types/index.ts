@@ -87,7 +87,7 @@ export interface WhoSettings {
 
 /**
  * Référentiel affiché en tête des suggestions. Les deux restent interrogés ;
- * seul l'ordre change. Défaut produit : `'api'` (CIM-11 OMS, puis CIM-10 local).
+ * seul l'ordre change. Défaut produit : `'api'` (CIM-11 OMS, puis CIM-10 embarqué).
  */
 export type SourcePriority = 'api' | 'local';
 

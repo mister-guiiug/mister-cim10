@@ -118,7 +118,7 @@ describe('HomePage quand la passerelle OMS tombe', () => {
     // …et le fait que la moitié locale est là, sans quoi le message donnerait
     // à croire que toute l'analyse est perdue.
     expect(alerte).toHaveTextContent(
-      'Les codes du dictionnaire CIM-10 local restent affichés.'
+      'Les codes du dictionnaire CIM-10 embarqué restent affichés.'
     );
   });
 

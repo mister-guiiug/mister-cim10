@@ -1,14 +1,13 @@
 import { useOnline } from '@mister-guiiug/dev-pwa-config/react/use-online';
 import { useSettingsStore } from '../store/settingsStore';
 import { useI18n } from '../i18n';
+import { SourceMark } from './SourceMark';
 
 /**
  * QUEL RÉFÉRENTIEL RÉPOND, ET OÙ RESTENT LES DONNÉES — sans ouvrir Paramètres.
  *
- * Une ligne de texte d'appoint et deux points d'état, plus des pilules : un
- * badge, dit Astryx, ne se pose que sur un état qui demande d'agir, et « le
- * référentiel local est prêt » est l'état normal. Le point vert n'est que
- * redondant avec le texte, jamais seul porteur du sens.
+ * Livre / nuage disent *quel* référentiel ; la couleur dit s'il répond. Le
+ * texte reste le porteur du sens (Astryx) — l'icône ne fait que reconnaître.
  */
 export function TrustBar() {
   const isOnline = useOnline();
@@ -21,18 +20,22 @@ export function TrustBar() {
   return (
     <div className="trust-bar" role="status" aria-label={t('trust.label')}>
       <span className="trust-item">
-        <span className="status-dot status-dot--ok" aria-hidden="true" />
+        <span className="trust-source trust-source--ok" aria-hidden="true">
+          <SourceMark source="local" size={13} />
+        </span>
         {t('trust.localReady')}
       </span>
       <span className="trust-item">
         <span
           className={
             omsJoignable
-              ? 'status-dot status-dot--ok'
-              : 'status-dot status-dot--warn'
+              ? 'trust-source trust-source--ok'
+              : 'trust-source trust-source--warn'
           }
           aria-hidden="true"
-        />
+        >
+          <SourceMark source="api" size={13} />
+        </span>
         {omsJoignable ? t('trust.omsReady') : t('trust.omsUnavailable')}
       </span>
       {/* Le seuil est rangé en fraction (0,4) : l'afficher tel quel donnait

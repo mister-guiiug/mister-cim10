@@ -48,7 +48,7 @@ export const messages = {
     },
     trust: {
       label: 'Statut des référentiels',
-      localReady: 'CIM-10 local prêt',
+      localReady: 'Dictionnaire CIM-10 prêt',
       omsReady: 'OMS CIM-11 joignable',
       omsUnavailable: 'OMS indisponible',
       threshold: 'Seuil ≥ {pct} %',
@@ -339,9 +339,9 @@ export const messages = {
         'L’analyse interroge les deux référentiels : l’OMS (CIM-11) par la passerelle, et le dictionnaire CIM-10 embarqué. Quand l’OMS est joignable, ses codes passent en tête par défaut ; hors connexion, le dictionnaire répond seul et l’application vous le dit. Les suggestions de l’OMS supposent que des segments du compte-rendu partent vers ses serveurs.',
       priorityTitle: 'Ordre d’affichage',
       priorityHint:
-        'Les deux sources restent interrogées. Choisissez laquelle apparaît en premier dans la liste des suggestions.',
-      priorityApi: 'API CIM-11 d’abord',
-      priorityLocal: 'CIM-10 local d’abord',
+        'Les deux classifications restent interrogées. Choisissez celle qui apparaît en premier — comme sur les badges des suggestions.',
+      priorityApi: 'CIM-11 d’abord',
+      priorityLocal: 'CIM-10 d’abord',
       thresholdTitle: 'Seuil de confiance minimal',
       thresholdHint:
         'Les suggestions avec une confiance inférieure à ce seuil restent ignorées par défaut dans la liste.',
@@ -426,7 +426,7 @@ export const messages = {
       use1Strong: 'Configurer la source des suggestions',
       use1Mid: 'dans la page ',
       use1After:
-        ' : dictionnaire local CIM-10 (hors ligne), OMS en ligne (classification CIM-11), ou les deux combinés.',
+        ' : dictionnaire CIM-10 embarqué (hors ligne), OMS en ligne (classification CIM-11), ou les deux combinés.',
       use2Strong: 'Saisir le compte-rendu',
       use2Mid: 'sur l’',
       use2Link: 'accueil',
@@ -506,18 +506,18 @@ export const messages = {
         analyzeFailed: 'Erreur OMS pendant l’analyse (HTTP {status}).',
         unknown: 'Erreur inattendue pendant l’analyse.',
         offlineSkipped:
-          'Hors connexion : seul le dictionnaire CIM-10 local a répondu, la recherche OMS a été ignorée.',
+          'Hors connexion : seul le dictionnaire CIM-10 embarqué a répondu, la recherche OMS a été ignorée.',
         // Pas une erreur : l'app fonctionne, avec un référentiel sur deux. Elle
         // le dit parce que sur un outil de cotation, savoir QUELLE
         // classification a répondu fait partie du résultat.
         notConfigured:
-          'Cette installation n’est pas reliée à l’OMS : seul le dictionnaire CIM-10 local a répondu. La passerelle se pose au déploiement, elle ne se règle pas depuis l’application.',
+          'Cette installation n’est pas reliée à l’OMS : seul le dictionnaire CIM-10 embarqué a répondu. La passerelle se pose au déploiement, elle ne se règle pas depuis l’application.',
         // La passerelle a échoué, le dictionnaire local avait déjà répondu :
         // le message porte la raison exacte de l'échec ET dit que les codes
         // locaux sont toujours là, sinon l'alerte donne à croire que l'analyse
         // entière est perdue.
         localKept:
-          '{raison} Les codes du dictionnaire CIM-10 local restent affichés.',
+          '{raison} Les codes du dictionnaire CIM-10 embarqué restent affichés.',
       },
     },
     footer: {
@@ -564,7 +564,7 @@ export const messages = {
     },
     trust: {
       label: 'Reference status',
-      localReady: 'Local ICD-10 ready',
+      localReady: 'Built-in ICD-10 ready',
       omsReady: 'WHO ICD-11 reachable',
       omsUnavailable: 'WHO unavailable',
       threshold: 'Threshold ≥ {pct} %',
@@ -856,9 +856,9 @@ export const messages = {
         'The analysis queries both references: the WHO (ICD-11) through the gateway, and the built-in ICD-10 dictionary. When the WHO is reachable, its codes come first by default; offline, the dictionary answers alone and the application says so. WHO suggestions mean segments of the report are sent to its servers.',
       priorityTitle: 'Display order',
       priorityHint:
-        'Both sources are still queried. Choose which one appears first in the suggestions list.',
-      priorityApi: 'ICD-11 API first',
-      priorityLocal: 'Local ICD-10 first',
+        'Both classifications are still queried. Choose which one appears first — as on the suggestion badges.',
+      priorityApi: 'ICD-11 first',
+      priorityLocal: 'ICD-10 first',
       thresholdTitle: 'Minimum confidence threshold',
       thresholdHint:
         'Suggestions with a confidence below this threshold stay hidden from the list by default.',
@@ -942,7 +942,7 @@ export const messages = {
       use1Strong: 'Set the suggestion source',
       use1Mid: 'in the ',
       use1After:
-        ' page: local ICD-10 dictionary (offline), WHO online (ICD-11 classification), or both combined.',
+        ' page: built-in ICD-10 dictionary (offline), WHO online (ICD-11 classification), or both combined.',
       use2Strong: 'Enter the report',
       use2Mid: 'on the ',
       use2Link: 'home page',
@@ -1019,11 +1019,11 @@ export const messages = {
         analyzeFailed: 'WHO error during analysis (HTTP {status}).',
         unknown: 'Unexpected error during analysis.',
         offlineSkipped:
-          'Offline: only the local ICD-10 dictionary answered, the WHO lookup was skipped.',
+          'Offline: only the built-in ICD-10 dictionary answered, the WHO lookup was skipped.',
         notConfigured:
-          'This installation is not connected to the WHO: only the local ICD-10 dictionary answered. The gateway is set at deployment time, not from the application.',
+          'This installation is not connected to the WHO: only the built-in ICD-10 dictionary answered. The gateway is set at deployment time, not from the application.',
         localKept:
-          '{raison} The local ICD-10 dictionary codes are still shown.',
+          '{raison} The built-in ICD-10 dictionary codes are still shown.',
       },
     },
     footer: {
