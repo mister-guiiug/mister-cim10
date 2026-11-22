@@ -1,8 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { SourceBadge } from '../../components/SourceBadge';
+import { SourceMark } from '../../components/SourceMark';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { getFamily } from '../../lib/icd-hierarchy';
+import { passageOmsTropLarge } from '../../lib/terme-affiche';
 import { useI18n } from '../../i18n';
 import { FavoriteToggle } from './FavoriteToggle';
 import { suggestionsATrancher } from './aTrancher';
@@ -66,6 +75,7 @@ export function SuggestionsPanel() {
   const addManualDiagnostic = useWorkspaceStore(s => s.addManualDiagnostic);
   const isAnalyzing = useWorkspaceStore(s => s.isAnalyzing);
   const minConfidence = useSettingsStore(s => s.minConfidence);
+  const sourcePriority = useSettingsStore(s => s.sourcePriority);
   const disposition = useDisposition();
   const setVue = useVueStore(s => s.setVue);
   const { t } = useI18n();
@@ -335,6 +345,19 @@ export function SuggestionsPanel() {
           )
         ) : (
           <>
+            <p className="suggestions-legend">
+              {t('results.legend', {
+                first:
+                  sourcePriority === 'api'
+                    ? t('results.badgeIcd11')
+                    : t('results.badgeIcd10'),
+                second:
+                  sourcePriority === 'api'
+                    ? t('results.badgeIcd10')
+                    : t('results.badgeIcd11'),
+                pct: String(Math.round(minConfidence * 100)),
+              })}
+            </p>
             <p className="suggestions-clavier">
               {t('results.keyboardHintBefore')} <kbd>↑</kbd> <kbd>↓</kbd>{' '}
               {t('results.keyboardHintMove')} <kbd>V</kbd>{' '}
@@ -342,32 +365,56 @@ export function SuggestionsPanel() {
               {t('results.keyboardHintReject')}
             </p>
             <ul className="suggestion-list" role="list" ref={listeRef}>
-              {groupes.map((groupe, index) => (
-                <SuggestionCard
-                  key={groupe[0]!.id}
-                  groupe={groupe}
-                  validatedCodes={validatedCodes}
-                  onValidate={s => {
-                    validate(s);
-                    setAnnonce(
-                      t('results.announceValidated', { code: s.code })
-                    );
-                    suivreLeFocus(index);
-                  }}
-                  onReject={s => {
-                    reject(s.id);
-                    setAnnonce(t('results.announceRejected', { code: s.code }));
-                    suivreLeFocus(index);
-                  }}
-                  onHighlight={s =>
-                    setHighlightedMatchedTerm(s.extrait ?? s.matchedTerm)
-                  }
-                  onValidateRelated={(code, label) =>
-                    addManualDiagnostic(code, label)
-                  }
-                  onAnnounce={setAnnonce}
-                />
-              ))}
+              {groupes.map((groupe, index) => {
+                const source = groupe[0]!.source ?? 'local';
+                const prevSource =
+                  index > 0
+                    ? (groupes[index - 1]![0]!.source ?? 'local')
+                    : null;
+                const nouvelleSection = prevSource !== source;
+                return (
+                  <Fragment key={groupe[0]!.id}>
+                    {nouvelleSection && (
+                      <li
+                        className={`suggestion-section-item suggestion-section-item--${source}`}
+                        role="presentation"
+                      >
+                        <p className="suggestion-section">
+                          <SourceMark source={source} size={13} />
+                          {source === 'api'
+                            ? t('results.sectionApi')
+                            : t('results.sectionLocal')}
+                        </p>
+                      </li>
+                    )}
+                    <SuggestionCard
+                      groupe={groupe}
+                      validatedCodes={validatedCodes}
+                      onValidate={s => {
+                        validate(s);
+                        setAnnonce(
+                          t('results.announceValidated', { code: s.code })
+                        );
+                        suivreLeFocus(index);
+                      }}
+                      onReject={s => {
+                        reject(s.id);
+                        setAnnonce(
+                          t('results.announceRejected', { code: s.code })
+                        );
+                        suivreLeFocus(index);
+                      }}
+                      onHighlight={s =>
+                        setHighlightedMatchedTerm(s.extrait ?? s.matchedTerm)
+                      }
+                      onValidateRelated={(code, label) =>
+                        addManualDiagnostic(code, label)
+                      }
+                      onAnnounce={setAnnonce}
+                    />
+                  </Fragment>
+                );
+              })}
             </ul>
           </>
         )}
@@ -400,6 +447,8 @@ function SuggestionCard({
   const { t } = useI18n();
   const suggestion = groupe[0]!;
   const precisions = groupe.slice(1);
+  const passageLarge = passageOmsTropLarge(suggestion);
+  const termeAffiche = suggestion.extrait ?? suggestion.matchedTerm;
   const [comparing, setComparing] = useState(false);
   /*
    * LA FAMILLE EST CALCULÉE D'EMBLÉE, pour savoir s'il y a un bouton à
@@ -458,16 +507,20 @@ function SuggestionCard({
         </div>
         {suggestion.matchedTerm && (
           <p className="suggestion-term">
-            {t('results.matchedTerm')}{' '}
+            {passageLarge ? t('results.passageOms') : t('results.matchedTerm')}{' '}
             <button
               type="button"
               className="suggestion-term-link"
               onClick={() => onHighlight(suggestion)}
-              title={t('results.matchedTermTitle')}
+              title={
+                passageLarge
+                  ? t('results.passageOmsTitle')
+                  : t('results.matchedTermTitle')
+              }
             >
               {/* Le passage tel qu'écrit dans le compte-rendu : c'est
                   lui qu'on cherche des yeux, pas sa forme normalisée. */}
-              {suggestion.extrait ?? suggestion.matchedTerm}
+              {termeAffiche}
             </button>
             {suggestion.contexte && (
               <span

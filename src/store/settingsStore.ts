@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { GESTES, trackEvent } from '@mister-guiiug/dev-pwa-config/analytics';
 import type { SourcePriority, WhoSettings } from '../types/index';
 import {
   readMinConfidenceThreshold,
@@ -49,6 +50,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setSourcePriority: value => {
     writeSourcePriority(value);
     set({ sourcePriority: value });
+    // Pas de texte clinique : seulement quelle classification passe en tête.
+    trackEvent(GESTES.OPERATION, {
+      nom: 'ordre_suggestions',
+      etape: 'reussie',
+      source: value,
+    });
   },
   setWho: patch => {
     const next = { ...get().who, ...patch };
