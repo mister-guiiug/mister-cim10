@@ -2422,7 +2422,7 @@ p.hint.dictation-status {
   color: var(--color-text-primary);
   background: var(--color-background-surface, var(--surface));
   border: 1px solid var(--color-border-emphasized, var(--surface2));
-  border-radius: var(--radius-element, 0.5rem);
+  border-radius: var(--radius-element);
   cursor: pointer;
 }
 
