@@ -128,7 +128,9 @@ body {
 /* Badge de référentiel sur une suggestion / un diagnostic : CIM-10 (local) vs
    CIM-11 (OMS). */
 .source-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
   font-size: var(--text-supporting-size);
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -137,6 +139,10 @@ body {
   border: 1px solid transparent;
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.source-badge svg {
+  flex-shrink: 0;
 }
 
 .source-badge--local {
@@ -2364,6 +2370,32 @@ p.hint.dictation-status {
 
 .status-dot--warn {
   color: var(--color-warning);
+}
+
+/* Icône de référentiel dans la barre d'état : même rôle que le point, avec
+   la forme livre / nuage pour reconnaître CIM-10 et CIM-11 d'un coup d'œil. */
+.trust-source {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.trust-source--ok {
+  color: var(--color-success);
+}
+
+.trust-source--warn {
+  color: var(--color-warning);
+}
+
+.settings-priority-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+.settings-priority-btn svg {
+  flex-shrink: 0;
 }
 
 /* Le bandeau d'information d'Astryx : statut dit par le titre, icône
