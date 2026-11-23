@@ -11,6 +11,11 @@
 
 ---
 
+## Guides
+
+- [CIM-10 et CIM-11 : les différences](https://mister-guiiug.github.io/mister-cim10/cim-10-et-cim-11-differences.html)
+- [Trouver un code CIM-10](https://mister-guiiug.github.io/mister-cim10/trouver-un-code-cim-10.html)
+
 ## Pour qui ?
 
 Mister CIM-10 s'adresse aux **professionnels de santé** (médecins, DIM, techniciens d'information médicale) qui souhaitent disposer d'une aide rapide à la cotation CIM-10 directement dans leur navigateur, sans dépendance à un logiciel métier.
